@@ -1,0 +1,80 @@
+# API
+
+All API responses use a consistent envelope.
+
+Success:
+
+```json
+{
+  "success": true,
+  "message": "string",
+  "data": {}
+}
+```
+
+Error:
+
+```json
+{
+  "success": false,
+  "message": "string",
+  "errorCode": "string",
+  "details": []
+}
+```
+
+## Auth
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| POST | `/api/auth/register` | Register a user | Public |
+| POST | `/api/auth/login` | Login and receive JWT | Public |
+| GET | `/api/auth/me` | Current profile | USER/ADMIN |
+
+## Users
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| GET | `/api/users/me` | Current user profile | USER/ADMIN |
+| GET | `/api/admin/users` | List users | ADMIN |
+
+## Subjects
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| GET | `/api/subjects` | List subjects | USER/ADMIN |
+| POST | `/api/admin/subjects` | Create subject | ADMIN |
+| PUT | `/api/admin/subjects/{id}` | Update subject | ADMIN |
+| DELETE | `/api/admin/subjects/{id}` | Delete subject | ADMIN |
+
+## Submissions
+
+| Method | Path | Description | Auth | Ownership |
+|---|---|---|---|---|
+| POST | `/api/submissions` | Upload homework image | USER/ADMIN | Current user |
+| GET | `/api/submissions/me` | List own submissions | USER/ADMIN | Own only |
+| GET | `/api/submissions/{id}` | View own submission | USER/ADMIN | USER own only |
+| DELETE | `/api/submissions/{id}` | Delete own submission | USER/ADMIN | USER own only |
+| GET | `/api/admin/submissions` | List all submissions | ADMIN | Any |
+| GET | `/api/admin/submissions/{id}` | View any submission | ADMIN | Any |
+
+## AI
+
+| Method | Path | Description | Auth | Ownership |
+|---|---|---|---|---|
+| POST | `/api/submissions/{id}/explain` | Generate explanation | USER/ADMIN | USER own only |
+| POST | `/api/submissions/{id}/grade` | Grade answer | USER/ADMIN | USER own only |
+
+Grading request:
+
+```json
+{
+  "userAnswer": "My answer is..."
+}
+```
+
+## AI Usage
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| GET | `/api/admin/ai-usage-logs` | List AI usage logs | ADMIN |

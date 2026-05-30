@@ -1,0 +1,61 @@
+# Security
+
+## JWT Security
+
+JWTs are signed with a backend secret. The backend validates every protected request and extracts user identity from Spring Security context.
+
+## RBAC
+
+Roles are `GUEST`, `USER`, and `ADMIN`. Backend authorization is the source of truth. Frontend route protection is only for UX.
+
+## IDOR Prevention
+
+Submission endpoints must verify ownership in the service layer. A USER can only view, explain, grade, or delete submissions where `submission.user.id` equals the authenticated user id.
+
+## Delete-Own-Submission Security
+
+USER deletion requires authentication and ownership. Non-owned submission deletion returns a forbidden response. ADMIN deletion can be provided through admin-only endpoints.
+
+## CORS
+
+CORS must use explicit allowed origins from environment variables. Do not use wildcard origins with credentials.
+
+## File Upload Validation
+
+Allowed types: `jpg`, `jpeg`, `png`, `webp`. Backend validates file size and type before Cloudinary upload.
+
+## Input Validation
+
+Use request DTO validation with `jakarta.validation`.
+
+## Secret Management
+
+Do not hardcode or commit secrets. Do not log secrets, JWTs, passwords, or API keys.
+
+## AI Security
+
+Do not rely on AI for authorization. Keep prompts compact and avoid sending unnecessary private data.
+
+## Frontend Token Handling
+
+MVP token storage is simple and must be treated as XSS-sensitive. Clear the token on logout and unauthorized responses.
+
+## PWA Cache Privacy
+
+Do not cache private API responses. Cache only safe static assets.
+
+## Checklist
+
+- JWT validation
+- RBAC bypass
+- IDOR
+- SQL injection risk
+- Unsafe file upload
+- Exposed secrets
+- Insecure CORS
+- Weak input validation
+- Unsafe error response
+- XSS risk in React
+- Token storage risk
+- PWA cache privacy risk
+- Public access to private resources

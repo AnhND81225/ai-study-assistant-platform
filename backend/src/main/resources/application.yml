@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: edu-ai-platform
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/eduaidb}
+    username: ${DATABASE_USERNAME:eduaidb_user}
+    password: ${DATABASE_PASSWORD:change_me}
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  servlet:
+    multipart:
+      max-file-size: ${MAX_UPLOAD_SIZE_MB:5}MB
+      max-request-size: ${MAX_UPLOAD_SIZE_MB:5}MB
+
+server:
+  port: ${PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change_this_to_a_long_random_secret_at_least_32_characters}
+    expiration-ms: ${JWT_EXPIRATION:86400000}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  upload:
+    max-size-mb: ${MAX_UPLOAD_SIZE_MB:5}
+  ai:
+    openai-api-key: ${OPENAI_API_KEY:}
+    openai-model: ${OPENAI_MODEL:gpt-4o-mini}
+    timeout-seconds: ${AI_TIMEOUT_SECONDS:45}
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+  api-key: ${CLOUDINARY_API_KEY:}
+  api-secret: ${CLOUDINARY_API_SECRET:}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
