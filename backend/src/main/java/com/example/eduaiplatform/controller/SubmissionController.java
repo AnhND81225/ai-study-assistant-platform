@@ -57,6 +57,23 @@ public class SubmissionController {
         return ApiResponse.success("Answer graded", submissionService.gradeSubmission(id, request));
     }
 
+    @PostMapping("/api/submissions/{id}/grade-image")
+    public ApiResponse<GradingResultResponse> gradeImage(
+            @PathVariable Long id,
+            @RequestPart("image") MultipartFile image
+    ) {
+        return ApiResponse.success("Answer image graded", submissionService.gradeSubmissionImage(id, image));
+    }
+
+    @PostMapping("/api/gradings/image")
+    public ApiResponse<SubmissionResponse> gradeNewWorkImage(
+            @RequestParam @NotNull Long subjectId,
+            @RequestParam(required = false) String note,
+            @RequestPart("image") MultipartFile image
+    ) {
+        return ApiResponse.success("Student work graded", submissionService.gradeNewWorkImage(subjectId, note, image));
+    }
+
     @GetMapping("/api/admin/submissions")
     public ApiResponse<Page<SubmissionResponse>> all(Pageable pageable) {
         return ApiResponse.success("Submissions", submissionService.getAllSubmissions(pageable));

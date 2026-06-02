@@ -1,10 +1,11 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { BookOpen, History, Home, LogOut, Shield, Upload, User } from 'lucide-react';
+import { BookOpen, ClipboardCheck, History, Home, LogOut, Shield, Upload, User } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 
 const userNav = [
   { to: '/dashboard', label: 'Home', icon: Home },
-  { to: '/upload', label: 'Upload', icon: Upload },
+  { to: '/upload', label: 'Explain', icon: Upload },
+  { to: '/grade', label: 'Grade', icon: ClipboardCheck },
   { to: '/submissions', label: 'History', icon: History },
   { to: '/profile', label: 'Profile', icon: User },
 ];
@@ -53,7 +54,7 @@ export function AppLayout() {
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-soft backdrop-blur md:hidden">
         <div
           className="mx-auto grid max-w-md gap-1 py-2"
-          style={{ gridTemplateColumns: `repeat(${isAdmin ? 5 : 4}, minmax(0, 1fr))` }}
+          style={{ gridTemplateColumns: `repeat(${isAdmin ? 6 : 5}, minmax(0, 1fr))` }}
         >
           {userNav.map((item) => (
             <MobileNavItem key={item.to} item={item} />

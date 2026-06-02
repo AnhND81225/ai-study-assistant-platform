@@ -38,3 +38,89 @@ textarea {
 .tap-target {
   min-height: 44px;
 }
+
+.scanner-shell {
+  border-radius: 0.75rem;
+}
+
+.scanner-frame {
+  display: grid;
+  min-height: 18rem;
+  place-items: center;
+  overflow: hidden;
+  border: 2px dashed #cbd5e1;
+  border-radius: 0.75rem;
+  background:
+    linear-gradient(135deg, rgba(20, 184, 166, 0.08), transparent 38%),
+    #f8fafc;
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.scanner-shell:focus-within .scanner-frame,
+.scanner-frame:hover {
+  border-color: #0f766e;
+  box-shadow: 0 16px 36px rgba(15, 118, 110, 0.08);
+}
+
+.smooth-card {
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.smooth-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.09);
+}
+
+.fade-in {
+  animation: fade-in-up 220ms ease-out both;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smooth-card,
+  .fade-in {
+    animation: none;
+    transition: none;
+  }
+
+  .smooth-card:hover {
+    transform: none;
+  }
+}
+
+.rich-text {
+  color: #334155;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.rich-text p {
+  margin: 0.5rem 0;
+}
+
+.rich-text ul,
+.rich-text ol {
+  margin: 0.5rem 0;
+  padding-left: 1.25rem;
+}
+
+.rich-text strong {
+  color: #102033;
+}
+
+.rich-text .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
+}

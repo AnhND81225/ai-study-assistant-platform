@@ -42,6 +42,7 @@ public final class SubmissionMapper {
         return new GradingResultResponse(
                 result.getId(),
                 result.getUserAnswer(),
+                result.getUserAnswerImageUrl(),
                 result.getScore(),
                 result.getFeedback(),
                 result.getMistakes(),

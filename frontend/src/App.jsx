@@ -8,6 +8,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { UploadPage } from './pages/UploadPage';
+import { GradePage } from './pages/GradePage';
 import { HistoryPage } from './pages/HistoryPage';
 import { SubmissionDetailPage } from './pages/SubmissionDetailPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -30,6 +31,7 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/upload" element={<UploadPage />} />
+          <Route path="/grade" element={<GradePage />} />
           <Route path="/submissions" element={<HistoryPage />} />
           <Route path="/submissions/:id" element={<SubmissionDetailPage />} />
           <Route path="/profile" element={<ProfilePage />} />

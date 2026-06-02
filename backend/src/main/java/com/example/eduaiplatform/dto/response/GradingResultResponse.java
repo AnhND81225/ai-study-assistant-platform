@@ -5,6 +5,7 @@ import java.time.Instant;
 public record GradingResultResponse(
         Long id,
         String userAnswer,
+        String userAnswerImageUrl,
         Integer score,
         String feedback,
         String mistakes,

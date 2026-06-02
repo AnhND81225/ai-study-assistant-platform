@@ -16,6 +16,12 @@ public class GradingResult extends Auditable {
     @Column(columnDefinition = "text", nullable = false)
     private String userAnswer;
 
+    @Column(length = 1000)
+    private String userAnswerImageUrl;
+
+    @Column(length = 300)
+    private String userAnswerCloudinaryPublicId;
+
     @Column(nullable = false)
     private Integer score;
 
@@ -32,8 +38,14 @@ public class GradingResult extends Auditable {
     }
 
     public GradingResult(Submission submission, String userAnswer, Integer score, String feedback, String mistakes, String improvementSuggestions) {
+        this(submission, userAnswer, null, null, score, feedback, mistakes, improvementSuggestions);
+    }
+
+    public GradingResult(Submission submission, String userAnswer, String userAnswerImageUrl, String userAnswerCloudinaryPublicId, Integer score, String feedback, String mistakes, String improvementSuggestions) {
         this.submission = submission;
         this.userAnswer = userAnswer;
+        this.userAnswerImageUrl = userAnswerImageUrl;
+        this.userAnswerCloudinaryPublicId = userAnswerCloudinaryPublicId;
         this.score = score;
         this.feedback = feedback;
         this.mistakes = mistakes;
@@ -46,6 +58,14 @@ public class GradingResult extends Auditable {
 
     public String getUserAnswer() {
         return userAnswer;
+    }
+
+    public String getUserAnswerImageUrl() {
+        return userAnswerImageUrl;
+    }
+
+    public String getUserAnswerCloudinaryPublicId() {
+        return userAnswerCloudinaryPublicId;
     }
 
     public Integer getScore() {

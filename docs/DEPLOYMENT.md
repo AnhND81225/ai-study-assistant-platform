@@ -19,6 +19,7 @@ Docker Compose is used for local development. Cloud deployment should use Vercel
 - Start command: `java -jar target/*.jar`
 - Required env vars: database, JWT, Cloudinary, AI provider, and CORS settings.
 - Set `CORS_ALLOWED_ORIGINS` to the Vercel frontend origin.
+- Set OpenAI variables only on the backend service: `OPENAI_API_KEY`, `OPENAI_MODEL`, `AI_TIMEOUT_SECONDS`, `AI_MAX_OUTPUT_TOKENS`, and `AI_EXPLAIN_LIMIT_PER_USER`.
 
 ## Neon PostgreSQL
 
@@ -40,6 +41,8 @@ Uploads are validated by file type and size before sending to Cloudinary.
 ## Environment Variables
 
 Never commit real values. Use platform secrets in Vercel and Render.
+
+Frontend deployments should only receive `VITE_API_BASE_URL`. Do not set `OPENAI_API_KEY` on Vercel frontend projects.
 
 ## Common Issues
 

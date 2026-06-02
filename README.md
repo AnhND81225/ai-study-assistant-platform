@@ -9,9 +9,10 @@ This project is designed to demonstrate fullstack development, backend architect
 - Register and login with JWT authentication.
 - Role-based access control for `GUEST`, `USER`, and `ADMIN`.
 - Mobile-first React UI.
-- Upload homework images from camera or gallery.
+- Scan homework images from camera or gallery with preview, rotate, and clear controls.
 - Validate and store images with Cloudinary.
-- AI explanation workflow.
+- AI explanation workflow with Markdown and LaTeX-ready responses.
+- AI grading workflow for typed answers, answer images, or a new image containing both the question and student work.
 - Submission history and delete-own-submission flow.
 - Admin-ready API structure.
 - PostgreSQL persistence.
@@ -180,6 +181,18 @@ If IntelliJ shows `Cannot determine shell script parent directory`, reload the p
 
 Backend variables are documented in `backend/.env.example`.
 Frontend variables are documented in `frontend/.env.example`.
+
+OpenAI is called only by the Spring Boot backend. The frontend must call backend endpoints such as `/api/submissions/{id}/explain`; it must never contain `OPENAI_API_KEY`.
+
+Required OpenAI backend variables:
+
+| Variable | Purpose |
+|---|---|
+| `OPENAI_API_KEY` | Secret API key used only by the backend |
+| `OPENAI_MODEL` | Model name, for example `gpt-5.4-mini` |
+| `AI_TIMEOUT_SECONDS` | OpenAI request timeout |
+| `AI_MAX_OUTPUT_TOKENS` | Output token cap for cost control |
+| `AI_EXPLAIN_LIMIT_PER_USER` | Maximum successful explanation requests per user per day |
 
 Never commit real `.env` files.
 

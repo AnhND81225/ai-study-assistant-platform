@@ -64,6 +64,8 @@ Error:
 |---|---|---|---|---|
 | POST | `/api/submissions/{id}/explain` | Generate explanation | USER/ADMIN | USER own only |
 | POST | `/api/submissions/{id}/grade` | Grade answer | USER/ADMIN | USER own only |
+| POST | `/api/submissions/{id}/grade-image` | Grade answer from uploaded image | USER/ADMIN | USER own only |
+| POST | `/api/gradings/image` | Grade a new image containing both question and student work | USER/ADMIN | Current user |
 
 Grading request:
 
@@ -72,6 +74,14 @@ Grading request:
   "userAnswer": "My answer is..."
 }
 ```
+
+Grade new work from image uses `multipart/form-data`:
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `subjectId` | number | Yes | Subject used to guide AI grading |
+| `note` | string | No | Optional grading note or rubric |
+| `image` | file | Yes | JPG, PNG, or WebP image containing the question and student work |
 
 ## AI Usage
 

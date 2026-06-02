@@ -34,7 +34,9 @@ Do not hardcode or commit secrets. Do not log secrets, JWTs, passwords, or API k
 
 ## AI Security
 
-Do not rely on AI for authorization. Keep prompts compact and avoid sending unnecessary private data.
+Do not rely on AI for authorization. Keep prompts compact and avoid sending unnecessary private data. The frontend must never call OpenAI directly or receive `OPENAI_API_KEY`; the Spring Boot backend is the only OpenAI caller.
+
+Each normal user is limited to a configurable number of successful AI explanation requests per day through `AI_EXPLAIN_LIMIT_PER_USER`.
 
 ## Frontend Token Handling
 

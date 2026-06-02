@@ -57,7 +57,7 @@ Grading flow:
 
 ## Upload Workflow
 
-Only `jpg`, `jpeg`, `png`, and `webp` are allowed. The backend validates type and size before Cloudinary upload. Cloudinary URL and public ID are stored with the submission.
+The frontend uses a shared scanner input for explain and grade flows. It supports mobile camera capture, gallery selection, preview, 90-degree rotation, and clearing the selected file before upload. Only `jpg`, `jpeg`, `png`, and `webp` are allowed. The backend remains the source of truth for file validation and checks type and size before Cloudinary upload. Cloudinary URL and public ID are stored with the submission.
 
 ## Delete Submission Workflow
 

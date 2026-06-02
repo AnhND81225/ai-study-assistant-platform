@@ -14,6 +14,8 @@ public interface SubmissionService {
     void deleteOwnSubmission(Long id);
     SubmissionResponse explainSubmission(Long id);
     GradingResultResponse gradeSubmission(Long id, GradeRequest request);
+    GradingResultResponse gradeSubmissionImage(Long id, MultipartFile image);
+    SubmissionResponse gradeNewWorkImage(Long subjectId, String note, MultipartFile image);
     Page<SubmissionResponse> getAllSubmissions(Pageable pageable);
     SubmissionResponse getAdminSubmission(Long id);
 }

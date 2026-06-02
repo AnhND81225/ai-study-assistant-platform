@@ -44,6 +44,13 @@ iOS Safari:
 - Upload requires internet.
 - iOS PWA install behavior depends on Safari.
 
+## Mobile Scanner Behavior
+
+- Explain and grade flows use a shared scanner input.
+- Mobile users can open the rear camera with `capture="environment"` when the browser supports it.
+- Users can also choose from the gallery, preview the image, rotate it 90 degrees, or clear it before upload.
+- Scanning is a frontend image-preparation step only; OpenAI is still called only by the Spring Boot backend.
+
 ## Testing Checklist
 
 - Manifest loads.
@@ -52,3 +59,5 @@ iOS Safari:
 - Offline fallback appears.
 - Private API responses are not cached.
 - Mobile layout has large tap targets.
+- Camera/gallery upload controls work on mobile browsers.
+- Rotate keeps the selected image uploadable.

@@ -1,14 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, ImagePlus, Sparkles } from 'lucide-react';
+import { Camera, Sparkles } from 'lucide-react';
 import { subjectApi } from '../api/subjectApi';
 import { submissionApi } from '../api/submissionApi';
 import { apiMessage } from '../api/client';
 import { PageHeader } from '../components/common/PageHeader';
 import { ErrorBanner } from '../components/common/ErrorBanner';
-
-const maxSizeBytes = 5 * 1024 * 1024;
-const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+import { ImageScannerInput } from '../components/common/ImageScannerInput';
 
 export function UploadPage() {
   const navigate = useNavigate();
@@ -19,32 +17,12 @@ export function UploadPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const previewUrl = useMemo(() => (image ? URL.createObjectURL(image) : null), [image]);
-
   useEffect(() => {
     subjectApi.list().then((items) => {
       setSubjects(items);
       setSubjectId(items[0]?.id || '');
     }).catch((err) => setError(apiMessage(err, 'Could not load subjects')));
   }, []);
-
-  useEffect(() => () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-  }, [previewUrl]);
-
-  function selectImage(file) {
-    setError('');
-    if (!file) return;
-    if (!allowedTypes.includes(file.type)) {
-      setError('Only JPG, PNG, and WebP images are supported.');
-      return;
-    }
-    if (file.size > maxSizeBytes) {
-      setError('Image must be 5 MB or smaller.');
-      return;
-    }
-    setImage(file);
-  }
 
   async function submit(event) {
     event.preventDefault();
@@ -67,22 +45,22 @@ export function UploadPage() {
 
   return (
     <div>
-      <PageHeader title="Upload homework" description="Use your camera or gallery, add a short note, and generate an AI explanation." />
+      <PageHeader title="Explain question" description="Upload a homework question image, add a short note, and generate an AI explanation." />
       <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[1fr_360px]">
         <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
           <ErrorBanner message={error} />
-          <label className="mt-4 grid min-h-72 cursor-pointer place-items-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center">
-            {previewUrl ? (
-              <img src={previewUrl} alt="Homework preview" className="max-h-96 w-full rounded-lg object-contain" />
-            ) : (
-              <div>
-                <ImagePlus className="mx-auto text-sea" size={42} />
-                <p className="mt-3 font-bold">Choose homework image</p>
-                <p className="mt-1 text-sm text-slate-600">Camera or gallery on mobile</p>
-              </div>
-            )}
-            <input type="file" accept="image/*" onChange={(event) => selectImage(event.target.files?.[0])} className="sr-only" />
-          </label>
+          <div className="mt-4">
+            <ImageScannerInput
+              value={image}
+              onChange={setImage}
+              onError={setError}
+              label="Question scan"
+              helperText="Scan the homework question with your camera, or choose a clear image from the gallery."
+              emptyTitle="Scan question image"
+              emptyDescription="Place the full question inside the frame, avoid shadows, then rotate if the photo is sideways."
+              kindLabel="question image"
+            />
+          </div>
         </section>
         <section className="rounded-lg border border-slate-200 bg-white p-4">
           <div className="grid gap-4">
@@ -98,7 +76,7 @@ export function UploadPage() {
             </label>
             <button disabled={loading || !subjectId} className="tap-target inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-4 font-bold text-white disabled:opacity-60">
               {loading ? <Sparkles size={18} className="animate-pulse" /> : <Camera size={18} />}
-              {loading ? 'Processing AI explanation...' : 'Upload and explain'}
+              {loading ? 'Processing AI explanation...' : 'Explain question'}
             </button>
           </div>
         </section>

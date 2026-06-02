@@ -27,10 +27,19 @@ public class CloudinaryServiceImpl implements CloudinaryService {
 
     @Override
     public UploadResult uploadHomeworkImage(MultipartFile file) {
+        return uploadImage(file, "ai-study-assistant/homework");
+    }
+
+    @Override
+    public UploadResult uploadStudentAnswerImage(MultipartFile file) {
+        return uploadImage(file, "ai-study-assistant/student-answers");
+    }
+
+    private UploadResult uploadImage(MultipartFile file, String folder) {
         validate(file);
         try {
             Map<?, ?> result = cloudinary.uploader().upload(file.getBytes(), Map.of(
-                    "folder", "ai-study-assistant/homework",
+                    "folder", folder,
                     "resource_type", "image"
             ));
             return new UploadResult(String.valueOf(result.get("secure_url")), String.valueOf(result.get("public_id")));
