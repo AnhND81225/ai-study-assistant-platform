@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { BookOpen, ClipboardCheck, History, Home, LogOut, Shield, Upload, User } from 'lucide-react';
+import { BookOpen, ClipboardCheck, History, Home, LogOut, Shield, Sparkles, Upload, User } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { PwaStatusBanner } from '../components/pwa/PwaStatusBanner';
 
@@ -21,22 +21,22 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-ink">
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <NavLink to="/dashboard" className="flex items-center gap-2 font-bold">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-sea text-white">
+    <div className="min-h-screen bg-paper text-ink">
+      <header className="sticky top-0 z-20 border-b border-sky-100 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+          <NavLink to="/dashboard" className="flex items-center gap-2 font-black">
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-sea text-white shadow-glow">
               <BookOpen size={19} />
             </span>
             <span>StudyAI</span>
           </NavLink>
           <div className="flex items-center gap-2">
             {isAdmin ? (
-              <NavLink to="/admin" className="hidden tap-target items-center gap-2 rounded-lg px-3 text-sm font-semibold text-sea sm:flex">
+              <NavLink to="/admin" className="secondary-button hidden px-3 text-sm sm:inline-flex">
                 <Shield size={17} /> Admin
               </NavLink>
             ) : null}
-            <button onClick={handleLogout} className="tap-target rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700">
+            <button onClick={handleLogout} className="secondary-button px-3 text-sm text-slate-700">
               <LogOut size={17} aria-hidden="true" />
               <span className="sr-only">Logout</span>
             </button>
@@ -45,15 +45,22 @@ export function AppLayout() {
       </header>
       <PwaStatusBanner />
 
-      <main className="safe-bottom mx-auto w-full max-w-6xl px-4 py-5">
-        <div className="mb-5">
-          <p className="text-sm text-slate-500">Signed in as</p>
-          <h1 className="text-xl font-bold text-ink">{user?.fullName || 'Student'}</h1>
+      <main className="safe-bottom mx-auto w-full max-w-5xl px-4 py-5">
+        <div className="mb-5 overflow-hidden rounded-[1.25rem] bg-sea p-5 text-white shadow-glow">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-white/80">Signed in as</p>
+              <h1 className="mt-1 text-2xl font-black">{user?.fullName || 'Student'}</h1>
+            </div>
+            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white/20">
+              <Sparkles size={20} />
+            </span>
+          </div>
         </div>
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-soft backdrop-blur md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-sky-100 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-soft backdrop-blur md:hidden">
         <div
           className="mx-auto grid max-w-md gap-1 py-2"
           style={{ gridTemplateColumns: `repeat(${isAdmin ? 6 : 5}, minmax(0, 1fr))` }}
@@ -75,7 +82,7 @@ function MobileNavItem({ item }) {
       to={item.to}
       className={({ isActive }) =>
         `flex min-h-14 flex-col items-center justify-center rounded-lg text-[11px] font-semibold ${
-          isActive ? 'bg-mint text-sea' : 'text-slate-500'
+          isActive ? 'bg-mint text-ocean' : 'text-slate-500'
         }`
       }
     >

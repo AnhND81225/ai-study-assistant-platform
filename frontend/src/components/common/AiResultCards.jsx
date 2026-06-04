@@ -4,9 +4,11 @@ import { RichText } from './RichText';
 export function ExplanationResultCard({ aiResponse }) {
   if (!aiResponse) return null;
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
+    <article className="app-card p-4">
       <div className="flex items-center gap-2">
-        <Lightbulb className="text-sea" size={20} />
+        <span className="grid h-9 w-9 place-items-center rounded-2xl bg-mint text-ocean">
+          <Lightbulb size={19} />
+        </span>
         <h3 className="text-lg font-black text-ink">AI explanation</h3>
       </div>
       <div className="mt-4 grid gap-3">
@@ -31,10 +33,10 @@ export function GradingResultCard({ result }) {
   const scoreStyle = score >= 80 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : score >= 50 ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-red-700 bg-red-50 border-red-200';
 
   return (
-    <article className="fade-in smooth-card rounded-lg border border-slate-200 bg-white p-4">
+    <article className="fade-in smooth-card app-card p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-sm font-bold text-slate-500">Score</p>
+          <p className="text-sm font-black text-slate-500">Score</p>
           <p className="mt-1 text-3xl font-black text-ink">{score}/100</p>
         </div>
         <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-black ${scoreStyle}`}>
@@ -68,9 +70,9 @@ export function GradingResultCard({ result }) {
 
 function ResultSection({ icon: Icon, title, children, accent = false }) {
   return (
-    <section className={`rounded-lg border p-3 ${accent ? 'border-teal-100 bg-mint/40' : 'border-slate-200 bg-slate-50'}`}>
+    <section className={`rounded-lg border p-3 ${accent ? 'border-sky-100 bg-mint/70' : 'border-sky-100 bg-paper'}`}>
       <div className="mb-1 flex items-center gap-2 text-sm font-black text-ink">
-        <Icon size={16} className={accent ? 'text-sea' : 'text-slate-500'} />
+        <Icon size={16} className={accent ? 'text-ocean' : 'text-sea'} />
         {title}
       </div>
       {children}

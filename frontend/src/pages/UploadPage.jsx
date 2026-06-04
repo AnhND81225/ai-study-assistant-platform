@@ -54,7 +54,7 @@ export function UploadPage() {
     <div>
       <PageHeader title="Explain question" description="Upload a homework question image, add a short note, and generate an AI explanation." />
       <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[1fr_360px]">
-        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
+        <section className="app-card p-4">
           <ErrorBanner message={error} />
           <div className="mt-4">
             <ImageScannerInput
@@ -69,20 +69,20 @@ export function UploadPage() {
             />
           </div>
         </section>
-        <section className="rounded-lg border border-slate-200 bg-white p-4">
+        <section className="app-card p-4">
           <div className="grid gap-4">
             <AiUsageCard compact />
             <label className="grid gap-1 text-sm font-semibold">
               Subject
-              <select value={subjectId} onChange={(event) => setSubjectId(event.target.value)} className="tap-target rounded-lg border border-slate-300 px-3">
+              <select value={subjectId} onChange={(event) => setSubjectId(event.target.value)} className="input-field">
                 {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
               </select>
             </label>
             <label className="grid gap-1 text-sm font-semibold">
               Note
-              <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Optional context or what you tried" className="rounded-lg border border-slate-300 px-3 py-3" />
+              <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Optional context or what you tried" className="rounded-lg border border-sky-100 bg-white px-3 py-3 outline-none transition focus:border-sea focus:ring-4 focus:ring-sky-100" />
             </label>
-            <button disabled={loading || !subjectId || !image || !online} className="tap-target inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-4 font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
+            <button disabled={loading || !subjectId || !image || !online} className="primary-button">
               {loading ? <Sparkles size={18} className="animate-pulse" /> : <Camera size={18} />}
               {loading ? 'Processing AI explanation...' : online ? 'Explain question' : 'Reconnect to explain'}
             </button>

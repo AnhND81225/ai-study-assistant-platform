@@ -4,12 +4,17 @@ export default {
     extend: {
       colors: {
         ink: '#102033',
-        sea: '#0f766e',
-        mint: '#ccfbf1',
-        warn: '#b45309',
+        sea: '#39B4F7',
+        ocean: '#1179C9',
+        mint: '#DDF6FF',
+        lilac: '#EEF0FF',
+        coral: '#FF7A59',
+        paper: '#F7FBFF',
+        warn: '#B45309',
       },
       boxShadow: {
-        soft: '0 12px 40px rgba(15, 23, 42, 0.08)',
+        soft: '0 14px 36px rgba(25, 80, 130, 0.10)',
+        glow: '0 18px 42px rgba(57, 180, 247, 0.28)',
       },
     },
   },

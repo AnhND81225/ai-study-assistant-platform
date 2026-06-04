@@ -60,28 +60,28 @@ export function SubmissionDetailPage() {
 
   return (
     <div>
-      <PageHeader title="Submission detail" description="Review the uploaded image, AI explanation, and grading results." action={<Link to="/submissions" className="tap-target inline-flex items-center rounded-lg border border-slate-300 px-4 font-bold">Back</Link>} />
+      <PageHeader title="Submission detail" description="Review the uploaded image, AI explanation, and grading results." action={<Link to="/submissions" className="secondary-button">Back</Link>} />
       <ErrorBanner message={error} />
       {submission ? (
         <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
-          <section className="rounded-lg border border-slate-200 bg-white p-4">
+          <section className="app-card p-4">
             <img src={submission.imageUrl} alt="Uploaded homework" className="w-full rounded-lg object-contain" />
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <StatusPill status={submission.status} />
               <span className="text-sm font-semibold text-slate-600">{submission.subject.name}</span>
             </div>
             {submission.note ? <p className="mt-3 text-sm leading-6 text-slate-600">{submission.note}</p> : null}
-            <button disabled={deleting} onClick={remove} className="tap-target mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 font-bold text-red-700 disabled:opacity-60">
+            <button disabled={deleting} onClick={remove} className="danger-button mt-4 w-full">
               <Trash2 size={17} />
               {deleting ? 'Deleting...' : 'Delete submission'}
             </button>
             {submission.aiResponse ? (
-              <Link to={`/grade?submissionId=${submission.id}`} className="tap-target mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-sea px-4 font-bold text-white">
+              <Link to={`/grade?submissionId=${submission.id}`} className="primary-button mt-3 w-full">
                 <ClipboardCheck size={17} />
                 Grade answer
               </Link>
             ) : (
-              <button disabled={explaining || !online} onClick={retryExplain} className="tap-target mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-sea px-4 font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
+              <button disabled={explaining || !online} onClick={retryExplain} className="primary-button mt-3 w-full">
                 <RefreshCw size={17} className={explaining ? 'animate-spin' : ''} />
                 {explaining ? 'Retrying explanation...' : online ? 'Retry explanation' : 'Reconnect to retry'}
               </button>
@@ -91,8 +91,8 @@ export function SubmissionDetailPage() {
             {submission.aiResponse ? (
               <ExplanationResultCard aiResponse={submission.aiResponse} />
             ) : (
-              <div className="rounded-lg border border-dashed border-slate-300 bg-white p-5">
-                <h3 className="text-lg font-bold">No explanation yet</h3>
+              <div className="app-card border-dashed p-5">
+                <h3 className="text-lg font-black">No explanation yet</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">The image is saved. Retry AI explanation when your connection and provider quota are ready.</p>
               </div>
             )}

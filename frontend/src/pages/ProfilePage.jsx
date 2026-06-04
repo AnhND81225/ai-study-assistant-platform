@@ -6,7 +6,7 @@ export function ProfilePage() {
   return (
     <div>
       <PageHeader title="Profile" description="Your authenticated account details." />
-      <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
+      <section className="app-card p-5">
         <dl className="grid gap-4 text-sm">
           <Row label="Name" value={user?.fullName} />
           <Row label="Email" value={user?.email} />
@@ -21,8 +21,8 @@ export function ProfilePage() {
 function Row({ label, value }) {
   return (
     <div className="grid gap-1">
-      <dt className="font-bold text-slate-500">{label}</dt>
-      <dd className="text-base font-semibold text-ink">{value || '-'}</dd>
+      <dt className="font-black text-slate-500">{label}</dt>
+      <dd className="text-base font-bold text-ink">{value || '-'}</dd>
     </div>
   );
 }

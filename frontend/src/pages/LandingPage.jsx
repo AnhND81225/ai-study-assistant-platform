@@ -1,5 +1,5 @@
 import { Link, Navigate } from 'react-router-dom';
-import { BookOpen, Camera, ShieldCheck, Smartphone } from 'lucide-react';
+import { BookOpen, Camera, CheckCircle2, ClipboardCheck, ShieldCheck, Sparkles } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 
 export function LandingPage() {
@@ -7,51 +7,100 @@ export function LandingPage() {
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
 
   return (
-    <main className="min-h-screen bg-white text-ink">
-      <section className="mx-auto grid min-h-screen w-full max-w-6xl grid-cols-[minmax(0,1fr)] content-center gap-8 overflow-hidden px-5 py-10 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
-        <div className="min-w-0">
-          <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-sea text-white">
-            <BookOpen size={24} />
+    <main className="min-h-screen overflow-hidden bg-sea text-white">
+      <section className="mx-auto grid min-h-screen w-full max-w-5xl content-between px-5 py-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 font-black">
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20">
+              <BookOpen size={20} />
+            </span>
+            StudyAI
           </div>
-          <h1 className="max-w-2xl text-4xl font-black leading-tight tracking-normal sm:text-6xl">AI Study Assistant</h1>
-          <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">
-            Upload a homework photo, get a step-by-step explanation, and keep a private study history in a mobile-first PWA.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link to="/register" className="tap-target inline-flex w-full items-center justify-center rounded-lg bg-sea px-5 font-bold text-white sm:w-auto">
-              Create account
-            </Link>
-            <Link to="/login" className="tap-target inline-flex w-full items-center justify-center rounded-lg border border-slate-300 px-5 font-bold text-ink sm:w-auto">
-              Sign in
-            </Link>
+          <Link to="/login" className="rounded-full bg-white/15 px-4 py-2 text-sm font-black backdrop-blur">
+            Sign in
+          </Link>
+        </div>
+
+        <div className="grid items-center gap-8 py-8 lg:grid-cols-[1fr_390px]">
+          <div className="max-w-2xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-2 text-sm font-black">
+              <Sparkles size={16} />
+              Mobile-first AI study helper
+            </div>
+            <h1 className="text-5xl font-black leading-[1.02] tracking-normal sm:text-6xl">
+              Turn homework photos into clear study steps.
+            </h1>
+            <p className="mt-5 max-w-xl text-base font-semibold leading-8 text-white/82">
+              Scan a question, get a structured explanation, grade student work, and keep everything private in your study history.
+            </p>
+            <div className="mt-8 grid gap-3 sm:flex">
+              <Link to="/register" className="primary-button bg-white px-6 text-ocean shadow-none hover:bg-sky-50">
+                Create account
+              </Link>
+              <Link to="/login" className="secondary-button border-white/40 bg-white/10 px-6 text-white hover:border-white hover:text-white">
+                I already have one
+              </Link>
+            </div>
+          </div>
+
+          <div className="relative mx-auto w-full max-w-[360px]">
+            <div className="absolute -left-6 top-8 h-24 w-24 rounded-full bg-white/15 blur-2xl" />
+            <div className="absolute -right-8 bottom-10 h-32 w-32 rounded-full bg-white/20 blur-3xl" />
+            <div className="relative rounded-[2rem] border border-white/20 bg-white p-4 text-ink shadow-glow">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-sea">Today</p>
+                  <h2 className="text-xl font-black">Study plan</h2>
+                </div>
+                <img src="/app-icon.svg" alt="StudyAI app icon" className="h-11 w-11 rounded-2xl" />
+              </div>
+              <div className="grid gap-3">
+                <PhoneCard icon={Camera} title="Scan question" detail="Camera or gallery upload" />
+                <PhoneCard icon={BookOpen} title="Explain steps" detail="Markdown and LaTeX ready" />
+                <PhoneCard icon={ClipboardCheck} title="Grade answer" detail="Score, mistakes, suggestions" />
+              </div>
+              <div className="mt-4 rounded-2xl bg-mint p-4">
+                <div className="flex items-center gap-2 text-sm font-black text-ocean">
+                  <ShieldCheck size={17} />
+                  Private by default
+                </div>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
+                  JWT auth, ownership checks, and safe PWA caching keep student work protected.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="min-w-0 w-full max-w-full justify-self-center rounded-lg border border-slate-200 bg-slate-50 p-4 shadow-soft sm:max-w-[420px] lg:justify-self-auto">
-          <div className="min-w-0 rounded-lg bg-white p-4">
-            <div className="flex items-center justify-between">
-              <p className="font-bold">Upload homework</p>
-              <span className="rounded-full bg-mint px-3 py-1 text-xs font-bold text-sea">PWA</span>
-            </div>
-            <div className="mt-4 grid h-48 min-w-0 place-items-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50">
-              <Camera className="text-sea" size={42} />
-            </div>
-            <div className="mt-4 grid gap-3">
-              <Feature icon={Smartphone} label="Mobile camera upload" />
-              <Feature icon={ShieldCheck} label="JWT, RBAC, ownership checks" />
-              <Feature icon={BookOpen} label="AI explanation history" />
-            </div>
-          </div>
+
+        <div className="grid gap-3 pb-2 text-sm font-black text-white/88 sm:grid-cols-3">
+          <LandingPoint label="PWA installable" />
+          <LandingPoint label="Cloud image storage" />
+          <LandingPoint label="AI usage logging" />
         </div>
       </section>
     </main>
   );
 }
 
-function Feature({ icon: Icon, label }) {
+function PhoneCard({ icon: Icon, title, detail }) {
   return (
-    <div className="flex min-w-0 items-center gap-3 rounded-lg border border-slate-200 p-3 text-sm font-semibold">
-      <Icon size={18} className="text-sea" />
-      <span className="min-w-0 break-words">{label}</span>
+    <div className="flex items-center gap-3 rounded-2xl border border-sky-100 bg-paper p-3">
+      <span className="grid h-11 w-11 place-items-center rounded-2xl bg-sea text-white">
+        <Icon size={19} />
+      </span>
+      <div>
+        <p className="font-black">{title}</p>
+        <p className="text-sm font-semibold text-slate-500">{detail}</p>
+      </div>
+    </div>
+  );
+}
+
+function LandingPoint({ label }) {
+  return (
+    <div className="flex items-center gap-2 rounded-full bg-white/12 px-3 py-2">
+      <CheckCircle2 size={16} />
+      {label}
     </div>
   );
 }

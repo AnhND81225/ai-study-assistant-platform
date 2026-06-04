@@ -67,11 +67,11 @@ export function ImageScannerInput({
           {helperText ? <p className="mt-1 text-sm leading-6 text-slate-600">{helperText}</p> : null}
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex">
-          <button type="button" onClick={() => cameraInputRef.current?.click()} className="tap-target inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-3 text-sm font-bold text-white transition hover:bg-teal-700">
+          <button type="button" onClick={() => cameraInputRef.current?.click()} className="primary-button px-3 text-sm">
             <Camera size={17} />
             Camera
           </button>
-          <button type="button" onClick={() => galleryInputRef.current?.click()} className="tap-target inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-bold text-slate-700 transition hover:border-sea hover:text-sea">
+          <button type="button" onClick={() => galleryInputRef.current?.click()} className="secondary-button px-3 text-sm">
             <ImagePlus size={17} />
             Gallery
           </button>
@@ -83,7 +83,7 @@ export function ImageScannerInput({
           <img src={previewUrl} alt={`${kindLabel} preview`} className="max-h-[34rem] w-full rounded-lg object-contain" />
         ) : (
           <div className="px-4 py-12 text-center">
-            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-mint text-sea">
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-[1.25rem] bg-mint text-ocean">
               <Camera size={28} />
             </div>
             <p className="mt-4 text-base font-black text-ink">{emptyTitle}</p>
@@ -98,11 +98,11 @@ export function ImageScannerInput({
             {value.name} · {formatBytes(value.size)}
           </p>
           <div className="grid grid-cols-2 gap-2 sm:flex">
-            <button type="button" onClick={rotateClockwise} disabled={rotating} className="tap-target inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-bold text-slate-700 transition hover:border-sea hover:text-sea disabled:opacity-60">
+            <button type="button" onClick={rotateClockwise} disabled={rotating} className="secondary-button px-3 text-sm">
               <RotateCw size={17} />
               {rotating ? 'Rotating...' : 'Rotate'}
             </button>
-            <button type="button" onClick={clear} className="tap-target inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 text-sm font-bold text-red-700 transition hover:bg-red-100">
+            <button type="button" onClick={clear} className="danger-button px-3 text-sm">
               <Trash2 size={17} />
               Clear
             </button>

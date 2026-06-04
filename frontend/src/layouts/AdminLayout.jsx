@@ -12,8 +12,8 @@ const adminNav = [
 export function AdminLayout() {
   return (
     <div className="grid gap-4 lg:grid-cols-[240px_1fr]">
-      <aside className="rounded-lg border border-slate-200 bg-white p-3">
-        <h2 className="px-2 py-2 text-sm font-bold uppercase tracking-wide text-slate-500">Admin</h2>
+      <aside className="app-card p-3">
+        <h2 className="px-2 py-2 text-sm font-black uppercase tracking-wide text-slate-500">Admin</h2>
         <nav className="grid gap-1">
           {adminNav.map((item) => {
             const Icon = item.icon;
@@ -24,7 +24,7 @@ export function AdminLayout() {
                 end={item.end}
                 className={({ isActive }) =>
                   `tap-target flex items-center gap-2 rounded-lg px-3 text-sm font-semibold ${
-                    isActive ? 'bg-mint text-sea' : 'text-slate-600 hover:bg-slate-50'
+                    isActive ? 'bg-mint text-ocean' : 'text-slate-600 hover:bg-sky-50'
                   }`
                 }
               >

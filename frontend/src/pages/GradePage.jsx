@@ -135,18 +135,18 @@ export function GradePage() {
       <PageHeader
         title="Grade answer"
         description="Grade a new image containing the question and student work, or grade an answer for an existing explanation."
-        action={<Link to="/upload" className="tap-target inline-flex items-center rounded-lg border border-slate-300 px-4 font-bold">Explain only</Link>}
+        action={<Link to="/upload" className="secondary-button">Explain only</Link>}
       />
       <ErrorBanner message={error} />
 
-      <div className="mb-4 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
+      <div className="mb-4 grid grid-cols-2 gap-2 rounded-[1rem] bg-sky-50 p-1">
         <button
           type="button"
           onClick={() => {
             setWorkflow('new');
             setSearchParams({}, { replace: true });
           }}
-          className={`tap-target rounded-lg px-3 text-sm font-bold transition ${workflow === 'new' ? 'bg-white text-sea shadow-soft' : 'text-slate-600'}`}
+          className={`tap-target rounded-lg px-3 text-sm font-black transition ${workflow === 'new' ? 'bg-white text-ocean shadow-soft' : 'text-slate-600'}`}
         >
           Grade new work
         </button>
@@ -156,7 +156,7 @@ export function GradePage() {
             setWorkflow('existing');
             if (selectedId) setSearchParams({ submissionId: selectedId }, { replace: true });
           }}
-          className={`tap-target rounded-lg px-3 text-sm font-bold transition ${workflow === 'existing' ? 'bg-white text-sea shadow-soft' : 'text-slate-600'}`}
+          className={`tap-target rounded-lg px-3 text-sm font-black transition ${workflow === 'existing' ? 'bg-white text-ocean shadow-soft' : 'text-slate-600'}`}
         >
           Grade existing
         </button>
@@ -164,7 +164,7 @@ export function GradePage() {
 
       {workflow === 'new' ? (
         <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[1fr_360px]">
-          <section className="smooth-card rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
+          <section className="smooth-card app-card p-4">
             <ImageScannerInput
               value={newWorkImage}
               onChange={setNewWorkImage}
@@ -177,19 +177,19 @@ export function GradePage() {
             />
           </section>
 
-          <section className="rounded-lg border border-slate-200 bg-white p-4">
+          <section className="app-card p-4">
             <div className="grid gap-4">
               <label className="grid gap-1 text-sm font-semibold">
                 Subject
-                <select value={subjectId} onChange={(event) => setSubjectId(event.target.value)} className="tap-target rounded-lg border border-slate-300 px-3">
+                <select value={subjectId} onChange={(event) => setSubjectId(event.target.value)} className="input-field">
                   {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
                 </select>
               </label>
               <label className="grid gap-1 text-sm font-semibold">
                 Note or rubric
-                <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Optional grading instruction" className="rounded-lg border border-slate-300 px-3 py-3" />
+                <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Optional grading instruction" className="rounded-lg border border-sky-100 bg-white px-3 py-3 outline-none transition focus:border-sea focus:ring-4 focus:ring-sky-100" />
               </label>
-              <button disabled={grading || !subjectId || !newWorkImage || !online} className="tap-target inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-4 font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
+              <button disabled={grading || !subjectId || !newWorkImage || !online} className="primary-button">
                 {grading ? <Sparkles size={18} className="animate-pulse" /> : <ClipboardCheck size={18} />}
                 {grading ? 'Reading and grading...' : online ? 'Grade new work' : 'Reconnect to grade'}
               </button>
@@ -200,14 +200,14 @@ export function GradePage() {
         <EmptyState
           title="No explained questions yet"
           description="Generate an explanation first, or switch to Grade new work to grade a full image directly."
-          action={<Link to="/upload" className="tap-target inline-flex items-center rounded-lg bg-sea px-4 font-bold text-white">Explain question</Link>}
+          action={<Link to="/upload" className="primary-button">Explain question</Link>}
         />
       ) : (
         <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[340px_1fr]">
-          <section className="rounded-lg border border-slate-200 bg-white p-4">
+          <section className="app-card p-4">
             <label className="grid gap-1 text-sm font-semibold">
               Explained question
-              <select value={selectedId} onChange={(event) => setSelectedId(event.target.value)} className="tap-target rounded-lg border border-slate-300 px-3">
+              <select value={selectedId} onChange={(event) => setSelectedId(event.target.value)} className="input-field">
                 {explainedItems.map((item) => <option key={item.id} value={item.id}>#{item.id} - {item.subject.name}</option>)}
               </select>
             </label>
@@ -227,14 +227,14 @@ export function GradePage() {
               <ExplanationResultCard aiResponse={selected.aiResponse} />
             ) : null}
 
-            <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
-              <h3 className="text-lg font-bold">Student answer</h3>
-              <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-slate-100 p-1">
-                <button type="button" onClick={() => setMode('text')} className={`tap-target rounded-md px-3 text-sm font-bold ${mode === 'text' ? 'bg-white text-sea shadow-soft' : 'text-slate-600'}`}>Type answer</button>
-                <button type="button" onClick={() => setMode('image')} className={`tap-target rounded-md px-3 text-sm font-bold ${mode === 'image' ? 'bg-white text-sea shadow-soft' : 'text-slate-600'}`}>Upload image</button>
+            <div className="app-card p-4">
+              <h3 className="text-lg font-black">Student answer</h3>
+              <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-sky-50 p-1">
+                <button type="button" onClick={() => setMode('text')} className={`tap-target rounded-md px-3 text-sm font-black ${mode === 'text' ? 'bg-white text-ocean shadow-soft' : 'text-slate-600'}`}>Type answer</button>
+                <button type="button" onClick={() => setMode('image')} className={`tap-target rounded-md px-3 text-sm font-black ${mode === 'image' ? 'bg-white text-ocean shadow-soft' : 'text-slate-600'}`}>Upload image</button>
               </div>
               {mode === 'text' ? (
-                <textarea value={answer} onChange={(event) => setAnswer(event.target.value)} rows={7} placeholder="Paste or type the student's answer" className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-3 transition focus:border-sea focus:outline-none focus:ring-4 focus:ring-mint/70" />
+                <textarea value={answer} onChange={(event) => setAnswer(event.target.value)} rows={7} placeholder="Paste or type the student's answer" className="mt-3 w-full rounded-lg border border-sky-100 px-3 py-3 transition focus:border-sea focus:outline-none focus:ring-4 focus:ring-sky-100" />
               ) : (
                 <div className="mt-3">
                   <ImageScannerInput
@@ -249,7 +249,7 @@ export function GradePage() {
                   />
                 </div>
               )}
-              <button disabled={grading || !canGradeExisting || !online} className="tap-target mt-3 inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-4 font-bold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60">
+              <button disabled={grading || !canGradeExisting || !online} className="primary-button mt-3">
                 {grading ? <Sparkles size={18} className="animate-pulse" /> : <ClipboardCheck size={18} />}
                 {grading ? 'Grading...' : !online ? 'Reconnect to grade' : mode === 'image' ? 'Grade image' : 'Submit for grading'}
               </button>

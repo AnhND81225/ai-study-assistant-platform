@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { ArrowRight, Plus } from 'lucide-react';
 import { submissionApi } from '../api/submissionApi';
 import { apiMessage } from '../api/client';
 import { PageHeader } from '../components/common/PageHeader';
@@ -19,14 +20,14 @@ export function HistoryPage() {
 
   return (
     <div>
-      <PageHeader title="Submission history" description="Your uploaded homework questions and AI results." action={<Link to="/upload" className="tap-target inline-flex items-center rounded-lg bg-sea px-4 font-bold text-white">New upload</Link>} />
+      <PageHeader title="Submission history" description="Your uploaded homework questions and AI results." action={<Link to="/upload" className="primary-button"><Plus size={17} />New upload</Link>} />
       <ErrorBanner message={error} />
       {items.length === 0 && !error ? (
-        <EmptyState title="No submissions yet" description="Upload your first homework image to generate an explanation." action={<Link to="/upload" className="tap-target inline-flex items-center rounded-lg bg-sea px-4 font-bold text-white">Upload homework</Link>} />
+        <EmptyState title="No submissions yet" description="Upload your first homework image to generate an explanation." action={<Link to="/upload" className="primary-button">Upload homework</Link>} />
       ) : (
         <div className="grid gap-3">
           {items.map((item) => (
-            <Link key={item.id} to={`/submissions/${item.id}`} className="rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
+            <Link key={item.id} to={`/submissions/${item.id}`} className="smooth-card app-card p-4">
               <div className="flex items-start gap-3">
                 <img src={item.imageUrl} alt={`Submission ${item.id}`} className="h-20 w-20 rounded-lg object-cover" />
                 <div className="min-w-0 flex-1">
@@ -36,6 +37,7 @@ export function HistoryPage() {
                   </div>
                   <p className="mt-1 line-clamp-2 text-sm text-slate-600">{item.aiResponse?.detectedQuestion || item.note || 'Tap to view details'}</p>
                 </div>
+                <ArrowRight className="mt-1 shrink-0 text-sea" size={18} />
               </div>
             </Link>
           ))}
