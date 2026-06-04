@@ -2,7 +2,7 @@
 
 ## Overview
 
-The frontend is installable as a Progressive Web App with a manifest, standalone display mode, safe static caching, and offline fallback.
+The frontend is installable as a Progressive Web App with a manifest, standalone display mode, safe static caching, offline fallback, an install prompt banner when supported, and an online/offline status banner.
 
 ## Manifest Requirements
 
@@ -23,6 +23,12 @@ Do not cache authenticated API responses, image URLs, submission data, grading r
 ## Offline Fallback
 
 Offline users see a fallback page. AI features, upload, login, and history require network access.
+
+Authenticated screens also show an offline banner and disable upload, explanation, and grading actions while the browser is offline.
+
+## Install Prompt UX
+
+When the browser fires `beforeinstallprompt`, the app shows a lightweight install banner. Android Chrome commonly supports this prompt. iOS Safari does not expose the same event, so iOS users should install through the Share menu.
 
 ## Install Guide
 
@@ -56,7 +62,9 @@ iOS Safari:
 - Manifest loads.
 - Service worker registers.
 - App is installable on HTTPS or localhost.
+- Install banner appears on supported browsers before installation.
 - Offline fallback appears.
+- Authenticated actions are blocked while offline.
 - Private API responses are not cached.
 - Mobile layout has large tap targets.
 - Camera/gallery upload controls work on mobile browsers.

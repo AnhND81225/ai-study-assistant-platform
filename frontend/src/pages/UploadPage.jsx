@@ -7,9 +7,12 @@ import { apiMessage } from '../api/client';
 import { PageHeader } from '../components/common/PageHeader';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { ImageScannerInput } from '../components/common/ImageScannerInput';
+import { AiUsageCard } from '../components/common/AiUsageCard';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 export function UploadPage() {
   const navigate = useNavigate();
+  const online = useOnlineStatus();
   const [subjects, setSubjects] = useState([]);
   const [subjectId, setSubjectId] = useState('');
   const [note, setNote] = useState('');
@@ -26,6 +29,10 @@ export function UploadPage() {
 
   async function submit(event) {
     event.preventDefault();
+    if (!online) {
+      setError('You are offline. Reconnect before uploading or requesting AI explanation.');
+      return;
+    }
     if (!image) {
       setError('Choose a homework image first.');
       return;
@@ -64,6 +71,7 @@ export function UploadPage() {
         </section>
         <section className="rounded-lg border border-slate-200 bg-white p-4">
           <div className="grid gap-4">
+            <AiUsageCard compact />
             <label className="grid gap-1 text-sm font-semibold">
               Subject
               <select value={subjectId} onChange={(event) => setSubjectId(event.target.value)} className="tap-target rounded-lg border border-slate-300 px-3">
@@ -74,9 +82,9 @@ export function UploadPage() {
               Note
               <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Optional context or what you tried" className="rounded-lg border border-slate-300 px-3 py-3" />
             </label>
-            <button disabled={loading || !subjectId} className="tap-target inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-4 font-bold text-white disabled:opacity-60">
+            <button disabled={loading || !subjectId || !image || !online} className="tap-target inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-4 font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
               {loading ? <Sparkles size={18} className="animate-pulse" /> : <Camera size={18} />}
-              {loading ? 'Processing AI explanation...' : 'Explain question'}
+              {loading ? 'Processing AI explanation...' : online ? 'Explain question' : 'Reconnect to explain'}
             </button>
           </div>
         </section>

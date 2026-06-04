@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { BookOpen, ClipboardCheck, History, Home, LogOut, Shield, Upload, User } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
+import { PwaStatusBanner } from '../components/pwa/PwaStatusBanner';
 
 const userNav = [
   { to: '/dashboard', label: 'Home', icon: Home },
@@ -42,6 +43,7 @@ export function AppLayout() {
           </div>
         </div>
       </header>
+      <PwaStatusBanner />
 
       <main className="safe-bottom mx-auto w-full max-w-6xl px-4 py-5">
         <div className="mb-5">

@@ -13,10 +13,11 @@ This project is designed to demonstrate fullstack development, backend architect
 - Validate and store images with Cloudinary.
 - AI explanation workflow with Markdown and LaTeX-ready responses.
 - AI grading workflow for typed answers, answer images, or a new image containing both the question and student work.
+- Daily AI explanation quota with user-visible remaining usage.
 - Submission history and delete-own-submission flow.
 - Admin-ready API structure.
 - PostgreSQL persistence.
-- PWA manifest, service worker strategy, and offline fallback.
+- PWA manifest, service worker strategy, install prompt, and offline fallback.
 - Docker Compose local development.
 
 ## Tech Stack
@@ -94,6 +95,8 @@ iOS:
 3. Choose **Add to Home Screen**.
 
 AI explanation, grading, login, upload, and history require an internet connection. Offline mode only serves the static fallback and safe cached assets.
+
+When supported by the browser, the app shows an install banner. Authenticated screens also show an offline warning and block AI/upload actions while offline.
 
 See [docs/PWA.md](docs/PWA.md).
 
@@ -204,6 +207,12 @@ When the backend is running, Swagger UI is available at:
 http://localhost:8080/swagger-ui.html
 ```
 
+Health checks:
+
+```text
+http://localhost:8080/healthz
+```
+
 See [docs/API.md](docs/API.md).
 
 ## Database Schema Overview
@@ -242,7 +251,7 @@ Screenshots should be added after the UI is deployed or locally verified.
 ## Future Improvements
 
 - Async AI job queue.
-- Rate limiting.
+- Per-minute rate limiting in addition to the daily explanation quota.
 - More advanced admin analytics.
 - Sentry monitoring.
 - Additional AI providers.

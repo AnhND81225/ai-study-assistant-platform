@@ -34,7 +34,7 @@ The primary layout targets phones first. User pages use large tap targets, card/
 
 ## PWA Architecture
 
-The PWA provides a manifest, standalone display mode, icons, and safe static asset caching. Private API responses are not cached. Offline mode shows a fallback page and does not pretend AI features work offline.
+The PWA provides a manifest, standalone display mode, icons, safe static asset caching, an install prompt banner, and online/offline status messaging. Private API responses are not cached. Offline mode shows a fallback page and does not pretend AI features work offline.
 
 ## AI Workflow
 
@@ -54,6 +54,13 @@ Grading flow:
 2. Backend loads the submission and existing AI explanation.
 3. Backend sends compact context to the AI provider.
 4. Backend stores score, feedback, mistakes, and suggestions.
+
+Usage quota flow:
+
+1. Backend logs AI requests with request type, model, status, and timestamp.
+2. Successful explanation requests are counted per user per UTC day.
+3. The frontend reads `/api/ai-usage/me` to show the remaining daily explanation quota.
+4. The backend enforces the configured limit before starting another explanation request.
 
 ## Upload Workflow
 
@@ -93,6 +100,7 @@ Docker Compose starts PostgreSQL, backend, and frontend services for local devel
 - Entity graphs or focused DTO queries to reduce N+1 risk.
 - External API timeouts.
 - Compact AI prompts.
+- Daily AI quota visibility to reduce surprise failures and control cost.
 - No unnecessary large payloads.
 
 ## Scalability Considerations

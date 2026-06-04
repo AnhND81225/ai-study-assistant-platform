@@ -10,7 +10,8 @@ Built a fullstack AI Study Assistant using Java Spring Boot, React, PostgreSQL, 
 - Implemented JWT authentication, role-based access control, and service-layer ownership checks to prevent IDOR vulnerabilities.
 - Integrated Cloudinary image uploads with backend file type and size validation.
 - Designed an AI provider abstraction for explanation and grading workflows with usage logging.
-- Built a PWA-ready frontend with protected routes, offline fallback, and safe static asset caching.
+- Built a PWA-ready frontend with protected routes, install prompt UX, offline fallback, online/offline state handling, and safe static asset caching.
+- Added user-visible daily AI usage quota to support cost control and transparent user feedback.
 - Prepared Docker Compose local development with PostgreSQL, backend, and frontend services.
 - Documented architecture, API, deployment, security, PWA behavior, and CV highlights.
 
@@ -21,6 +22,7 @@ Built a fullstack AI Study Assistant using Java Spring Boot, React, PostgreSQL, 
 - PostgreSQL relational model.
 - Mobile-first React architecture.
 - PWA installability and cache privacy.
+- AI quota visibility and usage logging.
 - Deployment-ready environment variable documentation.
 
 ## What This Demonstrates

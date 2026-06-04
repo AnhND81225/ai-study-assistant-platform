@@ -31,6 +31,13 @@ Error:
 | POST | `/api/auth/login` | Login and receive JWT | Public |
 | GET | `/api/auth/me` | Current profile | USER/ADMIN |
 
+## Health
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| GET | `/` | Basic API status response | Public |
+| GET | `/healthz` | Render-ready health check endpoint | Public |
+
 ## Users
 
 | Method | Path | Description | Auth |
@@ -87,4 +94,16 @@ Grade new work from image uses `multipart/form-data`:
 
 | Method | Path | Description | Auth |
 |---|---|---|---|
+| GET | `/api/ai-usage/me` | Current user's daily explanation quota | USER/ADMIN |
 | GET | `/api/admin/ai-usage-logs` | List AI usage logs | ADMIN |
+
+Quota response:
+
+```json
+{
+  "dailyLimit": 10,
+  "usedToday": 3,
+  "remainingToday": 7,
+  "resetAt": "2026-06-05T00:00:00Z"
+}
+```

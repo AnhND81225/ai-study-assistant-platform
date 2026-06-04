@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom';
 import { Camera, ClipboardCheck, Clock } from 'lucide-react';
 import { PageHeader } from '../components/common/PageHeader';
+import { AiUsageCard } from '../components/common/AiUsageCard';
 
 export function DashboardPage() {
   return (
     <div>
       <PageHeader title="Study dashboard" description="Choose a focused AI workflow, then review saved results from your private history." />
+      <div className="mb-4">
+        <AiUsageCard />
+      </div>
       <div className="grid gap-4 md:grid-cols-3">
         <Link to="/upload" className="smooth-card rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
           <Camera className="text-sea" size={28} />

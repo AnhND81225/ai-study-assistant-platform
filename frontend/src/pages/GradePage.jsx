@@ -8,11 +8,13 @@ import { PageHeader } from '../components/common/PageHeader';
 import { EmptyState } from '../components/common/EmptyState';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { StatusPill } from '../components/common/StatusPill';
-import { RichText } from '../components/common/RichText';
 import { ImageScannerInput } from '../components/common/ImageScannerInput';
+import { ExplanationResultCard, GradingResultCard } from '../components/common/AiResultCards';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 export function GradePage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const online = useOnlineStatus();
   const initialSubmissionId = searchParams.get('submissionId') || '';
   const [workflow, setWorkflow] = useState(initialSubmissionId ? 'existing' : 'new');
   const [items, setItems] = useState([]);
@@ -68,6 +70,10 @@ export function GradePage() {
   async function submit(event) {
     event.preventDefault();
     setError('');
+    if (!online) {
+      setError('You are offline. Reconnect before requesting AI grading.');
+      return;
+    }
     if (workflow === 'new') {
       if (!newWorkImage) {
         setError('Choose a student work image first.');
@@ -183,9 +189,9 @@ export function GradePage() {
                 Note or rubric
                 <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Optional grading instruction" className="rounded-lg border border-slate-300 px-3 py-3" />
               </label>
-              <button disabled={grading || !subjectId || !newWorkImage} className="tap-target inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-4 font-bold text-white disabled:opacity-60">
+              <button disabled={grading || !subjectId || !newWorkImage || !online} className="tap-target inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-4 font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
                 {grading ? <Sparkles size={18} className="animate-pulse" /> : <ClipboardCheck size={18} />}
-                {grading ? 'Reading and grading...' : 'Grade new work'}
+                {grading ? 'Reading and grading...' : online ? 'Grade new work' : 'Reconnect to grade'}
               </button>
             </div>
           </section>
@@ -218,11 +224,7 @@ export function GradePage() {
 
           <section className="grid gap-4">
             {selected?.aiResponse ? (
-              <article className="rounded-lg border border-slate-200 bg-white p-4">
-                <h3 className="text-lg font-bold">Reference explanation</h3>
-                <div className="mt-3"><strong className="text-sm text-slate-700">Detected question:</strong><RichText>{selected.aiResponse.detectedQuestion}</RichText></div>
-                {selected.aiResponse.finalAnswer ? <div className="mt-2"><strong className="text-sm text-slate-700">Final answer:</strong><RichText>{selected.aiResponse.finalAnswer}</RichText></div> : null}
-              </article>
+              <ExplanationResultCard aiResponse={selected.aiResponse} />
             ) : null}
 
             <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
@@ -247,9 +249,9 @@ export function GradePage() {
                   />
                 </div>
               )}
-              <button disabled={grading || !canGradeExisting} className="tap-target mt-3 inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-4 font-bold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60">
+              <button disabled={grading || !canGradeExisting || !online} className="tap-target mt-3 inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-4 font-bold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60">
                 {grading ? <Sparkles size={18} className="animate-pulse" /> : <ClipboardCheck size={18} />}
-                {grading ? 'Grading...' : mode === 'image' ? 'Grade image' : 'Submit for grading'}
+                {grading ? 'Grading...' : !online ? 'Reconnect to grade' : mode === 'image' ? 'Grade image' : 'Submit for grading'}
               </button>
             </div>
           </section>
@@ -259,14 +261,7 @@ export function GradePage() {
       {selected?.gradingResults?.length ? (
         <div className="mt-4 grid gap-3">
           {selected.gradingResults.map((result) => (
-            <article key={result.id} className="fade-in smooth-card rounded-lg border border-slate-200 bg-white p-4">
-              <p className="text-2xl font-black text-sea">{result.score}/100</p>
-              {result.userAnswerImageUrl ? <img src={result.userAnswerImageUrl} alt="Graded student answer" className="mt-3 max-h-72 w-full rounded-lg object-contain" /> : null}
-              {result.userAnswer ? <div className="mt-2"><strong className="text-sm text-slate-700">Student answer:</strong><RichText>{result.userAnswer}</RichText></div> : null}
-              <RichText className="mt-2">{result.feedback}</RichText>
-              {result.mistakes ? <div className="mt-2"><strong className="text-sm text-slate-700">Mistakes:</strong><RichText>{result.mistakes}</RichText></div> : null}
-              {result.improvementSuggestions ? <div className="mt-2"><strong className="text-sm text-slate-700">Improve:</strong><RichText>{result.improvementSuggestions}</RichText></div> : null}
-            </article>
+            <GradingResultCard key={result.id} result={result} />
           ))}
         </div>
       ) : null}
