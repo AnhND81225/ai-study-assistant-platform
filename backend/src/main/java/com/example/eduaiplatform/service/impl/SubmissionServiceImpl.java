@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 
 @Service
 public class SubmissionServiceImpl implements SubmissionService {
@@ -102,10 +103,12 @@ public class SubmissionServiceImpl implements SubmissionService {
             throw new ApiException(HttpStatus.FORBIDDEN, ErrorCode.ACCESS_DENIED, "You can delete only your own submissions");
         }
         String publicId = submission.getCloudinaryPublicId();
-        submission.getGradingResults().stream()
+        List<String> gradingImagePublicIds = submission.getGradingResults().stream()
                 .map(GradingResult::getUserAnswerCloudinaryPublicId)
-                .forEach(cloudinaryService::deleteAsset);
+                .toList();
+        aiUsageLogRepository.clearSubmissionReference(submission.getId());
         submissionRepository.delete(submission);
+        gradingImagePublicIds.forEach(cloudinaryService::deleteAsset);
         cloudinaryService.deleteAsset(publicId);
     }
 
