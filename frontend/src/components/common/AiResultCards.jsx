@@ -30,7 +30,7 @@ export function ExplanationResultCard({ aiResponse }) {
 
 export function GradingResultCard({ result }) {
   const score = Number(result.score || 0);
-  const scoreStyle = score >= 80 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : score >= 50 ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-red-700 bg-red-50 border-red-200';
+  const scoreStyle = score >= 80 ? 'text-ocean bg-sky-50 border-sky-200' : score >= 50 ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-red-700 bg-red-50 border-red-200';
 
   return (
     <article className="fade-in smooth-card app-card p-4">

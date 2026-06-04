@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="AI Study Assistant icon">
-  <rect width="512" height="512" rx="96" fill="#0f766e"/>
+  <rect width="512" height="512" rx="96" fill="#39B4F7"/>
   <rect x="116" y="104" width="280" height="304" rx="28" fill="#ffffff"/>
   <path d="M164 172h184M164 228h184M164 284h116" stroke="#102033" stroke-width="28" stroke-linecap="round"/>
-  <circle cx="342" cy="326" r="48" fill="#ccfbf1"/>
-  <path d="M342 294v64M310 326h64" stroke="#0f766e" stroke-width="22" stroke-linecap="round"/>
+  <circle cx="342" cy="326" r="48" fill="#DDF6FF"/>
+  <path d="M342 294v64M310 326h64" stroke="#1179C9" stroke-width="22" stroke-linecap="round"/>
 </svg>
