@@ -40,7 +40,7 @@ export function RegisterPage() {
         <h1 className="text-3xl font-black text-ink">Create account</h1>
         <p className="mt-2 text-sm font-semibold text-slate-500">Start saving explanations and grading results.</p>
         <div className="mt-5 grid gap-4">
-          <ErrorBanner message={error} />
+          <ErrorBanner message={error} onDismiss={() => setError('')} />
           <label className="grid gap-1 text-sm font-semibold text-slate-700">
             Full name
             <span className="relative">

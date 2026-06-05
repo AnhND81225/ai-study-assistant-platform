@@ -24,6 +24,7 @@ export function HistoryPage() {
   const [editForm, setEditForm] = useState({ title: '', note: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
 
   const filterKey = useMemo(() => `${search}|${subjectId}|${status}|${favoriteOnly}`, [search, subjectId, status, favoriteOnly]);
 
@@ -67,7 +68,7 @@ export function HistoryPage() {
     return () => {
       ignore = true;
     };
-  }, [page, search, subjectId, status, favoriteOnly]);
+  }, [page, search, subjectId, status, favoriteOnly, retryKey]);
 
   function beginEdit(item) {
     setEditing(item.id);
@@ -106,7 +107,7 @@ export function HistoryPage() {
   return (
     <div>
       <PageHeader title="Submission history" description="Search, filter, favorite, and organize your saved homework results." action={<Link to="/upload" className="primary-button"><Plus size={17} />New upload</Link>} />
-      <ErrorBanner message={error} />
+      <ErrorBanner message={error} onRetry={() => setRetryKey((current) => current + 1)} onDismiss={() => setError('')} />
 
       <section className="app-card mb-4 grid gap-3 p-4">
         <label className="relative">

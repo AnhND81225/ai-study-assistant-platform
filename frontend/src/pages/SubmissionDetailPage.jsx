@@ -79,7 +79,7 @@ export function SubmissionDetailPage() {
             {submission.aiResponse ? (
               <Link to={`/grade?submissionId=${submission.id}`} className="primary-button mt-3 w-full">
                 <ClipboardCheck size={17} />
-                Grade answer
+                Check student answer
               </Link>
             ) : (
               <button disabled={explaining || !online} onClick={retryExplain} className="primary-button mt-3 w-full">

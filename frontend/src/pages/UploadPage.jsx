@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Camera, Sparkles } from 'lucide-react';
 import { subjectApi } from '../api/subjectApi';
 import { submissionApi } from '../api/submissionApi';
-import { apiMessage } from '../api/client';
+import { apiMessage, isRetryableError } from '../api/client';
 import { PageHeader } from '../components/common/PageHeader';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { ImageScannerInput } from '../components/common/ImageScannerInput';
 import { AiUsageCard } from '../components/common/AiUsageCard';
+import { ProcessProgress } from '../components/common/ProcessProgress';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 export function UploadPage() {
@@ -19,6 +20,14 @@ export function UploadPage() {
   const [image, setImage] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeStep, setActiveStep] = useState(-1);
+  const [canRetry, setCanRetry] = useState(false);
+
+  const progressSteps = [
+    { label: 'Save scan', detail: 'Securely uploading your question image.' },
+    { label: 'Read question', detail: 'AI is reading the question and subject context.' },
+    { label: 'Build solution', detail: 'Preparing clear study steps and the final answer.' },
+  ];
 
   useEffect(() => {
     subjectApi.list().then((items) => {
@@ -28,9 +37,9 @@ export function UploadPage() {
   }, []);
 
   async function submit(event) {
-    event.preventDefault();
+    event?.preventDefault();
     if (!online) {
-      setError('You are offline. Reconnect before uploading or requesting AI explanation.');
+      setError('You are offline. Reconnect before uploading or requesting an AI solution.');
       return;
     }
     if (!image) {
@@ -39,30 +48,37 @@ export function UploadPage() {
     }
     setLoading(true);
     setError('');
+    setCanRetry(false);
+    setActiveStep(0);
     try {
       const submission = await submissionApi.create({ subjectId, note, image });
+      setActiveStep(1);
       const explained = await submissionApi.explain(submission.id);
+      setActiveStep(2);
       navigate(`/submissions/${explained.id}`);
     } catch (err) {
-      setError(apiMessage(err, 'Upload or AI explanation failed'));
+      setError(apiMessage(err, 'Could not solve this question'));
+      setCanRetry(isRetryableError(err));
     } finally {
       setLoading(false);
+      setActiveStep(-1);
     }
   }
 
   return (
     <div>
-      <PageHeader title="Explain question" description="Upload a homework question image, add a short note, and generate an AI explanation." />
+      <PageHeader title="Solve a question" description="Scan one clear homework question and get a guided, step-by-step solution." />
+      <ProcessProgress title="Creating your solution" steps={progressSteps} activeStep={activeStep} />
       <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[1fr_360px]">
         <section className="app-card p-4">
-          <ErrorBanner message={error} />
+          <ErrorBanner message={error} onRetry={canRetry ? () => submit() : undefined} onDismiss={() => setError('')} />
           <div className="mt-4">
             <ImageScannerInput
               value={image}
               onChange={setImage}
               onError={setError}
-              label="Question scan"
-              helperText="Scan the homework question with your camera, or choose a clear image from the gallery."
+              label="Question photo"
+              helperText="Include the full question. Keep handwriting and formulas sharp and well lit."
               emptyTitle="Scan question image"
               emptyDescription="Place the full question inside the frame, avoid shadows, then rotate if the photo is sideways."
               kindLabel="question image"
@@ -84,7 +100,7 @@ export function UploadPage() {
             </label>
             <button disabled={loading || !subjectId || !image || !online} className="primary-button">
               {loading ? <Sparkles size={18} className="animate-pulse" /> : <Camera size={18} />}
-              {loading ? 'Processing AI explanation...' : online ? 'Explain question' : 'Reconnect to explain'}
+                {loading ? 'Creating solution...' : online ? 'Solve this question' : 'Reconnect to solve'}
             </button>
           </div>
         </section>

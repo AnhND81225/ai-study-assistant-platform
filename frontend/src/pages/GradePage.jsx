@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { ClipboardCheck, Sparkles } from 'lucide-react';
 import { subjectApi } from '../api/subjectApi';
 import { submissionApi } from '../api/submissionApi';
-import { apiMessage } from '../api/client';
+import { apiMessage, isRetryableError } from '../api/client';
 import { PageHeader } from '../components/common/PageHeader';
 import { EmptyState } from '../components/common/EmptyState';
 import { ErrorBanner } from '../components/common/ErrorBanner';
@@ -11,6 +11,7 @@ import { StatusPill } from '../components/common/StatusPill';
 import { ImageScannerInput } from '../components/common/ImageScannerInput';
 import { ExplanationResultCard, GradingResultCard } from '../components/common/AiResultCards';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { ProcessProgress } from '../components/common/ProcessProgress';
 
 export function GradePage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -30,6 +31,14 @@ export function GradePage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [grading, setGrading] = useState(false);
+  const [activeStep, setActiveStep] = useState(-1);
+  const [canRetry, setCanRetry] = useState(false);
+
+  const progressSteps = [
+    { label: 'Read work', detail: 'Reading the question and student answer.' },
+    { label: 'Check solution', detail: 'Comparing the work with a correct solution.' },
+    { label: 'Write feedback', detail: 'Preparing the score, mistakes, and next steps.' },
+  ];
 
   const explainedItems = useMemo(() => items.filter((item) => item.aiResponse), [items]);
   const canGradeExisting = Boolean(selected?.aiResponse) && (mode === 'image' ? Boolean(answerImage) : Boolean(answer.trim()));
@@ -47,7 +56,7 @@ export function GradePage() {
         const initial = content.find((item) => String(item.id) === initialSubmissionId && item.aiResponse) || content.find((item) => item.aiResponse);
         if (initial) setSelectedId(String(initial.id));
       })
-      .catch((err) => setError(apiMessage(err, 'Could not load grading data')))
+      .catch((err) => setError(apiMessage(err, 'Could not load your checking workspace')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -68,10 +77,10 @@ export function GradePage() {
   }, [selectedId, setSearchParams, workflow]);
 
   async function submit(event) {
-    event.preventDefault();
+    event?.preventDefault();
     setError('');
     if (!online) {
-      setError('You are offline. Reconnect before requesting AI grading.');
+      setError('You are offline. Reconnect before checking student work.');
       return;
     }
     if (workflow === 'new') {
@@ -80,8 +89,12 @@ export function GradePage() {
         return;
       }
       setGrading(true);
+      setCanRetry(false);
+      setActiveStep(0);
       try {
+        setActiveStep(1);
         const submission = await submissionApi.gradeNewImage({ subjectId, note, image: newWorkImage });
+        setActiveStep(2);
         setItems((current) => [submission, ...current.filter((item) => item.id !== submission.id)]);
         setSelected(submission);
         setSelectedId(String(submission.id));
@@ -89,9 +102,11 @@ export function GradePage() {
         setNewWorkImage(null);
         setNote('');
       } catch (err) {
-        setError(apiMessage(err, 'Could not grade student work image'));
+        setError(apiMessage(err, 'Could not check the student work image'));
+        setCanRetry(isRetryableError(err));
       } finally {
         setGrading(false);
+        setActiveStep(-1);
       }
       return;
     }
@@ -101,7 +116,7 @@ export function GradePage() {
       return;
     }
     if (mode === 'text' && !answer.trim()) {
-      setError('Type the student answer before grading.');
+      setError('Type the student answer before checking it.');
       return;
     }
     if (mode === 'image' && !answerImage) {
@@ -109,7 +124,10 @@ export function GradePage() {
       return;
     }
     setGrading(true);
+    setCanRetry(false);
+    setActiveStep(0);
     try {
+      setActiveStep(1);
       const result = mode === 'image'
         ? await submissionApi.gradeImage(selected.id, answerImage)
         : await submissionApi.grade(selected.id, answer.trim());
@@ -119,25 +137,29 @@ export function GradePage() {
       }));
       setAnswer('');
       setAnswerImage(null);
+      setActiveStep(2);
     } catch (err) {
-      setError(apiMessage(err, 'Could not grade answer'));
+      setError(apiMessage(err, 'Could not check the student answer'));
+      setCanRetry(isRetryableError(err));
     } finally {
       setGrading(false);
+      setActiveStep(-1);
     }
   }
 
   if (loading) {
-    return <PageHeader title="Grade answer" description="Loading grading workspace." />;
+    return <PageHeader title="Check student work" description="Loading your checking workspace." />;
   }
 
   return (
     <div>
       <PageHeader
-        title="Grade answer"
-        description="Grade a new image containing the question and student work, or grade an answer for an existing explanation."
-        action={<Link to="/upload" className="secondary-button">Explain only</Link>}
+        title="Check student work"
+        description="Check a complete worksheet photo, or review a new answer for a question you already solved."
+        action={<Link to="/upload" className="secondary-button">Solve a question</Link>}
       />
-      <ErrorBanner message={error} />
+      <ErrorBanner message={error} onRetry={canRetry ? () => submit() : undefined} onDismiss={() => setError('')} />
+      <ProcessProgress title="Checking the student work" steps={progressSteps} activeStep={activeStep} />
 
       <div className="mb-4 grid grid-cols-2 gap-2 rounded-[1rem] bg-sky-50 p-1">
         <button
@@ -148,7 +170,7 @@ export function GradePage() {
           }}
           className={`tap-target rounded-lg px-3 text-sm font-black transition ${workflow === 'new' ? 'bg-white text-ocean shadow-soft' : 'text-slate-600'}`}
         >
-          Grade new work
+          Check a worksheet
         </button>
         <button
           type="button"
@@ -158,7 +180,7 @@ export function GradePage() {
           }}
           className={`tap-target rounded-lg px-3 text-sm font-black transition ${workflow === 'existing' ? 'bg-white text-ocean shadow-soft' : 'text-slate-600'}`}
         >
-          Grade existing
+          Check saved answer
         </button>
       </div>
 
@@ -191,7 +213,7 @@ export function GradePage() {
               </label>
               <button disabled={grading || !subjectId || !newWorkImage || !online} className="primary-button">
                 {grading ? <Sparkles size={18} className="animate-pulse" /> : <ClipboardCheck size={18} />}
-                {grading ? 'Reading and grading...' : online ? 'Grade new work' : 'Reconnect to grade'}
+                {grading ? 'Checking student work...' : online ? 'Check this worksheet' : 'Reconnect to check'}
               </button>
             </div>
           </section>
@@ -199,8 +221,8 @@ export function GradePage() {
       ) : explainedItems.length === 0 ? (
         <EmptyState
           title="No explained questions yet"
-          description="Generate an explanation first, or switch to Grade new work to grade a full image directly."
-          action={<Link to="/upload" className="primary-button">Explain question</Link>}
+          description="Solve a question first, or switch to Check a worksheet to review a complete image directly."
+          action={<Link to="/upload" className="primary-button">Solve a question</Link>}
         />
       ) : (
         <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[340px_1fr]">
@@ -244,14 +266,14 @@ export function GradePage() {
                     label="Answer scan"
                     helperText="Scan only the student's answer for this already-explained question."
                     emptyTitle="Scan student answer"
-                    emptyDescription="Use a clear close-up of the answer. The AI will read handwriting from the image before grading."
+                    emptyDescription="Use a clear close-up of the answer. AI will read the handwriting before checking the work."
                     kindLabel="answer image"
                   />
                 </div>
               )}
               <button disabled={grading || !canGradeExisting || !online} className="primary-button mt-3">
                 {grading ? <Sparkles size={18} className="animate-pulse" /> : <ClipboardCheck size={18} />}
-                {grading ? 'Grading...' : !online ? 'Reconnect to grade' : mode === 'image' ? 'Grade image' : 'Submit for grading'}
+                {grading ? 'Checking...' : !online ? 'Reconnect to check' : mode === 'image' ? 'Check answer image' : 'Check this answer'}
               </button>
             </div>
           </section>
