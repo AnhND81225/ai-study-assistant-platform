@@ -1,7 +1,7 @@
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { BookOpen, LockKeyhole, Mail } from 'lucide-react';
-import { useAuth } from '../auth/AuthContext';
+import { consumeSessionNotice, useAuth } from '../auth/AuthContext';
 import { apiMessage } from '../api/client';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 
@@ -10,7 +10,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
+  const [error, setError] = useState(() => consumeSessionNotice());
   const [loading, setLoading] = useState(false);
 
   if (auth.isAuthenticated) return <Navigate to="/dashboard" replace />;
@@ -29,10 +29,10 @@ export function LoginPage() {
     }
   }
 
-  return <AuthForm title="Welcome back" subtitle="Continue your study session." submitLabel="Sign in" form={form} setForm={setForm} submit={submit} loading={loading} error={error} footer={<Link to="/register" className="font-black text-ocean">Create an account</Link>} />;
+  return <AuthForm title="Welcome back" subtitle="Continue your study session." submitLabel="Sign in" form={form} setForm={setForm} submit={submit} loading={loading} error={error} dismissError={() => setError('')} footer={<Link to="/register" className="font-black text-ocean">Create an account</Link>} />;
 }
 
-function AuthForm({ title, subtitle, submitLabel, form, setForm, submit, loading, error, footer }) {
+function AuthForm({ title, subtitle, submitLabel, form, setForm, submit, loading, error, dismissError, footer }) {
   return (
     <main className="grid min-h-screen place-items-center bg-paper px-4 py-8">
       <form onSubmit={submit} className="w-full max-w-md rounded-[1.5rem] border border-sky-100 bg-white p-5 shadow-soft">
@@ -45,7 +45,7 @@ function AuthForm({ title, subtitle, submitLabel, form, setForm, submit, loading
         <h1 className="text-3xl font-black text-ink">{title}</h1>
         <p className="mt-2 text-sm font-semibold text-slate-500">{subtitle}</p>
         <div className="mt-5 grid gap-4">
-          <ErrorBanner message={error} />
+          <ErrorBanner message={error} onDismiss={dismissError} />
           <label className="grid gap-1 text-sm font-semibold text-slate-700">
             Email
             <span className="relative">

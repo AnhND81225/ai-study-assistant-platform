@@ -5,6 +5,7 @@ import { authApi } from '../api/authApi';
 const AuthContext = createContext(null);
 const TOKEN_KEY = 'studyai_token';
 const USER_KEY = 'studyai_user';
+const SESSION_NOTICE_KEY = 'studyai_session_notice';
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY));
@@ -17,7 +18,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     attachAuthInterceptors(
       () => localStorage.getItem(TOKEN_KEY),
-      () => logout(),
+      () => logout('Your session expired. Sign in again to continue where you left off.'),
     );
   }, []);
 
@@ -31,7 +32,7 @@ export function AuthProvider({ children }) {
         setUser(profile);
         localStorage.setItem(USER_KEY, JSON.stringify(profile));
       })
-      .catch(() => logout())
+      .catch(() => logout('Your session expired. Sign in again to continue where you left off.'))
       .finally(() => setBooting(false));
   }, [token]);
 
@@ -50,7 +51,10 @@ export function AuthProvider({ children }) {
     persistSession(await authApi.register(payload));
   }
 
-  function logout() {
+  function logout(notice = '') {
+    if (notice) {
+      sessionStorage.setItem(SESSION_NOTICE_KEY, notice);
+    }
     setToken(null);
     setUser(null);
     localStorage.removeItem(TOKEN_KEY);
@@ -69,6 +73,12 @@ export function AuthProvider({ children }) {
   }), [token, user, booting]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function consumeSessionNotice() {
+  const notice = sessionStorage.getItem(SESSION_NOTICE_KEY) || '';
+  sessionStorage.removeItem(SESSION_NOTICE_KEY);
+  return notice;
 }
 
 export function useAuth() {
