@@ -25,10 +25,10 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
               and (:favorite is null or s.favorite = :favorite)
               and (
                 :search is null
-                or lower(coalesce(s.title, '')) like lower(concat('%', :search, '%'))
-                or lower(coalesce(s.note, '')) like lower(concat('%', :search, '%'))
-                or lower(coalesce(ar.detectedQuestion, '')) like lower(concat('%', :search, '%'))
-                or lower(coalesce(s.originalFileName, '')) like lower(concat('%', :search, '%'))
+                or lower(coalesce(s.title, '')) like concat('%', lower(cast(:search as string)), '%')
+                or lower(coalesce(s.note, '')) like concat('%', lower(cast(:search as string)), '%')
+                or lower(coalesce(ar.detectedQuestion, '')) like concat('%', lower(cast(:search as string)), '%')
+                or lower(coalesce(s.originalFileName, '')) like concat('%', lower(cast(:search as string)), '%')
               )
             """)
     Page<Submission> searchByUser(
