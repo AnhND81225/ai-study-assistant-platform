@@ -1,5 +1,7 @@
 # AI Study Assistant Platform
 
+[![Build and Deploy Check](https://github.com/AnhND81225/ai-study-assistant-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/AnhND81225/ai-study-assistant-platform/actions/workflows/ci.yml)
+
 A professional fullstack learning project where students upload an image of a homework question, receive an AI-generated step-by-step explanation, and optionally grade their own answer.
 
 This project is designed to demonstrate fullstack development, backend architecture, mobile-first frontend design, PWA readiness, AI integration, security awareness, Docker local development, and deployment readiness.
@@ -214,6 +216,18 @@ http://localhost:8080/healthz
 ```
 
 See [docs/API.md](docs/API.md).
+
+## GitHub Actions
+
+The workflow in `.github/workflows/ci.yml` verifies the backend tests, frontend production build, and Render backend health endpoint.
+
+For the Render check, configure this repository variable in GitHub:
+
+```text
+RENDER_BACKEND_URL=https://ai-study-assistant-backend-t7gs.onrender.com
+```
+
+Set it under **Settings > Secrets and variables > Actions > Variables**. A secret with the same name also works, but the value is only the public backend URL, not an API key.
 
 ## Database Schema Overview
 

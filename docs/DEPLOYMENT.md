@@ -22,6 +22,28 @@ Docker Compose is used for local development. Cloud deployment should use Vercel
 - Set `CORS_ALLOWED_ORIGINS` to the Vercel frontend origin.
 - Set OpenAI variables only on the backend service: `OPENAI_API_KEY`, `OPENAI_MODEL`, `AI_TIMEOUT_SECONDS`, `AI_MAX_OUTPUT_TOKENS`, and `AI_EXPLAIN_LIMIT_PER_USER`.
 
+## GitHub Actions Deployment Check
+
+The repository includes `.github/workflows/ci.yml`.
+
+It runs:
+
+- Backend Maven tests from `backend/`.
+- Frontend Vite production build from `frontend/`.
+- Render backend health check against `/healthz` after successful builds.
+
+Configure the backend URL in GitHub:
+
+```text
+Settings > Secrets and variables > Actions > Variables
+Name: RENDER_BACKEND_URL
+Value: https://ai-study-assistant-backend-t7gs.onrender.com
+```
+
+You can also store it as an Actions secret with the same name. Do not store API keys in this variable. The workflow has a fallback to the current Render URL, but the repository variable is easier to maintain if the Render service URL changes later.
+
+The Render health job runs on manual workflow dispatch and on pushes to `main`. Pull requests only run build checks, because they should not validate the production service.
+
 ## Neon PostgreSQL
 
 - Create a Neon project and database.

@@ -1,6 +1,7 @@
-name: Build
+name: Build and Deploy Check
 
 on:
+  workflow_dispatch:
   push:
     branches: ["main", "feature/**"]
   pull_request:
@@ -19,7 +20,7 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-      - run: mvn -B -DskipTests package
+      - run: mvn -B test
 
   frontend:
     runs-on: ubuntu-latest
@@ -33,3 +34,38 @@ jobs:
           node-version: "22"
       - run: npm install
       - run: npm run build
+
+  render-health:
+    name: Render health check
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    env:
+      RENDER_BACKEND_URL_VAR: ${{ vars.RENDER_BACKEND_URL }}
+      RENDER_BACKEND_URL_SECRET: ${{ secrets.RENDER_BACKEND_URL }}
+    steps:
+      - name: Wait for Render backend health
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BACKEND_URL="${RENDER_BACKEND_URL_VAR:-${RENDER_BACKEND_URL_SECRET:-https://ai-study-assistant-backend-t7gs.onrender.com}}"
+          BACKEND_URL="${BACKEND_URL%/}"
+          HEALTH_URL="${BACKEND_URL}/healthz"
+
+          echo "Checking Render health endpoint: ${HEALTH_URL}"
+
+          for attempt in $(seq 1 30); do
+            status_code="$(curl -sS -o /tmp/render-health.json -w "%{http_code}" "${HEALTH_URL}" || true)"
+            if [ "${status_code}" = "200" ]; then
+              echo "Render backend is healthy."
+              cat /tmp/render-health.json
+              exit 0
+            fi
+
+            echo "Attempt ${attempt}/30 returned HTTP ${status_code}. Waiting for Render..."
+            sleep 20
+          done
+
+          echo "Render backend did not become healthy in time."
+          exit 1
