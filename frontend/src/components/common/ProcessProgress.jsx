@@ -17,9 +17,9 @@ export function ProcessProgress({ title, steps, activeStep }) {
           const complete = index < activeStep;
           const active = index === activeStep;
           return (
-            <li key={step.label} className={`flex min-h-11 items-center gap-2 rounded-lg border px-3 text-sm font-bold ${
+            <li key={step.label} className={`flex min-h-11 items-center gap-2 rounded-lg border px-3 text-sm font-bold transition-all ${
               active ? 'border-sky-300 bg-mint text-ocean' : complete ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-100 bg-slate-50 text-slate-400'
-            }`}>
+            } ${active ? 'progress-active' : ''}`}>
               <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs ${complete ? 'bg-emerald-600 text-white' : active ? 'bg-sea text-white' : 'bg-slate-200 text-slate-500'}`}>
                 {complete ? <Check size={14} /> : index + 1}
               </span>

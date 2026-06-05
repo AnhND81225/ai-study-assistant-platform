@@ -3,6 +3,7 @@ import { adminApi } from '../../api/adminApi';
 import { apiMessage } from '../../api/client';
 import { ErrorBanner } from '../../components/common/ErrorBanner';
 import { PageHeader } from '../../components/common/PageHeader';
+import { roleLabel } from '../../utils/enumLabels';
 
 export function AdminUsersPage() {
   const [users, setUsers] = useState([]);
@@ -26,7 +27,7 @@ export function AdminUsersPage() {
                 <h3 className="font-bold">{user.fullName}</h3>
                 <p className="text-sm text-slate-600">{user.email}</p>
               </div>
-              <span className="rounded-full bg-mint px-3 py-1 text-xs font-bold text-sea">{user.role}</span>
+              <span className="rounded-full bg-mint px-3 py-1 text-xs font-bold text-sea">{roleLabel(user.role)}</span>
             </div>
           </article>
         ))}

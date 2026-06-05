@@ -152,7 +152,7 @@ export function GradePage() {
   }
 
   return (
-    <div>
+    <div className="motion-page">
       <PageHeader
         title="Check student work"
         description="Check a complete worksheet photo, or review a new answer for a question you already solved."
@@ -168,7 +168,7 @@ export function GradePage() {
             setWorkflow('new');
             setSearchParams({}, { replace: true });
           }}
-          className={`tap-target rounded-lg px-3 text-sm font-black transition ${workflow === 'new' ? 'bg-white text-ocean shadow-soft' : 'text-slate-600'}`}
+          className={`workflow-tab tap-target rounded-lg px-3 text-sm font-black ${workflow === 'new' ? 'workflow-tab-active bg-white text-ocean shadow-soft' : 'text-slate-600'}`}
         >
           Check a worksheet
         </button>
@@ -178,14 +178,15 @@ export function GradePage() {
             setWorkflow('existing');
             if (selectedId) setSearchParams({ submissionId: selectedId }, { replace: true });
           }}
-          className={`tap-target rounded-lg px-3 text-sm font-black transition ${workflow === 'existing' ? 'bg-white text-ocean shadow-soft' : 'text-slate-600'}`}
+          className={`workflow-tab tap-target rounded-lg px-3 text-sm font-black ${workflow === 'existing' ? 'workflow-tab-active bg-white text-ocean shadow-soft' : 'text-slate-600'}`}
         >
           Check saved answer
         </button>
       </div>
 
-      {workflow === 'new' ? (
-        <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[1fr_360px]">
+      <div key={workflow} className="workflow-reveal">
+        {workflow === 'new' ? (
+          <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[1fr_360px]">
           <section className="smooth-card app-card p-4">
             <ImageScannerInput
               value={newWorkImage}
@@ -199,7 +200,7 @@ export function GradePage() {
             />
           </section>
 
-          <section className="app-card p-4">
+          <section className="focus-panel app-card p-4">
             <div className="grid gap-4">
               <label className="grid gap-1 text-sm font-semibold">
                 Subject
@@ -218,14 +219,14 @@ export function GradePage() {
             </div>
           </section>
         </form>
-      ) : explainedItems.length === 0 ? (
-        <EmptyState
-          title="No explained questions yet"
-          description="Solve a question first, or switch to Check a worksheet to review a complete image directly."
-          action={<Link to="/upload" className="primary-button">Solve a question</Link>}
-        />
-      ) : (
-        <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[340px_1fr]">
+        ) : explainedItems.length === 0 ? (
+          <EmptyState
+            title="No explained questions yet"
+            description="Solve a question first, or switch to Check a worksheet to review a complete image directly."
+            action={<Link to="/upload" className="primary-button">Solve a question</Link>}
+          />
+        ) : (
+          <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[340px_1fr]">
           <section className="app-card p-4">
             <label className="grid gap-1 text-sm font-semibold">
               Explained question
@@ -235,7 +236,7 @@ export function GradePage() {
             </label>
             {selected ? (
               <div className="mt-4">
-                <img src={selected.imageUrl} alt="Selected homework" className="w-full rounded-lg object-contain" />
+                <img src={selected.imageUrl} alt="Selected homework" className="media-lift w-full rounded-lg object-contain" />
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <StatusPill status={selected.status} />
                   <span className="text-sm font-semibold text-slate-600">{selected.subject.name}</span>
@@ -249,7 +250,7 @@ export function GradePage() {
               <ExplanationResultCard aiResponse={selected.aiResponse} />
             ) : null}
 
-            <div className="app-card p-4">
+            <div className="focus-panel app-card p-4">
               <h3 className="text-lg font-black">Student answer</h3>
               <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-sky-50 p-1">
                 <button type="button" onClick={() => setMode('text')} className={`tap-target rounded-md px-3 text-sm font-black ${mode === 'text' ? 'bg-white text-ocean shadow-soft' : 'text-slate-600'}`}>Type answer</button>
@@ -277,8 +278,9 @@ export function GradePage() {
               </button>
             </div>
           </section>
-        </form>
-      )}
+          </form>
+        )}
+      </div>
 
       {selected?.gradingResults?.length ? (
         <div className="mt-4 grid gap-3">

@@ -49,11 +49,13 @@ textarea {
   .primary-button {
     @apply inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-4 font-black text-white shadow-glow transition hover:bg-ocean disabled:cursor-not-allowed disabled:opacity-60;
     min-height: 44px;
+    transition: transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
   }
 
   .secondary-button {
     @apply inline-flex items-center justify-center gap-2 rounded-lg border border-sky-200 bg-white px-4 font-black text-ink transition hover:border-sea hover:text-ocean disabled:cursor-not-allowed disabled:opacity-60;
     min-height: 44px;
+    transition: transform 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   }
 
   .danger-button {
@@ -69,6 +71,55 @@ textarea {
   .soft-panel {
     @apply rounded-lg border border-sky-100 bg-paper;
   }
+}
+
+.primary-button:not(:disabled):active,
+.secondary-button:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.motion-page {
+  animation: page-settle 300ms ease-out both;
+}
+
+.workflow-reveal {
+  animation: workflow-reveal 240ms ease-out both;
+}
+
+.workflow-tab {
+  position: relative;
+  transition: transform 180ms ease, color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.workflow-tab:hover {
+  transform: translateY(-1px);
+}
+
+.workflow-tab-active {
+  transform: translateY(-1px);
+}
+
+.focus-panel {
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.focus-panel:focus-within {
+  transform: translateY(-2px);
+  border-color: #8bd6ff;
+  box-shadow: 0 18px 42px rgba(25, 80, 130, 0.12);
+}
+
+.media-lift {
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.media-lift:hover {
+  transform: scale(1.01);
+  box-shadow: 0 16px 36px rgba(25, 80, 130, 0.12);
+}
+
+.progress-active {
+  animation: progress-breathe 1.6s ease-in-out infinite;
 }
 
 .scanner-shell {
@@ -119,14 +170,53 @@ textarea {
   }
 }
 
+@keyframes page-settle {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes workflow-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progress-breathe {
+  50% {
+    box-shadow: 0 0 0 4px rgba(57, 180, 247, 0.1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .smooth-card,
-  .fade-in {
+  .fade-in,
+  .motion-page,
+  .workflow-reveal,
+  .progress-active {
     animation: none;
     transition: none;
   }
 
-  .smooth-card:hover {
+  .smooth-card:hover,
+  .workflow-tab:hover,
+  .workflow-tab-active,
+  .focus-panel:focus-within,
+  .media-lift:hover,
+  .primary-button:not(:disabled):active,
+  .secondary-button:not(:disabled):active {
     transform: none;
   }
 }

@@ -25,7 +25,7 @@ export function LandingPage() {
           <div className="max-w-2xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-2 text-sm font-black">
               <Sparkles size={16} />
-              Mobile-first AI study helper
+              AI study assistant
             </div>
             <h1 className="text-5xl font-black leading-[1.02] tracking-normal sm:text-6xl">
               Turn homework photos into clear study steps.
