@@ -49,7 +49,8 @@ The Render health job runs on manual workflow dispatch and on pushes to `main`. 
 - Create a Neon project and database.
 - Use the pooled connection string when suitable.
 - Configure backend database env vars on Render.
-- Use migration or seed strategy for roles and subjects.
+- Backend schema compatibility fixes run through Flyway migrations before JPA starts.
+- Keep `JPA_DDL_AUTO=update` for the MVP unless switching fully to managed migrations later.
 
 ## Cloudinary
 

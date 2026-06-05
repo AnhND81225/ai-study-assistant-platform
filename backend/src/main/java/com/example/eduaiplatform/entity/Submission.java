@@ -41,7 +41,7 @@ public class Submission extends Auditable {
     @Column(length = 600)
     private String note;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean favorite = false;
 
     @OneToOne(mappedBy = "submission", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
