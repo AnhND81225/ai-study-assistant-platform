@@ -9,6 +9,8 @@ Docker Compose is used for local development. Cloud deployment should use Vercel
 - Build command: `npm run build`
 - Output directory: `dist`
 - Required env var: `VITE_API_BASE_URL`
+- Root directory: `frontend`
+- Keep `frontend/vercel.json` so React Router routes such as `/dashboard` and `/submissions` rewrite to `index.html` when refreshed.
 - Verify PWA manifest and service worker after deployment.
 - Confirm the deployed frontend can call the Render backend.
 
