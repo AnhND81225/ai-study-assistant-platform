@@ -25,6 +25,8 @@ export function HistoryPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
+  const [notice, setNotice] = useState('');
+  const [updatingFavoriteId, setUpdatingFavoriteId] = useState(null);
 
   const filterKey = useMemo(() => `${search}|${subjectId}|${status}|${favoriteOnly}`, [search, subjectId, status, favoriteOnly]);
 
@@ -92,29 +94,64 @@ export function HistoryPage() {
 
   async function toggleFavorite(item) {
     setError('');
+    setNotice('');
+    setUpdatingFavoriteId(item.id);
     try {
       const updated = await submissionApi.update(item.id, {
         title: item.title,
         note: item.note,
         favorite: !item.favorite,
       });
-      setItems((current) => current.map((entry) => (entry.id === item.id ? updated : entry)));
+      setItems((current) => {
+        if (favoriteOnly && !updated.favorite) {
+          return current.filter((entry) => entry.id !== item.id);
+        }
+        return current.map((entry) => (entry.id === item.id ? updated : entry));
+      });
+      setNotice(updated.favorite
+        ? 'Added to Favorites. You can quickly find it here anytime.'
+        : 'Removed from Favorites.');
     } catch (err) {
       setError(apiMessage(err, 'Could not update favorite'));
+    } finally {
+      setUpdatingFavoriteId(null);
     }
   }
 
   return (
     <div>
-      <PageHeader title="Submission history" description="Search, filter, favorite, and organize your saved homework results." action={<Link to="/upload" className="primary-button"><Plus size={17} />New upload</Link>} />
+      <PageHeader title="Saved homework" description="Review past questions, solutions, and feedback whenever you need them." action={<Link to="/upload" className="primary-button"><Plus size={17} />New homework</Link>} />
       <ErrorBanner message={error} onRetry={() => setRetryKey((current) => current + 1)} onDismiss={() => setError('')} />
+      {notice ? (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-sky-200 bg-mint px-4 py-3 text-sm font-bold text-ocean" role="status">
+          <span className="inline-flex items-center gap-2"><Star size={16} fill="currentColor" />{notice}</span>
+          <button type="button" onClick={() => setNotice('')} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ocean" aria-label="Dismiss message"><X size={16} /></button>
+        </div>
+      ) : null}
 
       <section className="app-card mb-4 grid gap-3 p-4">
+        <div className="grid grid-cols-2 gap-2 rounded-lg bg-sky-50 p-1" aria-label="Saved homework view">
+          <button
+            type="button"
+            onClick={() => setFavoriteOnly(false)}
+            className={`tap-target rounded-lg px-3 text-sm font-black transition ${!favoriteOnly ? 'bg-white text-ocean shadow-soft' : 'text-slate-600'}`}
+          >
+            All homework
+          </button>
+          <button
+            type="button"
+            onClick={() => setFavoriteOnly(true)}
+            className={`tap-target inline-flex items-center justify-center gap-2 rounded-lg px-3 text-sm font-black transition ${favoriteOnly ? 'bg-white text-ocean shadow-soft' : 'text-slate-600'}`}
+          >
+            <Star size={15} fill={favoriteOnly ? 'currentColor' : 'none'} />
+            Favorites
+          </button>
+        </div>
         <label className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search title, note, question, or filename" className="input-field w-full pl-10" />
         </label>
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2">
           <label className="grid gap-1 text-sm font-bold text-slate-600">
             Subject
             <select value={subjectId} onChange={(event) => setSubjectId(event.target.value)} className="input-field">
@@ -129,18 +166,15 @@ export function HistoryPage() {
               {statuses.map((item) => <option key={item} value={item}>{item}</option>)}
             </select>
           </label>
-          <label className="grid gap-1 text-sm font-bold text-slate-600">
-            View
-            <select value={favoriteOnly ? 'favorites' : 'all'} onChange={(event) => setFavoriteOnly(event.target.value === 'favorites')} className="input-field">
-              <option value="all">All saved work</option>
-              <option value="favorites">Favorites only</option>
-            </select>
-          </label>
         </div>
       </section>
 
       {items.length === 0 && !loading && !error ? (
-        <EmptyState title="No matching submissions" description="Try another search or upload your first homework image." action={<Link to="/upload" className="primary-button">Upload homework</Link>} />
+        <EmptyState
+          title={favoriteOnly ? 'No favorites yet' : 'No matching homework'}
+          description={favoriteOnly ? 'Use the star on homework you want to find quickly later.' : 'Try another search or upload your first homework image.'}
+          action={favoriteOnly ? <button type="button" onClick={() => setFavoriteOnly(false)} className="secondary-button">View all homework</button> : <Link to="/upload" className="primary-button">Upload homework</Link>}
+        />
       ) : (
         <div className="grid gap-3">
           {items.map((item) => (
@@ -154,6 +188,7 @@ export function HistoryPage() {
               cancelEdit={() => setEditing(null)}
               saveEdit={saveEdit}
               toggleFavorite={toggleFavorite}
+              updatingFavorite={updatingFavoriteId === item.id}
             />
           ))}
         </div>
@@ -172,11 +207,11 @@ export function HistoryPage() {
   );
 }
 
-function HistoryItem({ item, editing, editForm, setEditForm, beginEdit, cancelEdit, saveEdit, toggleFavorite }) {
+function HistoryItem({ item, editing, editForm, setEditForm, beginEdit, cancelEdit, saveEdit, toggleFavorite, updatingFavorite }) {
   const title = item.title || item.aiResponse?.detectedQuestion || `${item.subject.name} submission`;
 
   return (
-    <article className="smooth-card app-card p-4">
+    <article className={`smooth-card app-card p-4 ${item.favorite ? 'border-sky-200' : ''}`}>
       <div className="flex items-start gap-3">
         <Link to={`/submissions/${item.id}`} className="shrink-0">
           <img src={item.imageUrl} alt={`Submission ${item.id}`} className="h-20 w-20 rounded-lg object-cover" />
@@ -196,6 +231,7 @@ function HistoryItem({ item, editing, editForm, setEditForm, beginEdit, cancelEd
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="line-clamp-1 font-black">{title}</h3>
                 <StatusPill status={item.status} />
+                {item.favorite ? <span className="inline-flex items-center gap-1 rounded-full bg-mint px-2.5 py-1 text-xs font-black text-ocean"><Star size={12} fill="currentColor" />Favorite</span> : null}
               </div>
               <p className="mt-1 text-sm font-bold text-slate-500">{item.subject.name}</p>
               <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-600">{item.note || item.aiResponse?.detectedQuestion || 'Tap to view details'}</p>
@@ -204,7 +240,7 @@ function HistoryItem({ item, editing, editForm, setEditForm, beginEdit, cancelEd
         </div>
         {!editing ? (
           <div className="grid shrink-0 gap-2">
-            <button type="button" onClick={() => toggleFavorite(item)} className={`grid h-10 w-10 place-items-center rounded-lg border ${item.favorite ? 'border-sky-200 bg-mint text-ocean' : 'border-sky-100 bg-white text-slate-400'}`} aria-label={item.favorite ? 'Remove favorite' : 'Add favorite'}>
+            <button type="button" disabled={updatingFavorite} onClick={() => toggleFavorite(item)} className={`grid h-10 w-10 place-items-center rounded-lg border ${item.favorite ? 'border-sky-200 bg-mint text-ocean' : 'border-sky-100 bg-white text-slate-400'}`} aria-label={item.favorite ? 'Remove from favorites' : 'Add to favorites'} title={item.favorite ? 'Remove from favorites' : 'Add to favorites'}>
               <Star size={17} fill={item.favorite ? 'currentColor' : 'none'} />
             </button>
             <button type="button" onClick={() => beginEdit(item)} className="grid h-10 w-10 place-items-center rounded-lg border border-sky-100 bg-white text-slate-500" aria-label="Edit submission">

@@ -1,5 +1,6 @@
 import { useAuth } from '../auth/AuthContext';
 import { PageHeader } from '../components/common/PageHeader';
+import { roleLabel } from '../utils/enumLabels';
 
 export function ProfilePage() {
   const { user } = useAuth();
@@ -10,8 +11,8 @@ export function ProfilePage() {
         <dl className="grid gap-4 text-sm">
           <Row label="Name" value={user?.fullName} />
           <Row label="Email" value={user?.email} />
-          <Row label="Role" value={user?.role} />
-          <Row label="Status" value={user?.enabled ? 'Enabled' : 'Disabled'} />
+          <Row label="Account type" value={roleLabel(user?.role)} />
+          <Row label="Account status" value={user?.enabled ? 'Active' : 'Disabled'} />
         </dl>
       </section>
     </div>
