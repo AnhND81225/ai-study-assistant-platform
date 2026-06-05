@@ -8,8 +8,14 @@ export const submissionApi = {
     formData.append('image', image);
     return api.post('/submissions', formData).then((res) => res.data.data);
   },
-  mine: () => api.get('/submissions/me?sort=createdAt,desc').then((res) => res.data.data),
+  mine: (params = {}) => api.get('/submissions/me', {
+    params: {
+      sort: 'createdAt,desc',
+      ...params,
+    },
+  }).then((res) => res.data.data),
   detail: (id) => api.get(`/submissions/${id}`).then((res) => res.data.data),
+  update: (id, payload) => api.patch(`/submissions/${id}`, payload).then((res) => res.data.data),
   explain: (id) => api.post(`/submissions/${id}/explain`).then((res) => res.data.data),
   grade: (id, userAnswer) => api.post(`/submissions/${id}/grade`, { userAnswer }).then((res) => res.data.data),
   gradeImage: (id, image) => {

@@ -14,7 +14,7 @@ This project is designed to demonstrate fullstack development, backend architect
 - AI explanation workflow with Markdown and LaTeX-ready responses.
 - AI grading workflow for typed answers, answer images, or a new image containing both the question and student work.
 - Daily AI explanation quota with user-visible remaining usage.
-- Submission history and delete-own-submission flow.
+- Submission history with search, filters, favorites, editable notes, pagination, and delete-own-submission flow.
 - Admin-ready API structure.
 - PostgreSQL persistence.
 - PWA manifest, service worker strategy, install prompt, and offline fallback.

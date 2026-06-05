@@ -1,6 +1,7 @@
 package com.example.eduaiplatform.controller;
 
 import com.example.eduaiplatform.dto.request.GradeRequest;
+import com.example.eduaiplatform.dto.request.SubmissionUpdateRequest;
 import com.example.eduaiplatform.dto.response.ApiResponse;
 import com.example.eduaiplatform.dto.response.GradingResultResponse;
 import com.example.eduaiplatform.dto.response.SubmissionResponse;
@@ -32,13 +33,24 @@ public class SubmissionController {
     }
 
     @GetMapping("/api/submissions/me")
-    public ApiResponse<Page<SubmissionResponse>> mine(Pageable pageable) {
-        return ApiResponse.success("My submissions", submissionService.getMySubmissions(pageable));
+    public ApiResponse<Page<SubmissionResponse>> mine(
+            Pageable pageable,
+            @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Boolean favorite,
+            @RequestParam(required = false) String search
+    ) {
+        return ApiResponse.success("My submissions", submissionService.getMySubmissions(pageable, subjectId, status, favorite, search));
     }
 
     @GetMapping("/api/submissions/{id}")
     public ApiResponse<SubmissionResponse> detail(@PathVariable Long id) {
         return ApiResponse.success("Submission detail", submissionService.getSubmission(id));
+    }
+
+    @PatchMapping("/api/submissions/{id}")
+    public ApiResponse<SubmissionResponse> update(@PathVariable Long id, @Valid @RequestBody SubmissionUpdateRequest request) {
+        return ApiResponse.success("Submission updated", submissionService.updateSubmission(id, request));
     }
 
     @DeleteMapping("/api/submissions/{id}")

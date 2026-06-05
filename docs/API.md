@@ -59,11 +59,33 @@ Error:
 | Method | Path | Description | Auth | Ownership |
 |---|---|---|---|---|
 | POST | `/api/submissions` | Upload homework image | USER/ADMIN | Current user |
-| GET | `/api/submissions/me` | List own submissions | USER/ADMIN | Own only |
+| GET | `/api/submissions/me` | List, search, and filter own submissions | USER/ADMIN | Own only |
 | GET | `/api/submissions/{id}` | View own submission | USER/ADMIN | USER own only |
+| PATCH | `/api/submissions/{id}` | Update title, note, or favorite flag | USER/ADMIN | USER own only |
 | DELETE | `/api/submissions/{id}` | Delete own submission | USER/ADMIN | USER own only |
 | GET | `/api/admin/submissions` | List all submissions | ADMIN | Any |
 | GET | `/api/admin/submissions/{id}` | View any submission | ADMIN | Any |
+
+Supported query parameters for `GET /api/submissions/me`:
+
+| Parameter | Example | Description |
+|---|---|---|
+| `search` | `derivative` | Searches title, note, detected question, and original filename |
+| `subjectId` | `1` | Filters by subject |
+| `status` | `EXPLAINED` | Filters by `UPLOADED`, `EXPLAINED`, or `AI_FAILED` |
+| `favorite` | `true` | Shows favorited submissions only |
+| `page` / `size` | `0` / `8` | Pagination controls |
+| `sort` | `createdAt,desc` | Sort order |
+
+Submission update request:
+
+```json
+{
+  "title": "Calculus homework 02",
+  "note": "Review chain rule mistakes",
+  "favorite": true
+}
+```
 
 ## AI
 

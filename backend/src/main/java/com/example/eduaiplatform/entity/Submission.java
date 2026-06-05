@@ -31,12 +31,18 @@ public class Submission extends Auditable {
     @Column(length = 255)
     private String originalFileName;
 
+    @Column(length = 120)
+    private String title;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 40)
     private SubmissionStatus status = SubmissionStatus.UPLOADED;
 
     @Column(length = 600)
     private String note;
+
+    @Column(nullable = false)
+    private boolean favorite = false;
 
     @OneToOne(mappedBy = "submission", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private AiResponse aiResponse;
@@ -80,12 +86,20 @@ public class Submission extends Auditable {
         return originalFileName;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     public SubmissionStatus getStatus() {
         return status;
     }
 
     public String getNote() {
         return note;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
     }
 
     public AiResponse getAiResponse() {
@@ -103,5 +117,21 @@ public class Submission extends Auditable {
 
     public void markAiFailed() {
         this.status = SubmissionStatus.AI_FAILED;
+    }
+
+    public void updateStudyMetadata(String title, String note, Boolean favorite) {
+        this.title = normalize(title);
+        this.note = normalize(note);
+        if (favorite != null) {
+            this.favorite = favorite;
+        }
+    }
+
+    private String normalize(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

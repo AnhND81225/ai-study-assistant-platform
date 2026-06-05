@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ClipboardCheck, RefreshCw, Trash2 } from 'lucide-react';
+import { ClipboardCheck, RefreshCw, Star, Trash2 } from 'lucide-react';
 import { submissionApi } from '../api/submissionApi';
 import { apiMessage } from '../api/client';
 import { PageHeader } from '../components/common/PageHeader';
@@ -60,7 +60,7 @@ export function SubmissionDetailPage() {
 
   return (
     <div>
-      <PageHeader title="Submission detail" description="Review the uploaded image, AI explanation, and grading results." action={<Link to="/submissions" className="secondary-button">Back</Link>} />
+      <PageHeader title={submission?.title || 'Submission detail'} description="Review the uploaded image, AI explanation, and grading results." action={<Link to="/submissions" className="secondary-button">Back</Link>} />
       <ErrorBanner message={error} />
       {submission ? (
         <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
@@ -68,6 +68,7 @@ export function SubmissionDetailPage() {
             <img src={submission.imageUrl} alt="Uploaded homework" className="w-full rounded-lg object-contain" />
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <StatusPill status={submission.status} />
+              {submission.favorite ? <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-mint px-2.5 py-1 text-xs font-black text-ocean"><Star size={13} fill="currentColor" />Favorite</span> : null}
               <span className="text-sm font-semibold text-slate-600">{submission.subject.name}</span>
             </div>
             {submission.note ? <p className="mt-3 text-sm leading-6 text-slate-600">{submission.note}</p> : null}

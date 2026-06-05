@@ -1,6 +1,7 @@
 package com.example.eduaiplatform.service.impl;
 
 import com.example.eduaiplatform.dto.request.GradeRequest;
+import com.example.eduaiplatform.dto.request.SubmissionUpdateRequest;
 import com.example.eduaiplatform.dto.response.GradingResultResponse;
 import com.example.eduaiplatform.dto.response.SubmissionResponse;
 import com.example.eduaiplatform.entity.*;
@@ -79,8 +80,15 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<SubmissionResponse> getMySubmissions(Pageable pageable) {
-        return submissionRepository.findByUserId(SecurityUtils.currentUserId(), pageable)
+    public Page<SubmissionResponse> getMySubmissions(Pageable pageable, Long subjectId, String status, Boolean favorite, String search) {
+        return submissionRepository.searchByUser(
+                        SecurityUtils.currentUserId(),
+                        subjectId,
+                        parseStatus(status),
+                        favorite,
+                        normalizeSearch(search),
+                        pageable
+                )
                 .map(SubmissionMapper::toResponse);
     }
 
@@ -91,6 +99,14 @@ public class SubmissionServiceImpl implements SubmissionService {
                 ? findSubmission(id)
                 : submissionRepository.findByIdAndUserId(id, SecurityUtils.currentUserId())
                 .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, ErrorCode.ACCESS_DENIED, "You cannot access this submission"));
+        return SubmissionMapper.toResponse(submission);
+    }
+
+    @Override
+    @Transactional
+    public SubmissionResponse updateSubmission(Long id, SubmissionUpdateRequest request) {
+        Submission submission = loadOwnedOrAdminSubmission(id);
+        submission.updateStudyMetadata(request.title(), request.note(), request.favorite());
         return SubmissionMapper.toResponse(submission);
     }
 
@@ -356,6 +372,24 @@ public class SubmissionServiceImpl implements SubmissionService {
     private Submission findSubmission(Long id) {
         return submissionRepository.findWithDetailsById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ErrorCode.RESOURCE_NOT_FOUND, "Submission not found"));
+    }
+
+    private SubmissionStatus parseStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return null;
+        }
+        try {
+            return SubmissionStatus.valueOf(status.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, "Invalid submission status filter");
+        }
+    }
+
+    private String normalizeSearch(String search) {
+        if (search == null || search.isBlank()) {
+            return null;
+        }
+        return search.trim();
     }
 
     private User currentUserEntity() {

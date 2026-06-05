@@ -70,6 +70,10 @@ The frontend uses a shared scanner input for explain and grade flows. It support
 
 MVP uses hard delete. A USER can delete only their own submission. Related AI response and grading results are removed through cascade relationships. Cloudinary asset deletion is attempted using the stored public ID.
 
+## History Management Workflow
+
+Users can search and filter their own submissions by subject, status, favorite flag, and text. The backend enforces ownership for all history queries and metadata updates. Users can edit a saved title/note and mark submissions as favorites without changing the AI explanation or grading records.
+
 ## Auth Workflow
 
 Register creates a USER account with BCrypt password hash. Login returns a JWT. Backend extracts identity from Spring Security context. Frontend stores token for MVP simplicity and clears it on logout or unauthorized responses.
