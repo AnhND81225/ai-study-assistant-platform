@@ -4,7 +4,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localho
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 60000,
+  timeout: 90000,
 });
 
 export function attachAuthInterceptors(getToken, onUnauthorized) {
@@ -18,11 +18,23 @@ export function attachAuthInterceptors(getToken, onUnauthorized) {
 
   api.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
       const status = error.response?.status;
       if (status === 401 && getToken()) {
         onUnauthorized();
       }
+
+      const config = error.config;
+      const retryableGet = config?.method?.toLowerCase() === 'get'
+        && !config.__retried
+        && (!error.response || [502, 503, 504].includes(status));
+
+      if (retryableGet) {
+        config.__retried = true;
+        await delay(1500);
+        return api.request(config);
+      }
+
       return Promise.reject(error);
     },
   );
@@ -32,8 +44,11 @@ export function apiMessage(error, fallback = 'Something went wrong') {
   const status = error.response?.status;
   const code = error.response?.data?.errorCode;
 
+  if (error.code === 'ECONNABORTED') {
+    return 'The server is taking longer than expected to start. Wait a moment, then try again.';
+  }
   if (!error.response) {
-    return 'We could not reach the server. Check your connection and try again.';
+    return 'The server may be waking up or temporarily unavailable. Wait a moment, then try again.';
   }
   if (status === 401 || code === 'AUTHENTICATION_FAILED') {
     return 'Your session has expired. Please sign in again.';
@@ -62,4 +77,8 @@ export function apiMessage(error, fallback = 'Something went wrong') {
 export function isRetryableError(error) {
   const status = error.response?.status;
   return !error.response || status === 408 || status === 429 || status >= 500;
+}
+
+function delay(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
