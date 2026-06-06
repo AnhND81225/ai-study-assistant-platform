@@ -55,15 +55,15 @@ jobs:
 
           echo "Checking Render health endpoint: ${HEALTH_URL}"
 
-          for attempt in $(seq 1 30); do
-            status_code="$(curl -sS -o /tmp/render-health.json -w "%{http_code}" "${HEALTH_URL}" || true)"
+          for attempt in $(seq 1 20); do
+            status_code="$(curl --connect-timeout 10 --max-time 20 -sS -o /tmp/render-health.json -w "%{http_code}" "${HEALTH_URL}" || true)"
             if [ "${status_code}" = "200" ]; then
               echo "Render backend is healthy."
               cat /tmp/render-health.json
               exit 0
             fi
 
-            echo "Attempt ${attempt}/30 returned HTTP ${status_code}. Waiting for Render..."
+            echo "Attempt ${attempt}/20 returned HTTP ${status_code}. Waiting for Render..."
             sleep 20
           done
 

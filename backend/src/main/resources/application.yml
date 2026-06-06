@@ -5,6 +5,18 @@ spring:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/eduaidb}
     username: ${DATABASE_USERNAME:eduaidb_user}
     password: ${DATABASE_PASSWORD:change_me}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:5}
+      minimum-idle: ${DB_POOL_MIN_IDLE:0}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT_MS:10000}
+      validation-timeout: ${DB_VALIDATION_TIMEOUT_MS:5000}
+      idle-timeout: ${DB_IDLE_TIMEOUT_MS:300000}
+      max-lifetime: ${DB_MAX_LIFETIME_MS:900000}
+      keepalive-time: ${DB_KEEPALIVE_TIME_MS:120000}
+      data-source-properties:
+        connectTimeout: ${DB_CONNECT_TIMEOUT_SECONDS:10}
+        socketTimeout: ${DB_SOCKET_TIMEOUT_SECONDS:60}
+        tcpKeepAlive: true
   jpa:
     hibernate:
       ddl-auto: ${JPA_DDL_AUTO:update}
