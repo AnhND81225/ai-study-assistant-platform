@@ -161,14 +161,14 @@ export function GradePage() {
       <ErrorBanner message={error} onRetry={canRetry ? () => submit() : undefined} onDismiss={() => setError('')} />
       <ProcessProgress title="Checking the student work" steps={progressSteps} activeStep={activeStep} />
 
-      <div className="mb-4 grid grid-cols-2 gap-2 rounded-[1rem] bg-sky-50 p-1">
+      <div className="mb-5 grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-slate-100 p-1">
         <button
           type="button"
           onClick={() => {
             setWorkflow('new');
             setSearchParams({}, { replace: true });
           }}
-          className={`workflow-tab tap-target rounded-lg px-3 text-sm font-black ${workflow === 'new' ? 'workflow-tab-active bg-white text-ocean shadow-soft' : 'text-slate-600'}`}
+          className={`workflow-tab tap-target rounded-lg px-3 text-sm font-bold ${workflow === 'new' ? 'workflow-tab-active bg-white text-ocean shadow-sm' : 'text-slate-600'}`}
         >
           Check a worksheet
         </button>
@@ -178,7 +178,7 @@ export function GradePage() {
             setWorkflow('existing');
             if (selectedId) setSearchParams({ submissionId: selectedId }, { replace: true });
           }}
-          className={`workflow-tab tap-target rounded-lg px-3 text-sm font-black ${workflow === 'existing' ? 'workflow-tab-active bg-white text-ocean shadow-soft' : 'text-slate-600'}`}
+          className={`workflow-tab tap-target rounded-lg px-3 text-sm font-bold ${workflow === 'existing' ? 'workflow-tab-active bg-white text-ocean shadow-sm' : 'text-slate-600'}`}
         >
           Check saved answer
         </button>
@@ -187,7 +187,7 @@ export function GradePage() {
       <div key={workflow} className="workflow-reveal">
         {workflow === 'new' ? (
           <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[1fr_360px]">
-          <section className="smooth-card app-card p-4">
+          <section className="smooth-card app-card p-4 sm:p-5">
             <ImageScannerInput
               value={newWorkImage}
               onChange={setNewWorkImage}
@@ -200,17 +200,17 @@ export function GradePage() {
             />
           </section>
 
-          <section className="focus-panel app-card p-4">
+          <section className="focus-panel app-card h-fit p-4 sm:p-5 lg:sticky lg:top-24">
             <div className="grid gap-4">
-              <label className="grid gap-1 text-sm font-semibold">
+              <label className="grid gap-1.5 text-sm font-bold text-slate-700">
                 Subject
                 <select value={subjectId} onChange={(event) => setSubjectId(event.target.value)} className="input-field">
                   {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
                 </select>
               </label>
-              <label className="grid gap-1 text-sm font-semibold">
+              <label className="grid gap-1.5 text-sm font-bold text-slate-700">
                 Note or rubric
-                <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Optional grading instruction" className="rounded-lg border border-sky-100 bg-white px-3 py-3 outline-none transition focus:border-sea focus:ring-4 focus:ring-sky-100" />
+                <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Optional grading instruction" className="rounded-lg border border-slate-200 bg-white px-3 py-3 outline-none transition placeholder:text-slate-400 focus:border-sea focus:ring-4 focus:ring-blue-100" />
               </label>
               <button disabled={grading || !subjectId || !newWorkImage || !online} className="primary-button">
                 {grading ? <Sparkles size={18} className="animate-pulse" /> : <ClipboardCheck size={18} />}
@@ -227,8 +227,8 @@ export function GradePage() {
           />
         ) : (
           <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[340px_1fr]">
-          <section className="app-card p-4">
-            <label className="grid gap-1 text-sm font-semibold">
+          <section className="app-card h-fit p-4 sm:p-5 lg:sticky lg:top-24">
+            <label className="grid gap-1.5 text-sm font-bold text-slate-700">
               Explained question
               <select value={selectedId} onChange={(event) => setSelectedId(event.target.value)} className="input-field">
                 {explainedItems.map((item) => <option key={item.id} value={item.id}>#{item.id} - {item.subject.name}</option>)}
@@ -250,14 +250,14 @@ export function GradePage() {
               <ExplanationResultCard aiResponse={selected.aiResponse} />
             ) : null}
 
-            <div className="focus-panel app-card p-4">
-              <h3 className="text-lg font-black">Student answer</h3>
-              <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-sky-50 p-1">
-                <button type="button" onClick={() => setMode('text')} className={`tap-target rounded-md px-3 text-sm font-black ${mode === 'text' ? 'bg-white text-ocean shadow-soft' : 'text-slate-600'}`}>Type answer</button>
-                <button type="button" onClick={() => setMode('image')} className={`tap-target rounded-md px-3 text-sm font-black ${mode === 'image' ? 'bg-white text-ocean shadow-soft' : 'text-slate-600'}`}>Upload image</button>
+            <div className="focus-panel app-card p-4 sm:p-5">
+              <h3 className="text-lg font-extrabold">Student answer</h3>
+              <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-slate-100 p-1">
+                <button type="button" onClick={() => setMode('text')} className={`tap-target rounded-md px-3 text-sm font-bold ${mode === 'text' ? 'bg-white text-ocean shadow-sm' : 'text-slate-600'}`}>Type answer</button>
+                <button type="button" onClick={() => setMode('image')} className={`tap-target rounded-md px-3 text-sm font-bold ${mode === 'image' ? 'bg-white text-ocean shadow-sm' : 'text-slate-600'}`}>Upload image</button>
               </div>
               {mode === 'text' ? (
-                <textarea value={answer} onChange={(event) => setAnswer(event.target.value)} rows={7} placeholder="Paste or type the student's answer" className="mt-3 w-full rounded-lg border border-sky-100 px-3 py-3 transition focus:border-sea focus:outline-none focus:ring-4 focus:ring-sky-100" />
+                <textarea value={answer} onChange={(event) => setAnswer(event.target.value)} rows={7} placeholder="Paste or type the student's answer" className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-3 transition placeholder:text-slate-400 focus:border-sea focus:outline-none focus:ring-4 focus:ring-blue-100" />
               ) : (
                 <div className="mt-3">
                   <ImageScannerInput

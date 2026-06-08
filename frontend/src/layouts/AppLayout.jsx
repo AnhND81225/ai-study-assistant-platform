@@ -21,15 +21,16 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-paper text-ink">
-      <header className="sticky top-0 z-20 border-b border-sky-100 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
-          <NavLink to="/dashboard" className="flex items-center gap-2 font-black">
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-sea text-white shadow-glow">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
+      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <NavLink to="/dashboard" className="flex items-center gap-2.5 rounded-lg font-extrabold text-ink">
+            <span className="grid h-10 w-10 place-items-center rounded-lg bg-sea text-white shadow-glow">
               <BookOpen size={19} />
             </span>
-            <span>StudyAI</span>
+            <span className="text-lg">StudyAI</span>
           </NavLink>
-          <nav className="hidden items-center gap-1 md:flex">
+          <nav className="hidden items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 md:flex" aria-label="Primary navigation">
             {userNav.map((item) => <DesktopNavItem key={item.to} item={item} />)}
           </nav>
           <div className="flex items-center gap-2">
@@ -38,11 +39,11 @@ export function AppLayout() {
                 <Shield size={17} /><span className="hidden lg:inline">Admin</span>
               </NavLink>
             ) : null}
-            <NavLink to="/profile" className="secondary-button px-3 text-sm" aria-label="Open profile">
+            <NavLink to="/profile" className="secondary-button px-3" aria-label="Open profile">
               <User size={17} />
               <span className="hidden lg:inline max-w-28 truncate">{user?.fullName || 'Profile'}</span>
             </NavLink>
-            <button onClick={handleLogout} className="secondary-button px-3 text-sm text-slate-700">
+            <button onClick={handleLogout} className="secondary-button px-3 text-slate-700" title="Sign out">
               <LogOut size={17} aria-hidden="true" />
               <span className="sr-only">Logout</span>
             </button>
@@ -51,11 +52,11 @@ export function AppLayout() {
       </header>
       <PwaStatusBanner />
 
-      <main className="safe-bottom mx-auto w-full max-w-5xl px-4 py-5">
+      <main id="main-content" className="safe-bottom mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-sky-100 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-soft backdrop-blur md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl md:hidden" aria-label="Mobile navigation">
         <div className="mx-auto grid max-w-md grid-cols-4 gap-1 py-2">
           {userNav.map((item) => (
             <MobileNavItem key={item.to} item={item} />
@@ -69,7 +70,7 @@ export function AppLayout() {
 function DesktopNavItem({ item }) {
   const Icon = item.icon;
   return (
-    <NavLink to={item.to} className={({ isActive }) => `inline-flex min-h-10 items-center gap-2 rounded-lg px-3 text-sm font-bold ${isActive ? 'bg-mint text-ocean' : 'text-slate-500 hover:bg-sky-50 hover:text-ink'}`}>
+    <NavLink to={item.to} className={({ isActive }) => `inline-flex min-h-10 items-center gap-2 rounded-md px-3 text-sm font-bold transition-colors ${isActive ? 'bg-white text-ocean shadow-sm' : 'text-slate-600 hover:bg-white hover:text-ink'}`}>
       <Icon size={16} />
       {item.label}
     </NavLink>
@@ -82,8 +83,8 @@ function MobileNavItem({ item }) {
     <NavLink
       to={item.to}
       className={({ isActive }) =>
-        `flex min-h-14 flex-col items-center justify-center rounded-lg text-[11px] font-semibold ${
-          isActive ? 'bg-mint text-ocean' : 'text-slate-500'
+        `relative flex min-h-14 flex-col items-center justify-center rounded-lg text-[11px] font-bold transition-colors ${
+          isActive ? 'bg-blue-50 text-ocean' : 'text-slate-500 hover:bg-slate-50 hover:text-ink'
         }`
       }
     >

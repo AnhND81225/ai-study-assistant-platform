@@ -11,10 +11,13 @@ const adminNav = [
 
 export function AdminLayout() {
   return (
-    <div className="grid gap-4 lg:grid-cols-[240px_1fr]">
-      <aside className="app-card p-3">
-        <h2 className="px-2 py-2 text-sm font-black uppercase tracking-wide text-slate-500">Admin</h2>
-        <nav className="grid gap-1">
+    <div className="grid gap-5 lg:grid-cols-[230px_minmax(0,1fr)]">
+      <aside className="app-card h-fit p-3 lg:sticky lg:top-24">
+        <div className="border-b border-slate-100 px-2 pb-3 pt-1">
+          <h2 className="font-extrabold text-ink">Admin workspace</h2>
+          <p className="mt-1 text-xs font-semibold text-slate-500">Manage platform activity</p>
+        </div>
+        <nav className="mt-3 grid grid-cols-2 gap-1 sm:grid-cols-5 lg:grid-cols-1" aria-label="Admin navigation">
           {adminNav.map((item) => {
             const Icon = item.icon;
             return (
@@ -23,8 +26,8 @@ export function AdminLayout() {
                 to={item.to}
                 end={item.end}
                 className={({ isActive }) =>
-                  `tap-target flex items-center gap-2 rounded-lg px-3 text-sm font-semibold ${
-                    isActive ? 'bg-mint text-ocean' : 'text-slate-600 hover:bg-sky-50'
+                  `tap-target flex items-center gap-2 rounded-lg px-3 text-sm font-bold transition-colors ${
+                    isActive ? 'bg-blue-50 text-ocean' : 'text-slate-600 hover:bg-slate-50 hover:text-ink'
                   }`
                 }
               >
@@ -35,7 +38,7 @@ export function AdminLayout() {
           })}
         </nav>
       </aside>
-      <section>
+      <section className="min-w-0">
         <Outlet />
       </section>
     </div>

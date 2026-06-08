@@ -66,11 +66,11 @@ export function UploadPage() {
   }
 
   return (
-    <div>
+    <div className="motion-page">
       <PageHeader title="Solve a question" description="Scan one clear homework question and get a guided, step-by-step solution." />
       <ProcessProgress title="Creating your solution" steps={progressSteps} activeStep={activeStep} />
       <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[1fr_360px]">
-        <section className="app-card p-4">
+        <section className="app-card p-4 sm:p-5">
           <ErrorBanner message={error} onRetry={canRetry ? () => submit() : undefined} onDismiss={() => setError('')} />
           <div className="mt-4">
             <ImageScannerInput
@@ -85,18 +85,18 @@ export function UploadPage() {
             />
           </div>
         </section>
-        <section className="app-card p-4">
+        <section className="app-card h-fit p-4 sm:p-5 lg:sticky lg:top-24">
           <div className="grid gap-4">
             <AiUsageCard compact />
-            <label className="grid gap-1 text-sm font-semibold">
+            <label className="grid gap-1.5 text-sm font-bold text-slate-700">
               Subject
               <select value={subjectId} onChange={(event) => setSubjectId(event.target.value)} className="input-field">
                 {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
               </select>
             </label>
-            <label className="grid gap-1 text-sm font-semibold">
+            <label className="grid gap-1.5 text-sm font-bold text-slate-700">
               Note
-              <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Optional context or what you tried" className="rounded-lg border border-sky-100 bg-white px-3 py-3 outline-none transition focus:border-sea focus:ring-4 focus:ring-sky-100" />
+              <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Optional context or what you tried" className="rounded-lg border border-slate-200 bg-white px-3 py-3 outline-none transition placeholder:text-slate-400 focus:border-sea focus:ring-4 focus:ring-blue-100" />
             </label>
             <button disabled={loading || !subjectId || !image || !online} className="primary-button">
               {loading ? <Sparkles size={18} className="animate-pulse" /> : <Camera size={18} />}

@@ -21,13 +21,13 @@ export function AdminUsersPage() {
       <ErrorBanner message={error} />
       <div className="grid gap-3">
         {users.map((user) => (
-          <article key={user.id} className="rounded-lg border border-slate-200 bg-white p-4">
+          <article key={user.id} className="app-card p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h3 className="font-bold">{user.fullName}</h3>
-                <p className="text-sm text-slate-600">{user.email}</p>
+                <h3 className="font-extrabold">{user.fullName}</h3>
+                <p className="mt-1 text-sm font-medium text-slate-600">{user.email}</p>
               </div>
-              <span className="rounded-full bg-mint px-3 py-1 text-xs font-bold text-sea">{roleLabel(user.role)}</span>
+              <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-ocean">{roleLabel(user.role)}</span>
             </div>
           </article>
         ))}

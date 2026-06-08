@@ -1,3 +1,4 @@
+import { Activity, Cloud, ShieldCheck } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 
 export function AdminOverviewPage() {
@@ -5,19 +6,26 @@ export function AdminOverviewPage() {
     <div>
       <PageHeader title="Admin overview" description="Review users, submissions, subjects, and AI usage logs from the admin area." />
       <div className="grid gap-4 md:grid-cols-3">
-        <Metric label="Security" value="RBAC" />
-        <Metric label="Uploads" value="Cloudinary" />
-        <Metric label="AI Logs" value="Tracked" />
+        <Metric icon={ShieldCheck} label="Security" value="RBAC" tone="blue" />
+        <Metric icon={Cloud} label="Uploads" value="Cloudinary" tone="green" />
+        <Metric icon={Activity} label="AI Logs" value="Tracked" tone="orange" />
       </div>
     </div>
   );
 }
 
-function Metric({ label, value }) {
+const tones = {
+  blue: 'bg-blue-50 text-ocean',
+  green: 'bg-emerald-50 text-emerald-700',
+  orange: 'bg-orange-50 text-orange-700',
+};
+
+function Metric({ icon: Icon, label, value, tone }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-soft">
-      <p className="text-sm font-bold text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-black text-sea">{value}</p>
+    <div className="app-card p-5">
+      <span className={`grid h-11 w-11 place-items-center rounded-lg ${tones[tone]}`}><Icon size={20} /></span>
+      <p className="mt-4 text-sm font-bold text-slate-500">{label}</p>
+      <p className="mt-1 text-2xl font-extrabold text-ink">{value}</p>
     </div>
   );
 }

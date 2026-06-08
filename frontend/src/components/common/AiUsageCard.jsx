@@ -14,7 +14,7 @@ export function AiUsageCard({ compact = false }) {
 
   if (error) {
     return (
-      <div className="app-card px-4 py-3 text-sm font-bold text-slate-500">
+      <div className="app-card border-dashed px-4 py-3 text-sm font-semibold text-slate-500">
         {error}
       </div>
     );
@@ -22,7 +22,7 @@ export function AiUsageCard({ compact = false }) {
 
   if (!quota) {
     return (
-      <div className="app-card px-4 py-3 text-sm font-bold text-slate-500">
+      <div className="app-card border-dashed px-4 py-3 text-sm font-semibold text-slate-500">
         Loading AI quota...
       </div>
     );
@@ -31,24 +31,24 @@ export function AiUsageCard({ compact = false }) {
   const percent = quota.dailyLimit > 0 ? Math.min(100, (quota.usedToday / quota.dailyLimit) * 100) : 0;
 
   return (
-    <div className={`app-card overflow-hidden ${compact ? 'p-4' : 'p-5'}`}>
+    <div className={`app-card overflow-hidden border-blue-100 bg-blue-50/60 ${compact ? 'p-4' : 'p-5'}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-black text-slate-500">Daily explanation quota</p>
-          <p className="mt-1 text-2xl font-black text-ink">
+          <p className="text-sm font-bold text-slate-600">Solutions available today</p>
+          <p className="mt-1 text-2xl font-extrabold text-ink">
             {quota.remainingToday}
-            <span className="text-base font-black text-slate-500">/{quota.dailyLimit} left</span>
+            <span className="text-base font-bold text-slate-500"> of {quota.dailyLimit} left</span>
           </p>
         </div>
-        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-mint text-ocean">
+        <span className="grid h-11 w-11 place-items-center rounded-lg bg-white text-ocean shadow-sm">
           <Gauge size={20} />
         </span>
       </div>
-      <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-sky-100">
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-blue-100">
         <div className="h-full rounded-full bg-sea transition-all" style={{ width: `${percent}%` }} />
       </div>
-      <p className="mt-2 text-xs font-bold text-slate-500">
-        Used {quota.usedToday} today. Resets daily.
+      <p className="mt-2 text-xs font-semibold text-slate-500">
+        {quota.usedToday} used today. Your allowance resets daily.
       </p>
     </div>
   );

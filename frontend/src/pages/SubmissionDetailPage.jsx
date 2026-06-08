@@ -59,16 +59,16 @@ export function SubmissionDetailPage() {
   }
 
   return (
-    <div>
+    <div className="motion-page">
       <PageHeader title={submission?.title || 'Submission detail'} description="Review the uploaded image, AI explanation, and grading results." action={<Link to="/submissions" className="secondary-button">Back</Link>} />
       <ErrorBanner message={error} />
       {submission ? (
         <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
-          <section className="app-card p-4">
+          <section className="app-card h-fit p-4 sm:p-5 lg:sticky lg:top-24">
             <img src={submission.imageUrl} alt="Uploaded homework" className="w-full rounded-lg object-contain" />
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <StatusPill status={submission.status} />
-              {submission.favorite ? <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-mint px-2.5 py-1 text-xs font-black text-ocean"><Star size={13} fill="currentColor" />Favorite</span> : null}
+              {submission.favorite ? <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-bold text-ocean"><Star size={13} fill="currentColor" />Favorite</span> : null}
               <span className="text-sm font-semibold text-slate-600">{submission.subject.name}</span>
             </div>
             {submission.note ? <p className="mt-3 text-sm leading-6 text-slate-600">{submission.note}</p> : null}
@@ -93,7 +93,7 @@ export function SubmissionDetailPage() {
               <ExplanationResultCard aiResponse={submission.aiResponse} />
             ) : (
               <div className="app-card border-dashed p-5">
-                <h3 className="text-lg font-black">No explanation yet</h3>
+                <h3 className="text-lg font-extrabold">No explanation yet</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">The image is saved. Retry AI explanation when your connection and provider quota are ready.</p>
               </div>
             )}
