@@ -63,8 +63,8 @@ export function ImageScannerInput({
     <div className="scanner-shell">
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          {label ? <p className="text-sm font-bold text-ink">{label}</p> : null}
-          {helperText ? <p className="mt-1 text-sm leading-6 text-slate-600">{helperText}</p> : null}
+          {label ? <p className="text-base font-extrabold text-ink">{label}</p> : null}
+          {helperText ? <p className="mt-1 max-w-xl text-sm font-medium leading-6 text-slate-600">{helperText}</p> : null}
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex">
           <button type="button" onClick={() => cameraInputRef.current?.click()} className="primary-button px-3 text-sm">
@@ -83,11 +83,11 @@ export function ImageScannerInput({
           <img src={previewUrl} alt={`${kindLabel} preview`} className="max-h-[34rem] w-full rounded-lg object-contain" />
         ) : (
           <div className="px-4 py-12 text-center">
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-[1.25rem] bg-mint text-ocean">
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-lg bg-blue-50 text-ocean">
               <Camera size={28} />
             </div>
-            <p className="mt-4 text-base font-black text-ink">{emptyTitle}</p>
-            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-600">{emptyDescription}</p>
+            <p className="mt-4 text-base font-extrabold text-ink">{emptyTitle}</p>
+            <p className="mx-auto mt-2 max-w-sm text-sm font-medium leading-6 text-slate-600">{emptyDescription}</p>
           </div>
         )}
       </div>
