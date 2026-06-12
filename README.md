@@ -258,10 +258,6 @@ The backend enforces JWT, RBAC, and ownership checks. The frontend protects rout
 
 See [docs/SECURITY.md](docs/SECURITY.md).
 
-## Screenshots
-
-Screenshots should be added after the UI is deployed or locally verified.
-
 ## Future Improvements
 
 - Async AI job queue.
@@ -270,7 +266,3 @@ Screenshots should be added after the UI is deployed or locally verified.
 - Sentry monitoring.
 - Additional AI providers.
 - Capacitor wrapper if native app packaging is needed.
-
-## Author
-
-Add your name, portfolio, and GitHub profile here.
