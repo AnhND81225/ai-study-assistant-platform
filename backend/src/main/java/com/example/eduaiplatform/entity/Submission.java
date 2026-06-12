@@ -110,9 +110,14 @@ public class Submission extends Auditable {
         return gradingResults;
     }
 
-    public void markExplained(AiResponse response) {
+    public void markAiResult(AiResponse response, AiResultStatus resultStatus) {
         this.aiResponse = response;
-        this.status = SubmissionStatus.EXPLAINED;
+        this.status = switch (resultStatus) {
+            case SOLUTION_READY -> SubmissionStatus.EXPLAINED;
+            case QUESTION_SELECTION_REQUIRED -> SubmissionStatus.QUESTION_SELECTION_REQUIRED;
+            case INCOMPLETE_IMAGE -> SubmissionStatus.INCOMPLETE_IMAGE;
+            case PARTIAL_RESULT -> SubmissionStatus.PARTIAL_RESULT;
+        };
     }
 
     public void markAiFailed() {

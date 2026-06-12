@@ -44,10 +44,13 @@ Explanation flow:
 2. Backend validates file type and size.
 3. Backend uploads the file to Cloudinary.
 4. Backend creates a submission.
-5. Backend sends the image URL and subject to the AI provider.
-6. Backend validates completion status and structured response fields.
-7. Backend stores only valid explanations and optional user-facing input warnings.
-8. Backend returns the result to the frontend.
+5. Backend sends the image URL, subject, optional note, and requested solve scope to the AI provider.
+6. AI classifies the image as a single question, multi-question page, or multiple-choice page.
+7. When several questions are detected without a selected scope, backend stores `QUESTION_SELECTION_REQUIRED` instead of a generic solution.
+8. User selects one question, requests answer-only multiple-choice output, or explicitly requests all readable explanations.
+9. Backend validates completion status, result status, and structured response fields.
+10. Backend stores only valid solutions, partial results, selection metadata, or user-facing incomplete-image warnings.
+11. Backend returns the result to the frontend.
 
 Grading flow:
 
@@ -57,7 +60,18 @@ Grading flow:
 4. Backend validates the score and structured response fields.
 5. Backend stores score, feedback, mistakes, and suggestions.
 
-The uploaded image is the primary source of truth. Notes are optional context. Unrelated notes are ignored with a user-facing warning, while unresolved image-note conflicts are rejected before data is stored.
+The uploaded image is the primary source of truth. Notes are optional context and may identify a target such as "solve question 5." Unrelated notes are ignored with a user-facing warning, while unresolved image-note conflicts are rejected before data is stored.
+
+### Multi-question Routing
+
+`AiResultStatus` separates a real solution from an intermediate scan:
+
+- `SOLUTION_READY`: one complete scope was solved.
+- `QUESTION_SELECTION_REQUIRED`: several questions were found and the user must choose.
+- `INCOMPLETE_IMAGE`: the selected question is cropped or unreadable.
+- `PARTIAL_RESULT`: an explicit page-wide request completed only for readable questions.
+
+`AiSolveMode` keeps user intent explicit: `AUTO`, `ONE_QUESTION`, `ANSWERS_ONLY`, and `EXPLAIN_ALL`. This prevents the provider from randomly deciding whether to describe, solve, or answer an entire page.
 
 Usage quota flow:
 

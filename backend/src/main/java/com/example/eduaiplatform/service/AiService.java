@@ -1,7 +1,13 @@
 package com.example.eduaiplatform.service;
 
+import com.example.eduaiplatform.entity.AiQuestionType;
+import com.example.eduaiplatform.entity.AiResultStatus;
+import com.example.eduaiplatform.entity.AiSolveMode;
+
+import java.util.List;
+
 public interface AiService {
-    AiExplanationResult explain(String imageUrl, String subjectName, String note);
+    AiExplanationResult explain(String imageUrl, String subjectName, String note, Integer questionNumber, AiSolveMode solveMode);
     AiGradingResult grade(String detectedQuestion, String explanation, String finalAnswer, String userAnswer);
     AiGradingResult gradeImage(String detectedQuestion, String explanation, String finalAnswer, String studentAnswerImageUrl);
     AiNewWorkGradingResult gradeNewWorkImage(String imageUrl, String subjectName, String note);
@@ -11,6 +17,11 @@ public interface AiService {
             String explanation,
             String finalAnswer,
             String inputWarning,
+            AiQuestionType questionType,
+            AiResultStatus resultStatus,
+            AiSolveMode solveMode,
+            List<Integer> availableQuestions,
+            Integer selectedQuestionNumber,
             String modelName,
             Integer inputTokens,
             Integer outputTokens

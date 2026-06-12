@@ -130,9 +130,11 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Override
     @Transactional
-    public SubmissionResponse explainSubmission(Long id) {
+    public SubmissionResponse explainSubmission(Long id, Integer questionNumber, AiSolveMode solveMode) {
         Submission submission = loadOwnedOrAdminSubmission(id);
-        if (submission.getAiResponse() != null) {
+        AiSolveMode requestedMode = solveMode == null ? AiSolveMode.AUTO : solveMode;
+        validateExplainRequest(questionNumber, requestedMode);
+        if (submission.getAiResponse() != null && questionNumber == null && requestedMode == AiSolveMode.AUTO) {
             return SubmissionMapper.toResponse(submission);
         }
         enforceExplainLimit();
@@ -140,18 +142,41 @@ public class SubmissionServiceImpl implements SubmissionService {
             AiService.AiExplanationResult result = aiService.explain(
                     submission.getImageUrl(),
                     submission.getSubject().getName(),
-                    submission.getNote()
+                    submission.getNote(),
+                    questionNumber,
+                    requestedMode
             );
-            AiResponse response = new AiResponse(
-                    submission,
-                    result.detectedQuestion(),
-                    result.explanation(),
-                    result.finalAnswer(),
-                    result.inputWarning(),
-                    result.modelName()
-            );
+            AiResponse response = submission.getAiResponse();
+            if (response == null) {
+                response = new AiResponse(
+                        submission,
+                        result.detectedQuestion(),
+                        result.explanation(),
+                        result.finalAnswer(),
+                        result.inputWarning(),
+                        result.questionType(),
+                        result.resultStatus(),
+                        result.solveMode(),
+                        result.availableQuestions(),
+                        result.selectedQuestionNumber(),
+                        result.modelName()
+                );
+            } else {
+                response.updateAnalysis(
+                        result.detectedQuestion(),
+                        result.explanation(),
+                        result.finalAnswer(),
+                        result.inputWarning(),
+                        result.questionType(),
+                        result.resultStatus(),
+                        result.solveMode(),
+                        result.availableQuestions(),
+                        result.selectedQuestionNumber(),
+                        result.modelName()
+                );
+            }
             aiResponseRepository.save(response);
-            submission.markExplained(response);
+            submission.markAiResult(response, result.resultStatus());
             aiUsageLogRepository.save(new AiUsageLog(
                     currentUserEntity(),
                     submission,
@@ -187,6 +212,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         if (aiResponse == null) {
             throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, "Generate an explanation before grading");
         }
+        requireGradableResult(aiResponse);
         try {
             AiService.AiGradingResult result = aiService.grade(
                     aiResponse.getDetectedQuestion(),
@@ -236,6 +262,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         if (aiResponse == null) {
             throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, "Generate an explanation before grading");
         }
+        requireGradableResult(aiResponse);
         CloudinaryService.UploadResult upload = cloudinaryService.uploadStudentAnswerImage(image);
         try {
             AiService.AiGradingResult result = aiService.gradeImage(
@@ -308,10 +335,15 @@ public class SubmissionServiceImpl implements SubmissionService {
                     result.expectedExplanation(),
                     result.finalAnswer(),
                     result.inputWarning(),
+                    AiQuestionType.SINGLE_QUESTION,
+                    AiResultStatus.SOLUTION_READY,
+                    AiSolveMode.AUTO,
+                    List.of(),
+                    null,
                     result.modelName()
             );
             aiResponseRepository.save(response);
-            submission.markExplained(response);
+            submission.markAiResult(response, AiResultStatus.SOLUTION_READY);
 
             gradingResultRepository.save(new GradingResult(
                     submission,
@@ -384,6 +416,33 @@ public class SubmissionServiceImpl implements SubmissionService {
             return SubmissionStatus.valueOf(status.trim().toUpperCase());
         } catch (IllegalArgumentException ex) {
             throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, "Invalid submission status filter");
+        }
+    }
+
+    /**
+     * Keeps ambiguous multi-question requests out of the provider call. Selecting a
+     * question uses ONE_QUESTION, while page-wide modes intentionally omit a number.
+     */
+    private void validateExplainRequest(Integer questionNumber, AiSolveMode solveMode) {
+        if (questionNumber != null && questionNumber < 1) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, "Question number must be greater than zero");
+        }
+        if (solveMode == AiSolveMode.ONE_QUESTION && questionNumber == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, "Choose a question number to solve");
+        }
+        if (questionNumber != null && solveMode != AiSolveMode.ONE_QUESTION) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, "Use ONE_QUESTION when choosing a question number");
+        }
+    }
+
+    private void requireGradableResult(AiResponse response) {
+        AiResultStatus status = response.getResultStatus();
+        if (status != null && status != AiResultStatus.SOLUTION_READY && status != AiResultStatus.PARTIAL_RESULT) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST,
+                    ErrorCode.VALIDATION_ERROR,
+                    "Choose and solve a complete question before checking a student answer"
+            );
         }
     }
 

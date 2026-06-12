@@ -10,7 +10,7 @@ import { ErrorBanner } from '../components/common/ErrorBanner';
 import { StatusPill } from '../components/common/StatusPill';
 import { submissionStatusLabel } from '../utils/enumLabels';
 
-const statuses = ['UPLOADED', 'EXPLAINED', 'AI_FAILED'];
+const statuses = ['UPLOADED', 'EXPLAINED', 'QUESTION_SELECTION_REQUIRED', 'INCOMPLETE_IMAGE', 'PARTIAL_RESULT', 'AI_FAILED'];
 
 export function HistoryPage() {
   const [items, setItems] = useState([]);

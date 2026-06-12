@@ -5,6 +5,7 @@ import com.example.eduaiplatform.dto.request.SubmissionUpdateRequest;
 import com.example.eduaiplatform.dto.response.ApiResponse;
 import com.example.eduaiplatform.dto.response.GradingResultResponse;
 import com.example.eduaiplatform.dto.response.SubmissionResponse;
+import com.example.eduaiplatform.entity.AiSolveMode;
 import com.example.eduaiplatform.service.SubmissionService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -60,8 +61,12 @@ public class SubmissionController {
     }
 
     @PostMapping("/api/submissions/{id}/explain")
-    public ApiResponse<SubmissionResponse> explain(@PathVariable Long id) {
-        return ApiResponse.success("Explanation generated", submissionService.explainSubmission(id));
+    public ApiResponse<SubmissionResponse> explain(
+            @PathVariable Long id,
+            @RequestParam(required = false) Integer questionNumber,
+            @RequestParam(defaultValue = "AUTO") AiSolveMode solveMode
+    ) {
+        return ApiResponse.success("Explanation generated", submissionService.explainSubmission(id, questionNumber, solveMode));
     }
 
     @PostMapping("/api/submissions/{id}/grade")

@@ -2,10 +2,15 @@ package com.example.eduaiplatform.validation;
 
 import com.example.eduaiplatform.exception.ApiException;
 import com.example.eduaiplatform.exception.ErrorCode;
+import com.example.eduaiplatform.entity.AiQuestionType;
+import com.example.eduaiplatform.entity.AiResultStatus;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class AiResponseValidator {
@@ -26,17 +31,46 @@ public class AiResponseValidator {
         }
     }
 
+    /**
+     * Validates fields according to the AI result state. A real or partial solution
+     * must contain an explanation and final answer, while selection and incomplete
+     * states intentionally carry guidance instead of pretending to be a solution.
+     */
     public ExplanationPayload validateExplanation(JsonNode parsed) {
         rejectInputConflict(parsed);
+        AiQuestionType questionType = requiredEnum(parsed, "questionType", AiQuestionType.class);
+        AiResultStatus resultStatus = requiredEnum(parsed, "resultStatus", AiResultStatus.class);
         String detectedQuestion = requiredText(parsed, "detectedQuestion");
-        String explanation = requiredText(parsed, "explanation");
-        String finalAnswer = requiredText(parsed, "finalAnswer");
-        rejectNestedJson(finalAnswer);
+        String explanation = optionalText(parsed, "explanation");
+        String finalAnswer = optionalText(parsed, "finalAnswer");
+        List<Integer> availableQuestions = integerArray(parsed, "availableQuestions");
+        Integer selectedQuestionNumber = optionalPositiveInteger(parsed, "selectedQuestionNumber");
+
+        if (resultStatus == AiResultStatus.SOLUTION_READY || resultStatus == AiResultStatus.PARTIAL_RESULT) {
+            if (explanation.isBlank() || finalAnswer.isBlank()) {
+                throw invalidResponse();
+            }
+            rejectNestedJson(finalAnswer);
+        }
+        if (resultStatus == AiResultStatus.QUESTION_SELECTION_REQUIRED && availableQuestions.isEmpty()) {
+            throw invalidResponse();
+        }
+        if (explanation.isBlank() && resultStatus == AiResultStatus.QUESTION_SELECTION_REQUIRED) {
+            explanation = "Choose one of the detected question numbers to continue.";
+        }
+        if (explanation.isBlank() && resultStatus == AiResultStatus.INCOMPLETE_IMAGE) {
+            explanation = "The selected question could not be read completely from this image.";
+        }
+
         return new ExplanationPayload(
                 detectedQuestion,
                 explanation,
                 finalAnswer,
-                optionalText(parsed, "inputWarning")
+                optionalText(parsed, "inputWarning"),
+                questionType,
+                resultStatus,
+                availableQuestions,
+                selectedQuestionNumber
         );
     }
 
@@ -98,6 +132,33 @@ public class AiResponseValidator {
         return value.isTextual() ? value.asText("").trim() : "";
     }
 
+    private <T extends Enum<T>> T requiredEnum(JsonNode parsed, String field, Class<T> enumType) {
+        try {
+            return Enum.valueOf(enumType, requiredText(parsed, field).toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw invalidResponse();
+        }
+    }
+
+    private List<Integer> integerArray(JsonNode parsed, String field) {
+        JsonNode value = parsed.path(field);
+        if (!value.isArray()) {
+            return List.of();
+        }
+        List<Integer> numbers = new ArrayList<>();
+        value.forEach(item -> {
+            if (item.canConvertToInt() && item.asInt() > 0) {
+                numbers.add(item.asInt());
+            }
+        });
+        return numbers.stream().distinct().sorted().toList();
+    }
+
+    private Integer optionalPositiveInteger(JsonNode parsed, String field) {
+        JsonNode value = parsed.path(field);
+        return value.canConvertToInt() && value.asInt() > 0 ? value.asInt() : null;
+    }
+
     private void rejectNestedJson(String value) {
         String normalized = value.trim();
         if (normalized.startsWith("```json")) {
@@ -134,7 +195,11 @@ public class AiResponseValidator {
             String detectedQuestion,
             String explanation,
             String finalAnswer,
-            String inputWarning
+            String inputWarning,
+            AiQuestionType questionType,
+            AiResultStatus resultStatus,
+            List<Integer> availableQuestions,
+            Integer selectedQuestionNumber
     ) {
     }
 

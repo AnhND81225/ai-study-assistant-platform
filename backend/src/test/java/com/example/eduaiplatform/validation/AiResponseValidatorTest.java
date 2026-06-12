@@ -34,6 +34,9 @@ class AiResponseValidatorTest {
     void validateExplanation_acceptsUnrelatedNoteWarning() throws Exception {
         JsonNode parsed = objectMapper.readTree("""
                 {
+                  "questionType":"SINGLE_QUESTION",
+                  "resultStatus":"SOLUTION_READY",
+                  "availableQuestions":[],
                   "detectedQuestion":"Solve 2 + 2",
                   "explanation":"Add the numbers.",
                   "finalAnswer":"4",
@@ -46,12 +49,56 @@ class AiResponseValidatorTest {
 
         assertEquals("4", payload.finalAnswer());
         assertEquals("The note was unrelated, so the image was used.", payload.inputWarning());
+        assertEquals("SOLUTION_READY", payload.resultStatus().name());
+    }
+
+    @Test
+    void validateExplanation_acceptsQuestionSelectionRequired() throws Exception {
+        JsonNode parsed = objectMapper.readTree("""
+                {
+                  "questionType":"MULTIPLE_CHOICE",
+                  "resultStatus":"QUESTION_SELECTION_REQUIRED",
+                  "availableQuestions":[3,1,2,2],
+                  "detectedQuestion":"Questions 1 to 3",
+                  "explanation":"",
+                  "finalAnswer":"",
+                  "inputConflict":false,
+                  "inputWarning":""
+                }
+                """);
+
+        AiResponseValidator.ExplanationPayload payload = validator.validateExplanation(parsed);
+
+        assertEquals("QUESTION_SELECTION_REQUIRED", payload.resultStatus().name());
+        assertEquals(java.util.List.of(1, 2, 3), payload.availableQuestions());
+        assertEquals("Choose one of the detected question numbers to continue.", payload.explanation());
+    }
+
+    @Test
+    void validateExplanation_rejectsSelectionWithoutQuestionNumbers() throws Exception {
+        JsonNode parsed = objectMapper.readTree("""
+                {
+                  "questionType":"MULTI_QUESTION",
+                  "resultStatus":"QUESTION_SELECTION_REQUIRED",
+                  "availableQuestions":[],
+                  "detectedQuestion":"Several questions",
+                  "explanation":"",
+                  "finalAnswer":""
+                }
+                """);
+
+        ApiException exception = assertThrows(ApiException.class, () -> validator.validateExplanation(parsed));
+
+        assertEquals(ErrorCode.AI_RESPONSE_PARSE_ERROR, exception.getErrorCode());
     }
 
     @Test
     void validateExplanation_rejectsNestedJsonInFinalAnswer() throws Exception {
         JsonNode parsed = objectMapper.readTree("""
                 {
+                  "questionType":"SINGLE_QUESTION",
+                  "resultStatus":"SOLUTION_READY",
+                  "availableQuestions":[],
                   "detectedQuestion":"Write an essay",
                   "explanation":"Use an outline.",
                   "finalAnswer":"{\\"detectedQuestion\\":\\"Write an essay\\",\\"explanation\\":\\"Outline\\",\\"finalAnswer\\":\\"Essay\\"}"

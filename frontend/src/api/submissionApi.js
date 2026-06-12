@@ -16,7 +16,7 @@ export const submissionApi = {
   }).then((res) => res.data.data),
   detail: (id) => api.get(`/submissions/${id}`).then((res) => res.data.data),
   update: (id, payload) => api.patch(`/submissions/${id}`, payload).then((res) => res.data.data),
-  explain: (id) => api.post(`/submissions/${id}/explain`).then((res) => res.data.data),
+  explain: (id, params = {}) => api.post(`/submissions/${id}/explain`, null, { params }).then((res) => res.data.data),
   grade: (id, userAnswer) => api.post(`/submissions/${id}/grade`, { userAnswer }).then((res) => res.data.data),
   gradeImage: (id, image) => {
     const formData = new FormData();
