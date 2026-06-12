@@ -4,10 +4,10 @@ import { useAuth } from '../auth/AuthContext';
 import { PwaStatusBanner } from '../components/pwa/PwaStatusBanner';
 
 const userNav = [
-  { to: '/dashboard', label: 'Home', icon: Home },
-  { to: '/upload', label: 'Solve', icon: ScanLine },
-  { to: '/grade', label: 'Check', icon: ClipboardCheck },
-  { to: '/submissions', label: 'History', icon: History },
+  { to: '/dashboard', label: 'Home', icon: Home, preload: () => import('../pages/DashboardPage') },
+  { to: '/upload', label: 'Solve', icon: ScanLine, preload: () => import('../pages/UploadPage') },
+  { to: '/grade', label: 'Check', icon: ClipboardCheck, preload: () => import('../pages/GradePage') },
+  { to: '/submissions', label: 'History', icon: History, preload: () => import('../pages/HistoryPage') },
 ];
 
 export function AppLayout() {
@@ -70,7 +70,12 @@ export function AppLayout() {
 function DesktopNavItem({ item }) {
   const Icon = item.icon;
   return (
-    <NavLink to={item.to} className={({ isActive }) => `inline-flex min-h-10 items-center gap-2 rounded-md px-3 text-sm font-bold transition-colors ${isActive ? 'bg-white text-ocean shadow-sm' : 'text-slate-600 hover:bg-white hover:text-ink'}`}>
+    <NavLink
+      to={item.to}
+      onMouseEnter={item.preload}
+      onFocus={item.preload}
+      className={({ isActive }) => `inline-flex min-h-10 items-center gap-2 rounded-md px-3 text-sm font-bold transition-colors ${isActive ? 'bg-white text-ocean shadow-sm' : 'text-slate-600 hover:bg-white hover:text-ink'}`}
+    >
       <Icon size={16} />
       {item.label}
     </NavLink>
@@ -82,6 +87,8 @@ function MobileNavItem({ item }) {
   return (
     <NavLink
       to={item.to}
+      onTouchStart={item.preload}
+      onFocus={item.preload}
       className={({ isActive }) =>
         `relative flex min-h-14 flex-col items-center justify-center rounded-lg text-[11px] font-bold transition-colors ${
           isActive ? 'bg-blue-50 text-ocean' : 'text-slate-500 hover:bg-slate-50 hover:text-ink'

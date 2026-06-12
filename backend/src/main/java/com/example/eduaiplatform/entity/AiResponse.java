@@ -22,17 +22,21 @@ public class AiResponse extends Auditable {
     @Column(columnDefinition = "text")
     private String finalAnswer;
 
+    @Column(columnDefinition = "text")
+    private String inputWarning;
+
     @Column(length = 100)
     private String modelName;
 
     protected AiResponse() {
     }
 
-    public AiResponse(Submission submission, String detectedQuestion, String explanation, String finalAnswer, String modelName) {
+    public AiResponse(Submission submission, String detectedQuestion, String explanation, String finalAnswer, String inputWarning, String modelName) {
         this.submission = submission;
         this.detectedQuestion = detectedQuestion;
         this.explanation = explanation;
         this.finalAnswer = finalAnswer;
+        this.inputWarning = inputWarning;
         this.modelName = modelName;
     }
 
@@ -50,6 +54,10 @@ public class AiResponse extends Auditable {
 
     public String getFinalAnswer() {
         return finalAnswer;
+    }
+
+    public String getInputWarning() {
+        return inputWarning;
     }
 
     public String getModelName() {

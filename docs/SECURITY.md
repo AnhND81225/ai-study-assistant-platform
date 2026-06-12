@@ -38,6 +38,8 @@ Do not rely on AI for authorization. Keep prompts compact and avoid sending unne
 
 Each normal user is limited to a configurable number of successful AI explanation requests per day through `AI_EXPLAIN_LIMIT_PER_USER`.
 
+Uploaded images are the primary source of truth. User notes are treated as untrusted optional context and must not override the required response format or provider instructions. AI responses are validated before persistence; truncated, malformed, nested-JSON, invalid-score, and unresolved input-conflict responses are rejected.
+
 ## Frontend Token Handling
 
 MVP token storage is simple and must be treated as XSS-sensitive. Clear the token on logout and unauthorized responses.

@@ -65,6 +65,15 @@ export function apiMessage(error, fallback = 'Something went wrong') {
   if (code === 'AI_TIMEOUT') {
     return 'The AI took too long to respond. Your upload is safe, so you can try again.';
   }
+  if (code === 'AI_RESPONSE_TRUNCATED') {
+    return 'The answer was too long to complete. Try again or add a shorter, more specific note.';
+  }
+  if (code === 'AI_INPUT_CONFLICT') {
+    return 'The uploaded image and note describe different questions. Review the note or remove it, then try again.';
+  }
+  if (code === 'AI_RESPONSE_PARSE_ERROR') {
+    return 'We could not prepare the AI response correctly. Please try again.';
+  }
   if (code?.startsWith('AI_')) {
     return error.response?.data?.message || 'The AI service is temporarily unavailable. Please try again.';
   }

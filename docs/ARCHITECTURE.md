@@ -45,15 +45,19 @@ Explanation flow:
 3. Backend uploads the file to Cloudinary.
 4. Backend creates a submission.
 5. Backend sends the image URL and subject to the AI provider.
-6. Backend stores the structured explanation.
-7. Backend returns the result to the frontend.
+6. Backend validates completion status and structured response fields.
+7. Backend stores only valid explanations and optional user-facing input warnings.
+8. Backend returns the result to the frontend.
 
 Grading flow:
 
 1. User submits an answer for their own submission.
 2. Backend loads the submission and existing AI explanation.
 3. Backend sends compact context to the AI provider.
-4. Backend stores score, feedback, mistakes, and suggestions.
+4. Backend validates the score and structured response fields.
+5. Backend stores score, feedback, mistakes, and suggestions.
+
+The uploaded image is the primary source of truth. Notes are optional context. Unrelated notes are ignored with a user-facing warning, while unresolved image-note conflicts are rejected before data is stored.
 
 Usage quota flow:
 

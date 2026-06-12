@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ClipboardCheck, Sparkles } from 'lucide-react';
 import { subjectApi } from '../api/subjectApi';
@@ -9,15 +9,19 @@ import { EmptyState } from '../components/common/EmptyState';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { StatusPill } from '../components/common/StatusPill';
 import { ImageScannerInput } from '../components/common/ImageScannerInput';
-import { ExplanationResultCard, GradingResultCard } from '../components/common/AiResultCards';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { ProcessProgress } from '../components/common/ProcessProgress';
+
+const lazyNamed = (loader, name) => lazy(() => loader().then((module) => ({ default: module[name] })));
+const ExplanationResultCard = lazyNamed(() => import('../components/common/AiResultCards'), 'ExplanationResultCard');
+const GradingResultCard = lazyNamed(() => import('../components/common/AiResultCards'), 'GradingResultCard');
 
 export function GradePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const online = useOnlineStatus();
   const initialSubmissionId = searchParams.get('submissionId') || '';
-  const [workflow, setWorkflow] = useState(initialSubmissionId ? 'existing' : 'new');
+  const initialWorkflow = initialSubmissionId || searchParams.get('view') === 'saved' ? 'existing' : 'new';
+  const [workflow, setWorkflow] = useState(initialWorkflow);
   const [items, setItems] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [subjectId, setSubjectId] = useState('');
@@ -29,7 +33,9 @@ export function GradePage() {
   const [answerImage, setAnswerImage] = useState(null);
   const [newWorkImage, setNewWorkImage] = useState(null);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [subjectsLoading, setSubjectsLoading] = useState(true);
+  const [itemsLoading, setItemsLoading] = useState(false);
+  const [itemsLoaded, setItemsLoaded] = useState(false);
   const [grading, setGrading] = useState(false);
   const [activeStep, setActiveStep] = useState(-1);
   const [canRetry, setCanRetry] = useState(false);
@@ -44,21 +50,31 @@ export function GradePage() {
   const canGradeExisting = Boolean(selected?.aiResponse) && (mode === 'image' ? Boolean(answerImage) : Boolean(answer.trim()));
 
   useEffect(() => {
-    Promise.all([
-      submissionApi.mine(),
-      subjectApi.list(),
-    ])
-      .then(([page, subjectList]) => {
-        const content = page.content || [];
-        setItems(content);
+    subjectApi.list()
+      .then((subjectList) => {
         setSubjects(subjectList);
         setSubjectId(subjectList[0]?.id || '');
+      })
+      .catch((err) => setError(apiMessage(err, 'Could not load your checking workspace')))
+      .finally(() => setSubjectsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (workflow !== 'existing' || itemsLoaded || itemsLoading) return;
+    setItemsLoading(true);
+    submissionApi.mine()
+      .then((page) => {
+        const content = page.content || [];
+        setItems(content);
         const initial = content.find((item) => String(item.id) === initialSubmissionId && item.aiResponse) || content.find((item) => item.aiResponse);
         if (initial) setSelectedId(String(initial.id));
       })
-      .catch((err) => setError(apiMessage(err, 'Could not load your checking workspace')))
-      .finally(() => setLoading(false));
-  }, []);
+      .catch((err) => setError(apiMessage(err, 'Could not load your saved questions')))
+      .finally(() => {
+        setItemsLoaded(true);
+        setItemsLoading(false);
+      });
+  }, [workflow, itemsLoaded, itemsLoading, initialSubmissionId]);
 
   useEffect(() => {
     if (!selectedId) {
@@ -70,7 +86,7 @@ export function GradePage() {
       .then((detail) => {
         setSelected(detail);
         if (workflow === 'existing') {
-          setSearchParams({ submissionId: String(detail.id) }, { replace: true });
+          setSearchParams({ view: 'saved', submissionId: String(detail.id) }, { replace: true });
         }
       })
       .catch((err) => setError(apiMessage(err, 'Could not load selected submission')));
@@ -147,10 +163,6 @@ export function GradePage() {
     }
   }
 
-  if (loading) {
-    return <PageHeader title="Check student work" description="Loading your checking workspace." />;
-  }
-
   return (
     <div className="motion-page">
       <PageHeader
@@ -176,7 +188,10 @@ export function GradePage() {
           type="button"
           onClick={() => {
             setWorkflow('existing');
-            if (selectedId) setSearchParams({ submissionId: selectedId }, { replace: true });
+            setSearchParams({
+              view: 'saved',
+              ...(selectedId ? { submissionId: selectedId } : {}),
+            }, { replace: true });
           }}
           className={`workflow-tab tap-target rounded-lg px-3 text-sm font-bold ${workflow === 'existing' ? 'workflow-tab-active bg-white text-ocean shadow-sm' : 'text-slate-600'}`}
         >
@@ -204,7 +219,8 @@ export function GradePage() {
             <div className="grid gap-4">
               <label className="grid gap-1.5 text-sm font-bold text-slate-700">
                 Subject
-                <select value={subjectId} onChange={(event) => setSubjectId(event.target.value)} className="input-field">
+                <select value={subjectId} onChange={(event) => setSubjectId(event.target.value)} className="input-field" disabled={subjectsLoading}>
+                  {subjectsLoading ? <option value="">Loading subjects...</option> : null}
                   {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
                 </select>
               </label>
@@ -219,6 +235,11 @@ export function GradePage() {
             </div>
           </section>
         </form>
+        ) : itemsLoading ? (
+          <div className="app-card border-dashed p-6 text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-blue-100 border-t-sea" />
+            <p className="mt-3 text-sm font-bold text-slate-600">Loading saved questions...</p>
+          </div>
         ) : explainedItems.length === 0 ? (
           <EmptyState
             title="No explained questions yet"
@@ -247,7 +268,9 @@ export function GradePage() {
 
           <section className="grid gap-4">
             {selected?.aiResponse ? (
-              <ExplanationResultCard aiResponse={selected.aiResponse} />
+              <Suspense fallback={<ResultLoadingState />}>
+                <ExplanationResultCard aiResponse={selected.aiResponse} />
+              </Suspense>
             ) : null}
 
             <div className="focus-panel app-card p-4 sm:p-5">
@@ -285,10 +308,20 @@ export function GradePage() {
       {selected?.gradingResults?.length ? (
         <div className="mt-4 grid gap-3">
           {selected.gradingResults.map((result) => (
-            <GradingResultCard key={result.id} result={result} />
+            <Suspense key={result.id} fallback={<ResultLoadingState />}>
+              <GradingResultCard result={result} />
+            </Suspense>
           ))}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function ResultLoadingState() {
+  return (
+    <div className="app-card border-dashed p-5 text-sm font-bold text-slate-500">
+      Loading result...
     </div>
   );
 }

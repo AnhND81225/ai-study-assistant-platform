@@ -10,6 +10,7 @@ public interface AiService {
             String detectedQuestion,
             String explanation,
             String finalAnswer,
+            String inputWarning,
             String modelName,
             Integer inputTokens,
             Integer outputTokens
@@ -37,6 +38,7 @@ public interface AiService {
             String feedback,
             String mistakes,
             String improvementSuggestions,
+            String inputWarning,
             String modelName,
             Integer inputTokens,
             Integer outputTokens

@@ -112,6 +112,16 @@ Grade new work from image uses `multipart/form-data`:
 | `note` | string | No | Optional grading note or rubric |
 | `image` | file | Yes | JPG, PNG, or WebP image containing the question and student work |
 
+The uploaded image is the primary source of truth. An unrelated note is ignored and may produce an `inputWarning` in the saved AI explanation. If the image and note conflict so strongly that the task cannot be determined, the API returns `AI_INPUT_CONFLICT`.
+
+AI response validation errors:
+
+| Error code | Meaning |
+|---|---|
+| `AI_RESPONSE_TRUNCATED` | The provider stopped because the generated answer exceeded its output limit |
+| `AI_RESPONSE_PARSE_ERROR` | The provider response did not match the expected structured fields |
+| `AI_INPUT_CONFLICT` | The image and note conflict and the primary task cannot be determined reliably |
+
 ## AI Usage
 
 | Method | Path | Description | Auth |
