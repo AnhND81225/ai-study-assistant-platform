@@ -46,8 +46,8 @@ export function GradePage() {
     { label: 'Write feedback', detail: 'Preparing the score, mistakes, and next steps.' },
   ];
 
-  const explainedItems = useMemo(() => items.filter((item) => item.aiResponse), [items]);
-  const canGradeExisting = Boolean(selected?.aiResponse) && (mode === 'image' ? Boolean(answerImage) : Boolean(answer.trim()));
+  const explainedItems = useMemo(() => items.filter(isReadyForGrading), [items]);
+  const canGradeExisting = isReadyForGrading(selected) && (mode === 'image' ? Boolean(answerImage) : Boolean(answer.trim()));
 
   useEffect(() => {
     subjectApi.list()
@@ -66,7 +66,7 @@ export function GradePage() {
       .then((page) => {
         const content = page.content || [];
         setItems(content);
-        const initial = content.find((item) => String(item.id) === initialSubmissionId && item.aiResponse) || content.find((item) => item.aiResponse);
+        const initial = content.find((item) => String(item.id) === initialSubmissionId && isReadyForGrading(item)) || content.find(isReadyForGrading);
         if (initial) setSelectedId(String(initial.id));
       })
       .catch((err) => setError(apiMessage(err, 'Could not load your saved questions')))
@@ -127,8 +127,8 @@ export function GradePage() {
       return;
     }
 
-    if (!selected?.aiResponse) {
-      setError('Choose an explained submission first.');
+    if (!isReadyForGrading(selected)) {
+      setError('Choose a submission with a complete or partial solution first.');
       return;
     }
     if (mode === 'text' && !answer.trim()) {
@@ -316,6 +316,11 @@ export function GradePage() {
       ) : null}
     </div>
   );
+}
+
+function isReadyForGrading(submission) {
+  if (!submission?.aiResponse) return false;
+  return ['SOLUTION_READY', 'PARTIAL_RESULT'].includes(submission.aiResponse.resultStatus || 'SOLUTION_READY');
 }
 
 function ResultLoadingState() {

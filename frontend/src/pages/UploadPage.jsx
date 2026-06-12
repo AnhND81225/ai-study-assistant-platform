@@ -78,7 +78,7 @@ export function UploadPage() {
               onChange={setImage}
               onError={setError}
               label="Question photo"
-              helperText="Include the full question. Keep handwriting and formulas sharp and well lit."
+              helperText="Include the full question. For a page with several questions, add the question number in your note."
               emptyTitle="Scan question image"
               emptyDescription="Place the full question inside the frame, avoid shadows, then rotate if the photo is sideways."
               kindLabel="question image"
@@ -96,7 +96,7 @@ export function UploadPage() {
             </label>
             <label className="grid gap-1.5 text-sm font-bold text-slate-700">
               Note
-              <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Optional context or what you tried" className="rounded-lg border border-slate-200 bg-white px-3 py-3 outline-none transition placeholder:text-slate-400 focus:border-sea focus:ring-4 focus:ring-blue-100" />
+              <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Example: Solve question 5, or add what you tried" className="rounded-lg border border-slate-200 bg-white px-3 py-3 outline-none transition placeholder:text-slate-400 focus:border-sea focus:ring-4 focus:ring-blue-100" />
             </label>
             <button disabled={loading || !subjectId || !image || !online} className="primary-button">
               {loading ? <Sparkles size={18} className="animate-pulse" /> : <Camera size={18} />}

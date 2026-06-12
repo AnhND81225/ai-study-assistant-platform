@@ -72,7 +72,7 @@ Supported query parameters for `GET /api/submissions/me`:
 |---|---|---|
 | `search` | `derivative` | Searches title, note, detected question, and original filename |
 | `subjectId` | `1` | Filters by subject |
-| `status` | `EXPLAINED` | Filters by `UPLOADED`, `EXPLAINED`, or `AI_FAILED` |
+| `status` | `EXPLAINED` | Filters by submission status, including selection-required, incomplete-image, and partial-result states |
 | `favorite` | `true` | Shows favorited submissions only |
 | `page` / `size` | `0` / `8` | Pagination controls |
 | `sort` | `createdAt,desc` | Sort order |
@@ -95,6 +95,15 @@ Submission update request:
 | POST | `/api/submissions/{id}/grade` | Grade answer | USER/ADMIN | USER own only |
 | POST | `/api/submissions/{id}/grade-image` | Grade answer from uploaded image | USER/ADMIN | USER own only |
 | POST | `/api/gradings/image` | Grade a new image containing both question and student work | USER/ADMIN | Current user |
+
+`POST /api/submissions/{id}/explain` supports optional query parameters:
+
+| Parameter | Example | Description |
+|---|---|---|
+| `questionNumber` | `5` | Question to solve when the image contains several numbered questions |
+| `solveMode` | `ONE_QUESTION` | `AUTO`, `ONE_QUESTION`, `ANSWERS_ONLY`, or `EXPLAIN_ALL` |
+
+When an image contains multiple questions and no scope is supplied, the API stores a `QUESTION_SELECTION_REQUIRED` result instead of pretending that a solution is ready. The response includes `questionType`, `resultStatus`, and `availableQuestions`. `ANSWERS_ONLY` is intended for multiple-choice pages. A selected question that is cropped or unreadable returns `INCOMPLETE_IMAGE`.
 
 Grading request:
 

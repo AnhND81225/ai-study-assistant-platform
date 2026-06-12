@@ -37,6 +37,11 @@ public final class SubmissionMapper {
                 response.getExplanation(),
                 response.getFinalAnswer(),
                 response.getInputWarning(),
+                response.getQuestionType() == null ? null : response.getQuestionType().name(),
+                response.getResultStatus() == null ? "SOLUTION_READY" : response.getResultStatus().name(),
+                response.getSolveMode() == null ? "AUTO" : response.getSolveMode().name(),
+                response.getAvailableQuestions(),
+                response.getSelectedQuestionNumber(),
                 response.getModelName()
         );
     }

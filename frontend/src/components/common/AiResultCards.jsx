@@ -5,6 +5,10 @@ export function ExplanationResultCard({ aiResponse }) {
   if (!aiResponse) return null;
   const finalAnswer = readFinalAnswer(aiResponse.finalAnswer);
   const malformedFinalAnswer = Boolean(aiResponse.finalAnswer) && !finalAnswer;
+  const title = resultTitle(aiResponse.resultStatus);
+  const warningTitle = aiResponse.resultStatus === 'INCOMPLETE_IMAGE'
+    ? 'Upload a clearer photo to continue'
+    : 'We used the image as the main question';
   return (
     <article className="app-card overflow-hidden">
       <div className="border-b border-slate-200 bg-slate-50 px-4 py-4 sm:px-5">
@@ -12,7 +16,7 @@ export function ExplanationResultCard({ aiResponse }) {
         <span className="grid h-9 w-9 place-items-center rounded-lg bg-blue-50 text-ocean">
           <Lightbulb size={19} />
         </span>
-        <h2 className="text-lg font-extrabold text-ink">Your solution</h2>
+        <h2 className="text-lg font-extrabold text-ink">{title}</h2>
       </div>
       </div>
       <div className="grid gap-3 p-4 sm:p-5">
@@ -20,7 +24,7 @@ export function ExplanationResultCard({ aiResponse }) {
           <div className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
             <AlertTriangle className="mt-0.5 shrink-0" size={18} />
             <div>
-              <p className="font-extrabold">We used the image as the main question</p>
+              <p className="font-extrabold">{warningTitle}</p>
               <p className="mt-1 font-medium leading-5">{aiResponse.inputWarning}</p>
             </div>
           </div>
@@ -28,9 +32,11 @@ export function ExplanationResultCard({ aiResponse }) {
         <ResultSection icon={HelpCircle} title="Detected question">
           <RichText>{aiResponse.detectedQuestion}</RichText>
         </ResultSection>
-        <ResultSection icon={ListChecks} title="Step-by-step solution">
-          <RichText>{aiResponse.explanation}</RichText>
-        </ResultSection>
+        {aiResponse.explanation ? (
+          <ResultSection icon={ListChecks} title={aiResponse.resultStatus === 'QUESTION_SELECTION_REQUIRED' ? 'What to do next' : 'Step-by-step solution'}>
+            <RichText>{aiResponse.explanation}</RichText>
+          </ResultSection>
+        ) : null}
         {finalAnswer ? (
           <ResultSection icon={Target} title="Final answer" accent>
             <RichText>{finalAnswer}</RichText>
@@ -45,6 +51,13 @@ export function ExplanationResultCard({ aiResponse }) {
       </div>
     </article>
   );
+}
+
+function resultTitle(status) {
+  if (status === 'QUESTION_SELECTION_REQUIRED') return 'Choose a question to solve';
+  if (status === 'INCOMPLETE_IMAGE') return 'Photo needs attention';
+  if (status === 'PARTIAL_RESULT') return 'Partial solution';
+  return 'Your solution';
 }
 
 function readFinalAnswer(value) {

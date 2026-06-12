@@ -25,3 +25,6 @@ build/
 
 # Docker/local
 postgres-data/
+.codex/
+__pycache__/
+*.pyc
