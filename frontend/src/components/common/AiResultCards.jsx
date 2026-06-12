@@ -3,6 +3,8 @@ import { RichText } from './RichText';
 
 export function ExplanationResultCard({ aiResponse }) {
   if (!aiResponse) return null;
+  const finalAnswer = readFinalAnswer(aiResponse.finalAnswer);
+  const malformedFinalAnswer = Boolean(aiResponse.finalAnswer) && !finalAnswer;
   return (
     <article className="app-card overflow-hidden">
       <div className="border-b border-slate-200 bg-slate-50 px-4 py-4 sm:px-5">
@@ -14,20 +16,50 @@ export function ExplanationResultCard({ aiResponse }) {
       </div>
       </div>
       <div className="grid gap-3 p-4 sm:p-5">
+        {aiResponse.inputWarning ? (
+          <div className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <AlertTriangle className="mt-0.5 shrink-0" size={18} />
+            <div>
+              <p className="font-extrabold">We used the image as the main question</p>
+              <p className="mt-1 font-medium leading-5">{aiResponse.inputWarning}</p>
+            </div>
+          </div>
+        ) : null}
         <ResultSection icon={HelpCircle} title="Detected question">
           <RichText>{aiResponse.detectedQuestion}</RichText>
         </ResultSection>
         <ResultSection icon={ListChecks} title="Step-by-step solution">
           <RichText>{aiResponse.explanation}</RichText>
         </ResultSection>
-        {aiResponse.finalAnswer ? (
+        {finalAnswer ? (
           <ResultSection icon={Target} title="Final answer" accent>
-            <RichText>{aiResponse.finalAnswer}</RichText>
+            <RichText>{finalAnswer}</RichText>
           </ResultSection>
+        ) : null}
+        {malformedFinalAnswer ? (
+          <div className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <AlertTriangle className="mt-0.5 shrink-0" size={18} />
+            <p className="font-semibold leading-5">The saved final answer could not be displayed correctly. Try the solution again to generate a clean result.</p>
+          </div>
         ) : null}
       </div>
     </article>
   );
+}
+
+function readFinalAnswer(value) {
+  if (!value) return '';
+  const trimmed = value.trim();
+  const candidate = trimmed.startsWith('```json')
+    ? trimmed.slice(7).replace(/```\s*$/, '').trim()
+    : trimmed;
+  if (!candidate.startsWith('{')) return trimmed;
+  try {
+    const parsed = JSON.parse(candidate);
+    return typeof parsed.finalAnswer === 'string' ? parsed.finalAnswer.trim() : '';
+  } catch {
+    return '';
+  }
 }
 
 export function GradingResultCard({ result }) {

@@ -147,6 +147,7 @@ public class SubmissionServiceImpl implements SubmissionService {
                     result.detectedQuestion(),
                     result.explanation(),
                     result.finalAnswer(),
+                    result.inputWarning(),
                     result.modelName()
             );
             aiResponseRepository.save(response);
@@ -306,6 +307,7 @@ public class SubmissionServiceImpl implements SubmissionService {
                     result.detectedQuestion(),
                     result.expectedExplanation(),
                     result.finalAnswer(),
+                    result.inputWarning(),
                     result.modelName()
             );
             aiResponseRepository.save(response);

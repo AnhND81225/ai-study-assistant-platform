@@ -5,6 +5,7 @@ public record AiExplanationResponse(
         String detectedQuestion,
         String explanation,
         String finalAnswer,
+        String inputWarning,
         String modelName
 ) {
 }

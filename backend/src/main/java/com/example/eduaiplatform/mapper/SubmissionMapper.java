@@ -36,6 +36,7 @@ public final class SubmissionMapper {
                 response.getDetectedQuestion(),
                 response.getExplanation(),
                 response.getFinalAnswer(),
+                response.getInputWarning(),
                 response.getModelName()
         );
     }
