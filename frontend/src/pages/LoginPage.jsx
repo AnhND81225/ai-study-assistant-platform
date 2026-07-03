@@ -34,10 +34,10 @@ export function LoginPage() {
 
 function AuthForm({ title, subtitle, submitLabel, form, setForm, submit, loading, error, dismissError, footer }) {
   return (
-    <main className="grid min-h-screen place-items-center bg-slate-100 px-4 py-8">
-      <form onSubmit={submit} className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-soft sm:p-7">
+    <main className="grid min-h-[100dvh] place-items-center bg-[#f5f7fb] px-4 py-8">
+      <form onSubmit={submit} className="w-full max-w-md rounded-lg border border-slate-200 bg-white/95 p-5 shadow-[0_24px_60px_rgba(15,23,42,0.12)] sm:p-7">
         <Link to="/" className="mb-8 inline-flex items-center gap-2.5 font-extrabold text-ink">
-          <span className="grid h-10 w-10 place-items-center rounded-lg bg-sea text-white shadow-glow">
+          <span className="grid h-10 w-10 place-items-center rounded-lg bg-sea text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)]">
             <BookOpen size={19} />
           </span>
           StudyAI

@@ -20,12 +20,12 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-paper text-ink">
+    <div className="min-h-screen text-ink">
       <a href="#main-content" className="skip-link">Skip to main content</a>
-      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
+      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <NavLink to="/dashboard" className="flex items-center gap-2.5 rounded-lg font-extrabold text-ink">
-            <span className="grid h-10 w-10 place-items-center rounded-lg bg-sea text-white shadow-glow">
+            <span className="grid h-10 w-10 place-items-center rounded-lg bg-sea text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)]">
               <BookOpen size={19} />
             </span>
             <span className="text-lg">StudyAI</span>

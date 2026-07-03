@@ -4,7 +4,7 @@
 
 :root {
   color: #122033;
-  background: #f8fafc;
+  background: #f5f7fb;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -18,7 +18,9 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #f8fafc;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28rem),
+    linear-gradient(180deg, #f8fafc 0%, #f5f7fb 42%, #eef3f8 100%);
   overflow-x: hidden;
 }
 
@@ -78,28 +80,29 @@ select {
 
 @layer components {
   .app-card {
-    @apply rounded-lg border border-slate-200/80 bg-white shadow-soft;
+    @apply rounded-lg border border-slate-200/80 bg-white/95 shadow-soft;
   }
 
   .primary-button {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-4 text-sm font-bold text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-sea px-4 text-sm font-bold text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)] disabled:cursor-not-allowed disabled:opacity-60;
     min-height: 46px;
     transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
   }
 
   .primary-button:hover:not(:disabled) {
     @apply bg-ocean;
-    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
+    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.22);
   }
 
   .secondary-button {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-ink disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white/90 px-4 text-sm font-bold text-ink disabled:cursor-not-allowed disabled:opacity-60;
     min-height: 46px;
     transition: border-color 180ms ease, color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
   }
 
   .secondary-button:hover:not(:disabled) {
-    @apply border-blue-200 bg-blue-50 text-ocean;
+    @apply border-blue-200 bg-white text-ocean;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
   }
 
   .danger-button {
@@ -112,8 +115,16 @@ select {
     min-height: 46px;
   }
 
+  .textarea-field {
+    @apply rounded-lg border border-slate-200 bg-white px-3 py-3 text-ink outline-none transition placeholder:text-slate-400 focus:border-sea focus:ring-4 focus:ring-blue-100;
+  }
+
   .soft-panel {
-    @apply rounded-lg border border-slate-200/80 bg-slate-50;
+    @apply rounded-lg border border-slate-200/80 bg-slate-50/80;
+  }
+
+  .surface-panel {
+    @apply rounded-lg border border-slate-200/80 bg-white/80 shadow-[0_1px_0_rgba(15,23,42,0.03)];
   }
 }
 
@@ -185,7 +196,9 @@ textarea:focus-visible {
   overflow: hidden;
   border: 2px dashed #bfdbfe;
   border-radius: 0.75rem;
-  background: #f8fafc;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.05), transparent 48%),
+    #f8fafc;
   transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
 }
 
@@ -200,9 +213,9 @@ textarea:focus-visible {
 }
 
 .smooth-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   border-color: #bfdbfe;
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.09);
 }
 
 .fade-in {

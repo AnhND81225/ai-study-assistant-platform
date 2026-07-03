@@ -8,19 +8,19 @@ export function DashboardPage() {
     <div className="motion-page">
       <PageHeader title="Ready to study?" description="Start with a question you want to understand, or check work you have already completed." />
       <div className="mb-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="overflow-hidden rounded-lg bg-ink p-5 text-white shadow-soft sm:p-7">
+        <div className="overflow-hidden rounded-lg border border-blue-100 bg-white p-5 shadow-soft sm:p-7">
           <div className="flex items-start justify-between gap-4">
             <div className="max-w-xl">
-              <p className="text-sm font-bold text-blue-200">Start with one clear question</p>
-              <h2 className="mt-2 text-2xl font-extrabold leading-tight sm:text-3xl">Take a photo and understand every step.</h2>
-              <p className="mt-3 text-sm font-medium leading-6 text-slate-300">StudyAI reads the question, explains the approach, and keeps the result ready for review.</p>
-              <Link to="/upload" className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-bold text-ocean transition-colors hover:bg-blue-50">
+              <p className="text-sm font-bold text-ocean">Start with one clear question</p>
+              <h2 className="mt-2 text-2xl font-extrabold leading-tight text-ink sm:text-3xl">Take a photo and understand every step.</h2>
+              <p className="mt-3 text-sm font-medium leading-6 text-slate-600">StudyAI reads the question, explains the approach, and keeps the result ready for review.</p>
+              <Link to="/upload" className="primary-button mt-5 px-4">
                 <Camera size={18} />
                 Solve a question
                 <ArrowRight size={17} />
               </Link>
             </div>
-            <span className="hidden h-14 w-14 shrink-0 place-items-center rounded-lg bg-white/10 text-blue-200 sm:grid">
+            <span className="hidden h-14 w-14 shrink-0 place-items-center rounded-lg bg-blue-50 text-ocean sm:grid">
               <Sparkles size={24} />
             </span>
           </div>
@@ -38,8 +38,8 @@ export function DashboardPage() {
 
 const tones = {
   blue: 'bg-blue-50 text-ocean',
-  green: 'bg-emerald-50 text-emerald-700',
-  orange: 'bg-orange-50 text-orange-700',
+  green: 'bg-slate-100 text-slate-700',
+  orange: 'bg-slate-100 text-slate-700',
 };
 
 function ActionCard({ to, icon: Icon, title, detail, tone }) {

@@ -16,8 +16,8 @@ export function AdminOverviewPage() {
 
 const tones = {
   blue: 'bg-blue-50 text-ocean',
-  green: 'bg-emerald-50 text-emerald-700',
-  orange: 'bg-orange-50 text-orange-700',
+  green: 'bg-slate-100 text-slate-700',
+  orange: 'bg-slate-100 text-slate-700',
 };
 
 function Metric({ icon: Icon, label, value, tone }) {
