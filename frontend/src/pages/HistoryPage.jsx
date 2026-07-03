@@ -124,7 +124,7 @@ export function HistoryPage() {
       <PageHeader title="Saved homework" description="Review past questions, solutions, and feedback whenever you need them." action={<Link to="/upload" className="primary-button"><Plus size={17} />New homework</Link>} />
       <ErrorBanner message={error} onRetry={() => setRetryKey((current) => current + 1)} onDismiss={() => setError('')} />
       {notice ? (
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-sky-200 bg-mint px-4 py-3 text-sm font-bold text-ocean" role="status">
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-bold text-ocean" role="status">
           <span className="inline-flex items-center gap-2"><Star size={16} fill="currentColor" />{notice}</span>
           <button type="button" onClick={() => setNotice('')} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ocean" aria-label="Dismiss message"><X size={16} /></button>
         </div>
@@ -221,7 +221,7 @@ function HistoryItem({ item, editing, editForm, setEditForm, beginEdit, cancelEd
           {editing ? (
             <div className="grid gap-2">
               <input value={editForm.title} onChange={(event) => setEditForm({ ...editForm, title: event.target.value })} maxLength={120} placeholder="Short title" className="input-field w-full" />
-              <textarea value={editForm.note} onChange={(event) => setEditForm({ ...editForm, note: event.target.value })} maxLength={600} rows={3} placeholder="Note" className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-sea focus:ring-4 focus:ring-blue-100" />
+              <textarea value={editForm.note} onChange={(event) => setEditForm({ ...editForm, note: event.target.value })} maxLength={600} rows={3} placeholder="Note" className="textarea-field text-sm" />
               <div className="flex gap-2">
                 <button type="button" onClick={() => saveEdit(item)} className="primary-button px-3 text-sm"><Check size={16} />Save</button>
                 <button type="button" onClick={cancelEdit} className="secondary-button px-3 text-sm"><X size={16} />Cancel</button>

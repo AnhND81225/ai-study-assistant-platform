@@ -226,7 +226,7 @@ export function GradePage() {
               </label>
               <label className="grid gap-1.5 text-sm font-bold text-slate-700">
                 Note or rubric
-                <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Optional grading instruction" className="rounded-lg border border-slate-200 bg-white px-3 py-3 outline-none transition placeholder:text-slate-400 focus:border-sea focus:ring-4 focus:ring-blue-100" />
+                <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={5} maxLength={600} placeholder="Optional grading instruction" className="textarea-field" />
               </label>
               <button disabled={grading || !subjectId || !newWorkImage || !online} className="primary-button">
                 {grading ? <Sparkles size={18} className="animate-pulse" /> : <ClipboardCheck size={18} />}
@@ -280,7 +280,7 @@ export function GradePage() {
                 <button type="button" onClick={() => setMode('image')} className={`tap-target rounded-md px-3 text-sm font-bold ${mode === 'image' ? 'bg-white text-ocean shadow-sm' : 'text-slate-600'}`}>Upload image</button>
               </div>
               {mode === 'text' ? (
-                <textarea value={answer} onChange={(event) => setAnswer(event.target.value)} rows={7} placeholder="Paste or type the student's answer" className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-3 transition placeholder:text-slate-400 focus:border-sea focus:outline-none focus:ring-4 focus:ring-blue-100" />
+                <textarea value={answer} onChange={(event) => setAnswer(event.target.value)} rows={7} placeholder="Paste or type the student's answer" className="textarea-field mt-3 w-full" />
               ) : (
                 <div className="mt-3">
                   <ImageScannerInput

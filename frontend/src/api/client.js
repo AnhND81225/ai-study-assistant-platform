@@ -43,6 +43,7 @@ export function attachAuthInterceptors(getToken, onUnauthorized) {
 export function apiMessage(error, fallback = 'Something went wrong') {
   const status = error.response?.status;
   const code = error.response?.data?.errorCode;
+  const hadAuthHeader = Boolean(error.config?.headers?.Authorization);
 
   if (error.code === 'ECONNABORTED') {
     return 'The server is taking longer than expected to start. Wait a moment, then try again.';
@@ -51,7 +52,7 @@ export function apiMessage(error, fallback = 'Something went wrong') {
     return 'The server may be waking up or temporarily unavailable. Wait a moment, then try again.';
   }
   if (status === 401 || code === 'AUTHENTICATION_FAILED') {
-    return 'Your session has expired. Please sign in again.';
+    return hadAuthHeader ? 'Your session has expired. Please sign in again.' : fallback;
   }
   if (status === 403) {
     return 'You do not have permission to perform this action.';

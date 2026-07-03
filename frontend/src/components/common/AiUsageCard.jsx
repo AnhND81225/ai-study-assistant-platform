@@ -14,7 +14,7 @@ export function AiUsageCard({ compact = false }) {
 
   if (error) {
     return (
-      <div className="app-card border-dashed px-4 py-3 text-sm font-semibold text-slate-500">
+      <div className="surface-panel border-dashed px-4 py-3 text-sm font-semibold text-slate-500">
         {error}
       </div>
     );
@@ -22,7 +22,7 @@ export function AiUsageCard({ compact = false }) {
 
   if (!quota) {
     return (
-      <div className="app-card border-dashed px-4 py-3 text-sm font-semibold text-slate-500">
+      <div className="surface-panel border-dashed px-4 py-3 text-sm font-semibold text-slate-500">
         Loading AI quota...
       </div>
     );
@@ -31,7 +31,7 @@ export function AiUsageCard({ compact = false }) {
   const percent = quota.dailyLimit > 0 ? Math.min(100, (quota.usedToday / quota.dailyLimit) * 100) : 0;
 
   return (
-    <div className={`app-card overflow-hidden border-blue-100 bg-blue-50/60 ${compact ? 'p-4' : 'p-5'}`}>
+    <div className={`app-card overflow-hidden border-blue-100 bg-white ${compact ? 'p-4' : 'p-5'}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-bold text-slate-600">Solutions available today</p>
@@ -40,7 +40,7 @@ export function AiUsageCard({ compact = false }) {
             <span className="text-base font-bold text-slate-500"> of {quota.dailyLimit} left</span>
           </p>
         </div>
-        <span className="grid h-11 w-11 place-items-center rounded-lg bg-white text-ocean shadow-sm">
+        <span className="grid h-11 w-11 place-items-center rounded-lg bg-blue-50 text-ocean">
           <Gauge size={20} />
         </span>
       </div>
