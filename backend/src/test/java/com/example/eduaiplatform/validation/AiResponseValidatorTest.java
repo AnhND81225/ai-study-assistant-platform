@@ -93,6 +93,42 @@ class AiResponseValidatorTest {
     }
 
     @Test
+    void validateExplanation_rejectsInvalidEnumValue() throws Exception {
+        JsonNode parsed = objectMapper.readTree("""
+                {
+                  "questionType":"ESSAY",
+                  "resultStatus":"SOLUTION_READY",
+                  "availableQuestions":[],
+                  "detectedQuestion":"Solve 2 + 2",
+                  "explanation":"Add the numbers.",
+                  "finalAnswer":"4"
+                }
+                """);
+
+        ApiException exception = assertThrows(ApiException.class, () -> validator.validateExplanation(parsed));
+
+        assertEquals(ErrorCode.AI_RESPONSE_PARSE_ERROR, exception.getErrorCode());
+    }
+
+    @Test
+    void validateExplanation_rejectsSolutionReadyWithoutFinalAnswer() throws Exception {
+        JsonNode parsed = objectMapper.readTree("""
+                {
+                  "questionType":"SINGLE_QUESTION",
+                  "resultStatus":"SOLUTION_READY",
+                  "availableQuestions":[],
+                  "detectedQuestion":"Solve 2 + 2",
+                  "explanation":"Add the numbers.",
+                  "finalAnswer":""
+                }
+                """);
+
+        ApiException exception = assertThrows(ApiException.class, () -> validator.validateExplanation(parsed));
+
+        assertEquals(ErrorCode.AI_RESPONSE_PARSE_ERROR, exception.getErrorCode());
+    }
+
+    @Test
     void validateExplanation_rejectsNestedJsonInFinalAnswer() throws Exception {
         JsonNode parsed = objectMapper.readTree("""
                 {
@@ -133,6 +169,49 @@ class AiResponseValidatorTest {
                 """);
 
         ApiException exception = assertThrows(ApiException.class, () -> validator.validateGrading(parsed, false));
+
+        assertEquals(ErrorCode.AI_RESPONSE_PARSE_ERROR, exception.getErrorCode());
+    }
+
+    @Test
+    void validateNewWork_acceptsCompleteWorksheetGradingContract() throws Exception {
+        JsonNode parsed = objectMapper.readTree("""
+                {
+                  "detectedQuestion":"Solve 2 + 2",
+                  "expectedExplanation":"Add both numbers.",
+                  "finalAnswer":"4",
+                  "detectedStudentAnswer":"The student wrote 4.",
+                  "score":100,
+                  "feedback":"Correct.",
+                  "mistakes":"",
+                  "improvementSuggestions":"Keep showing the final step.",
+                  "inputConflict":false,
+                  "inputWarning":""
+                }
+                """);
+
+        AiResponseValidator.NewWorkPayload payload = validator.validateNewWork(parsed);
+
+        assertEquals(100, payload.score());
+        assertEquals("The student wrote 4.", payload.detectedStudentAnswer());
+        assertEquals("Correct.", payload.feedback());
+    }
+
+    @Test
+    void validateNewWork_rejectsMissingDetectedStudentAnswer() throws Exception {
+        JsonNode parsed = objectMapper.readTree("""
+                {
+                  "detectedQuestion":"Solve 2 + 2",
+                  "expectedExplanation":"Add both numbers.",
+                  "finalAnswer":"4",
+                  "score":100,
+                  "feedback":"Correct.",
+                  "mistakes":"",
+                  "improvementSuggestions":""
+                }
+                """);
+
+        ApiException exception = assertThrows(ApiException.class, () -> validator.validateNewWork(parsed));
 
         assertEquals(ErrorCode.AI_RESPONSE_PARSE_ERROR, exception.getErrorCode());
     }

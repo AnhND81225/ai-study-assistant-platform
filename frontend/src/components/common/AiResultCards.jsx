@@ -11,9 +11,9 @@ export function ExplanationResultCard({ aiResponse }) {
     : 'We used the image as the main question';
   return (
     <article className="app-card overflow-hidden">
-      <div className="border-b border-slate-200 bg-slate-50 px-4 py-4 sm:px-5">
+      <div className="border-b border-slate-200/80 bg-gradient-to-r from-slate-50 to-blue-50/50 px-4 py-4 sm:px-5">
       <div className="flex items-center gap-2">
-        <span className="grid h-9 w-9 place-items-center rounded-lg bg-blue-50 text-ocean">
+        <span className="grid h-10 w-10 place-items-center rounded-2xl bg-blue-50 text-ocean shadow-inner">
           <Lightbulb size={19} />
         </span>
         <h2 className="text-lg font-extrabold text-ink">{title}</h2>
@@ -21,7 +21,7 @@ export function ExplanationResultCard({ aiResponse }) {
       </div>
       <div className="grid gap-3 p-4 sm:p-5">
         {aiResponse.inputWarning ? (
-          <div className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <div className="flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
             <AlertTriangle className="mt-0.5 shrink-0" size={18} />
             <div>
               <p className="font-extrabold">{warningTitle}</p>
@@ -43,7 +43,7 @@ export function ExplanationResultCard({ aiResponse }) {
           </ResultSection>
         ) : null}
         {malformedFinalAnswer ? (
-          <div className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <div className="flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
             <AlertTriangle className="mt-0.5 shrink-0" size={18} />
             <p className="font-semibold leading-5">The saved final answer could not be displayed correctly. Try the solution again to generate a clean result.</p>
           </div>
@@ -90,7 +90,7 @@ export function GradingResultCard({ result }) {
           {score >= 80 ? 'Strong work' : score >= 50 ? 'Needs review' : 'Needs correction'}
         </span>
       </div>
-      {result.userAnswerImageUrl ? <img src={result.userAnswerImageUrl} alt="Graded student answer" className="mt-4 max-h-72 w-full rounded-lg object-contain" /> : null}
+      {result.userAnswerImageUrl ? <img src={result.userAnswerImageUrl} alt="Graded student answer" className="mt-4 max-h-72 w-full rounded-2xl object-contain shadow-[0_14px_34px_rgba(15,23,42,0.10)]" /> : null}
       <div className="mt-4 grid gap-3">
         {result.userAnswer ? (
           <ResultSection icon={HelpCircle} title="Student answer">
@@ -117,7 +117,7 @@ export function GradingResultCard({ result }) {
 
 function ResultSection({ icon: Icon, title, children, accent = false }) {
   return (
-    <section className={`rounded-lg border p-4 ${accent ? 'border-emerald-200 bg-emerald-50/70' : 'border-slate-200 bg-slate-50'}`}>
+    <section className={`rounded-2xl border p-4 ${accent ? 'border-emerald-200 bg-emerald-50/70' : 'border-slate-200/90 bg-slate-50/90'}`}>
       <div className="mb-2 flex items-center gap-2 text-sm font-extrabold text-ink">
         <Icon size={16} className={accent ? 'text-emerald-700' : 'text-ocean'} />
         {title}
