@@ -7,13 +7,14 @@ export function DashboardPage() {
   return (
     <div className="motion-page">
       <PageHeader title="Ready to study?" description="Start with a question you want to understand, or check work you have already completed." />
-      <div className="mb-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="overflow-hidden rounded-lg border border-blue-100 bg-white p-5 shadow-soft sm:p-7">
+      <div className="mb-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="app-card relative overflow-hidden border-blue-100 bg-white/92 p-6 sm:p-8">
+          <div className="absolute right-0 top-0 h-44 w-44 -translate-y-16 translate-x-12 rounded-full bg-blue-100/70 blur-2xl" aria-hidden="true" />
           <div className="flex items-start justify-between gap-4">
-            <div className="max-w-xl">
-              <p className="text-sm font-bold text-ocean">Start with one clear question</p>
-              <h2 className="mt-2 text-2xl font-extrabold leading-tight text-ink sm:text-3xl">Take a photo and understand every step.</h2>
-              <p className="mt-3 text-sm font-medium leading-6 text-slate-600">StudyAI reads the question, explains the approach, and keeps the result ready for review.</p>
+            <div className="relative max-w-xl">
+              <p className="eyebrow">Best next step</p>
+              <h2 className="mt-4 text-3xl font-extrabold leading-[1.05] text-ink sm:text-4xl">Solve one question now, save the explanation forever.</h2>
+              <p className="mt-4 text-sm font-semibold leading-7 text-slate-600">StudyAI reads the question, explains the approach, and keeps the result ready for review.</p>
               <Link to="/upload" className="primary-button mt-5 px-4">
                 <Camera size={18} />
                 Solve a question
@@ -38,14 +39,14 @@ export function DashboardPage() {
 
 const tones = {
   blue: 'bg-blue-50 text-ocean',
-  green: 'bg-slate-100 text-slate-700',
-  orange: 'bg-slate-100 text-slate-700',
+  green: 'bg-emerald-50 text-emerald-700',
+  orange: 'bg-amber-50 text-amber-700',
 };
 
 function ActionCard({ to, icon: Icon, title, detail, tone }) {
   return (
     <Link to={to} className="smooth-card app-card group p-5">
-      <span className={`grid h-12 w-12 place-items-center rounded-lg ${tones[tone]}`}>
+      <span className={`grid h-12 w-12 place-items-center rounded-2xl ${tones[tone]}`}>
         <Icon size={23} />
       </span>
       <div className="mt-4 flex items-center justify-between gap-3">

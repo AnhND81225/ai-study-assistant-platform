@@ -69,7 +69,7 @@ export function UploadPage() {
     <div className="motion-page">
       <PageHeader title="Solve a question" description="Scan one clear homework question and get a guided, step-by-step solution." />
       <ProcessProgress title="Creating your solution" steps={progressSteps} activeStep={activeStep} />
-      <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[1fr_360px]">
+      <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[1fr_360px]">
         <section className="app-card p-4 sm:p-5">
           <ErrorBanner message={error} onRetry={canRetry ? () => submit() : undefined} onDismiss={() => setError('')} />
           <div className="mt-4">
@@ -85,7 +85,7 @@ export function UploadPage() {
             />
           </div>
         </section>
-        <section className="app-card h-fit p-4 sm:p-5 lg:sticky lg:top-24">
+        <section className="focus-panel app-card h-fit p-4 sm:p-5 lg:sticky lg:top-28">
           <div className="grid gap-4">
             <AiUsageCard compact />
             <label className="grid gap-1.5 text-sm font-bold text-slate-700">

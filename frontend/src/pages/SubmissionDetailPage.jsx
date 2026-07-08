@@ -73,9 +73,9 @@ export function SubmissionDetailPage() {
       <PageHeader title={submission?.title || 'Submission detail'} description="Review the uploaded image, AI explanation, and grading results." action={<Link to="/submissions" className="secondary-button">Back</Link>} />
       <ErrorBanner message={error} />
       {submission ? (
-        <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
-          <section className="app-card h-fit p-4 sm:p-5 lg:sticky lg:top-24">
-            <img src={submission.imageUrl} alt="Uploaded homework" className="w-full rounded-lg object-contain" />
+        <div className="grid gap-5 lg:grid-cols-[360px_1fr]">
+          <section className="focus-panel app-card h-fit p-4 sm:p-5 lg:sticky lg:top-28">
+            <img src={submission.imageUrl} alt="Uploaded homework" className="w-full rounded-2xl object-contain shadow-[0_18px_38px_rgba(15,23,42,0.10)]" />
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <StatusPill status={submission.status} />
               {submission.favorite ? <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-bold text-ocean"><Star size={13} fill="currentColor" />Favorite</span> : null}
@@ -160,9 +160,9 @@ function QuestionScopePanel({
   const multipleChoice = aiResponse.questionType === 'MULTIPLE_CHOICE';
 
   return (
-    <section className="app-card border-violet-200 bg-violet-50/40 p-4 sm:p-5">
+    <section className="app-card border-violet-200 bg-violet-50/50 p-4 sm:p-5">
       <div className="flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-violet-100 text-violet-700">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-violet-100 text-violet-700">
           <ScanSearch size={20} />
         </span>
         <div>
@@ -180,7 +180,7 @@ function QuestionScopePanel({
               key={number}
               type="button"
               onClick={() => setQuestionNumber(String(number))}
-              className={`grid h-10 min-w-10 place-items-center rounded-lg border px-3 text-sm font-extrabold transition ${String(number) === questionNumber ? 'border-violet-500 bg-violet-600 text-white' : 'border-violet-200 bg-white text-violet-700 hover:border-violet-400'}`}
+              className={`grid h-10 min-w-10 place-items-center rounded-2xl border px-3 text-sm font-extrabold transition ${String(number) === questionNumber ? 'border-violet-500 bg-violet-600 text-white' : 'border-violet-200 bg-white text-violet-700 hover:border-violet-400'}`}
             >
               {number}
             </button>

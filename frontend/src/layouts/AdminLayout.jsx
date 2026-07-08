@@ -12,7 +12,7 @@ const adminNav = [
 export function AdminLayout() {
   return (
     <div className="grid gap-5 lg:grid-cols-[230px_minmax(0,1fr)]">
-      <aside className="app-card h-fit p-3 lg:sticky lg:top-24">
+      <aside className="app-card h-fit p-3 lg:sticky lg:top-28">
         <div className="border-b border-slate-100 px-2 pb-3 pt-1">
           <h2 className="font-extrabold text-ink">Admin workspace</h2>
           <p className="mt-1 text-xs font-semibold text-slate-500">Manage platform activity</p>
@@ -26,8 +26,8 @@ export function AdminLayout() {
                 to={item.to}
                 end={item.end}
                 className={({ isActive }) =>
-                  `tap-target flex items-center gap-2 rounded-lg px-3 text-sm font-bold transition-colors ${
-                    isActive ? 'bg-blue-50 text-ocean' : 'text-slate-600 hover:bg-slate-50 hover:text-ink'
+                  `tap-target flex items-center gap-2 rounded-2xl px-3 text-sm font-extrabold transition-colors ${
+                    isActive ? 'bg-blue-50 text-ocean shadow-inner' : 'text-slate-600 hover:bg-slate-50 hover:text-ink'
                   }`
                 }
               >

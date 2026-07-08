@@ -33,7 +33,16 @@ public class OpenAiServiceImpl implements AiService {
             OpenAiProperties properties,
             AiResponseValidator responseValidator
     ) {
-        this.webClient = builder.baseUrl("https://api.openai.com/v1").build();
+        this(builder.baseUrl("https://api.openai.com/v1").build(), objectMapper, properties, responseValidator);
+    }
+
+    OpenAiServiceImpl(
+            WebClient webClient,
+            ObjectMapper objectMapper,
+            OpenAiProperties properties,
+            AiResponseValidator responseValidator
+    ) {
+        this.webClient = webClient;
         this.objectMapper = objectMapper;
         this.properties = properties;
         this.responseValidator = responseValidator;

@@ -22,15 +22,15 @@ export function AppLayout() {
   return (
     <div className="min-h-screen text-ink">
       <a href="#main-content" className="skip-link">Skip to main content</a>
-      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <NavLink to="/dashboard" className="flex items-center gap-2.5 rounded-lg font-extrabold text-ink">
-            <span className="grid h-10 w-10 place-items-center rounded-lg bg-sea text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)]">
+      <header className="sticky top-0 z-20 px-3 pt-3 sm:px-6">
+        <div className="premium-shell mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-[1.5rem] bg-white/82 px-3 py-2.5 backdrop-blur-2xl sm:px-4">
+          <NavLink to="/dashboard" className="flex items-center gap-2.5 rounded-2xl font-extrabold text-ink">
+            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-sea text-white shadow-[0_18px_34px_rgba(37,99,235,0.24)]">
               <BookOpen size={19} />
             </span>
             <span className="text-lg">StudyAI</span>
           </NavLink>
-          <nav className="hidden items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 md:flex" aria-label="Primary navigation">
+          <nav className="hidden items-center gap-1 rounded-full border border-slate-200/80 bg-slate-100/80 p-1 md:flex" aria-label="Primary navigation">
             {userNav.map((item) => <DesktopNavItem key={item.to} item={item} />)}
           </nav>
           <div className="flex items-center gap-2">
@@ -52,12 +52,12 @@ export function AppLayout() {
       </header>
       <PwaStatusBanner />
 
-      <main id="main-content" className="safe-bottom mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <main id="main-content" className="safe-bottom mx-auto w-full max-w-6xl px-4 py-7 sm:px-6 sm:py-10">
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl md:hidden" aria-label="Mobile navigation">
-        <div className="mx-auto grid max-w-md grid-cols-4 gap-1 py-2">
+      <nav className="fixed inset-x-0 bottom-0 z-30 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:hidden" aria-label="Mobile navigation">
+        <div className="premium-shell mx-auto grid max-w-md grid-cols-4 gap-1 rounded-[1.5rem] bg-white/88 p-1.5 backdrop-blur-2xl">
           {userNav.map((item) => (
             <MobileNavItem key={item.to} item={item} />
           ))}
@@ -74,7 +74,7 @@ function DesktopNavItem({ item }) {
       to={item.to}
       onMouseEnter={item.preload}
       onFocus={item.preload}
-      className={({ isActive }) => `inline-flex min-h-10 items-center gap-2 rounded-md px-3 text-sm font-bold transition-colors ${isActive ? 'bg-white text-ocean shadow-sm' : 'text-slate-600 hover:bg-white hover:text-ink'}`}
+      className={({ isActive }) => `inline-flex min-h-10 items-center gap-2 rounded-full px-3.5 text-sm font-extrabold transition-all ${isActive ? 'bg-white text-ocean shadow-[0_10px_24px_rgba(15,23,42,0.08)]' : 'text-slate-600 hover:bg-white/80 hover:text-ink'}`}
     >
       <Icon size={16} />
       {item.label}
@@ -90,8 +90,8 @@ function MobileNavItem({ item }) {
       onTouchStart={item.preload}
       onFocus={item.preload}
       className={({ isActive }) =>
-        `relative flex min-h-14 flex-col items-center justify-center rounded-lg text-[11px] font-bold transition-colors ${
-          isActive ? 'bg-blue-50 text-ocean' : 'text-slate-500 hover:bg-slate-50 hover:text-ink'
+        `relative flex min-h-14 flex-col items-center justify-center rounded-[1.15rem] text-[11px] font-extrabold transition-all ${
+          isActive ? 'bg-sea text-white shadow-[0_14px_30px_rgba(37,99,235,0.22)]' : 'text-slate-500 hover:bg-slate-50 hover:text-ink'
         }`
       }
     >
