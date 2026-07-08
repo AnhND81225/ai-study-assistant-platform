@@ -266,6 +266,41 @@ textarea:focus-visible {
   box-shadow: 0 24px 54px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
+.landing-page {
+  position: relative;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(37, 99, 235, 0.16), transparent 26rem),
+    radial-gradient(circle at 92% 2%, rgba(16, 185, 129, 0.12), transparent 24rem),
+    linear-gradient(180deg, #f8fbff 0%, #eef7ff 42%, #f8fbff 72%, #eef4ff 100%);
+}
+
+.landing-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.22;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+  background-size: 38px 38px;
+  mask-image: linear-gradient(180deg, black, transparent 68%);
+}
+
+.landing-nav,
+.landing-step {
+  animation: fade-in-up 680ms var(--ease-premium) both;
+}
+
+.landing-step:nth-child(2) {
+  animation-delay: 90ms;
+}
+
+.landing-step:nth-child(3) {
+  animation-delay: 180ms;
+}
+
 .fade-in {
   animation: fade-in-up 520ms var(--ease-premium) both;
 }
@@ -315,6 +350,8 @@ textarea:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .smooth-card,
   .fade-in,
+  .landing-nav,
+  .landing-step,
   .motion-page,
   .workflow-reveal,
   .progress-active {
