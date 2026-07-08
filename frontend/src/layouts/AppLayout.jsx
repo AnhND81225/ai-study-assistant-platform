@@ -23,7 +23,7 @@ export function AppLayout() {
     <div className="min-h-screen text-ink">
       <a href="#main-content" className="skip-link">Skip to main content</a>
       <header className="sticky top-0 z-20 px-3 pt-3 sm:px-6">
-        <div className="premium-shell mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-[1.5rem] bg-white/82 px-3 py-2.5 backdrop-blur-2xl sm:px-4">
+        <div className="premium-shell mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-[1.5rem] bg-white/90 px-3 py-2.5 backdrop-blur-2xl sm:px-4">
           <NavLink to="/dashboard" className="flex items-center gap-2.5 rounded-2xl font-extrabold text-ink">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-sea text-white shadow-[0_18px_34px_rgba(37,99,235,0.24)]">
               <BookOpen size={19} />
@@ -57,7 +57,7 @@ export function AppLayout() {
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:hidden" aria-label="Mobile navigation">
-        <div className="premium-shell mx-auto grid max-w-md grid-cols-4 gap-1 rounded-[1.5rem] bg-white/88 p-1.5 backdrop-blur-2xl">
+        <div className="premium-shell mx-auto grid max-w-md grid-cols-4 gap-1 rounded-[1.5rem] bg-white/90 p-1.5 backdrop-blur-2xl">
           {userNav.map((item) => (
             <MobileNavItem key={item.to} item={item} />
           ))}

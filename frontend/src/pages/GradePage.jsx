@@ -173,7 +173,7 @@ export function GradePage() {
       <ErrorBanner message={error} onRetry={canRetry ? () => submit() : undefined} onDismiss={() => setError('')} />
       <ProcessProgress title="Checking the student work" steps={progressSteps} activeStep={activeStep} />
 
-      <div className="mb-6 grid grid-cols-2 gap-2 rounded-full border border-slate-200/80 bg-slate-100/80 p-1.5">
+      <div className="mb-6 grid grid-cols-2 gap-2 rounded-[1.5rem] border border-slate-200/80 bg-white/75 p-1.5 shadow-[0_16px_44px_rgba(15,23,42,0.06)]">
         <button
           type="button"
           onClick={() => {
@@ -201,8 +201,9 @@ export function GradePage() {
 
       <div key={workflow} className="workflow-reveal">
         {workflow === 'new' ? (
-          <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[1fr_360px]">
-          <section className="smooth-card app-card p-4 sm:p-5">
+          <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <section className="smooth-card workspace-card">
+            <div className="workspace-core p-4 sm:p-5">
             <ImageScannerInput
               value={newWorkImage}
               onChange={setNewWorkImage}
@@ -213,10 +214,16 @@ export function GradePage() {
               emptyDescription="Keep the question and answer visible in one frame. Rotate the photo if it was captured sideways."
               kindLabel="student work image"
             />
+            </div>
           </section>
 
-          <section className="focus-panel app-card h-fit p-4 sm:p-5 lg:sticky lg:top-28">
+          <section className="focus-panel workspace-card h-fit lg:sticky lg:top-28">
+            <div className="workspace-core p-4 sm:p-5">
             <div className="grid gap-4">
+              <div className="rounded-[1.35rem] border border-emerald-100 bg-emerald-50/70 p-4">
+                <p className="text-sm font-extrabold text-emerald-700">Check from image</p>
+                <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">Best for a page that already contains both the question and the student answer.</p>
+              </div>
               <label className="grid gap-1.5 text-sm font-bold text-slate-700">
                 Subject
                 <select value={subjectId} onChange={(event) => setSubjectId(event.target.value)} className="input-field" disabled={subjectsLoading}>
@@ -233,10 +240,11 @@ export function GradePage() {
                 {grading ? 'Checking student work...' : online ? 'Check this worksheet' : 'Reconnect to check'}
               </button>
             </div>
+            </div>
           </section>
         </form>
         ) : itemsLoading ? (
-          <div className="app-card border-dashed p-6 text-center">
+          <div className="workspace-card border-dashed p-6 text-center">
             <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-blue-100 border-t-sea" />
             <p className="mt-3 text-sm font-bold text-slate-600">Loading saved questions...</p>
           </div>
@@ -248,9 +256,15 @@ export function GradePage() {
           />
         ) : (
           <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[340px_1fr]">
-          <section className="focus-panel app-card h-fit p-4 sm:p-5 lg:sticky lg:top-28">
+          <section className="focus-panel workspace-card h-fit lg:sticky lg:top-28">
+            <div className="workspace-core p-4 sm:p-5">
+            <div className="mb-4">
+              <p className="eyebrow border-blue-100 bg-blue-50 text-ocean">Question context</p>
+              <h2 className="mt-3 text-xl font-extrabold tracking-[-0.025em] text-ink">Pick the saved question</h2>
+              <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">Use this solved question as the answer key before checking a student's work.</p>
+            </div>
             <label className="grid gap-1.5 text-sm font-bold text-slate-700">
-              Explained question
+              Saved question
               <select value={selectedId} onChange={(event) => setSelectedId(event.target.value)} className="input-field">
                 {explainedItems.map((item) => <option key={item.id} value={item.id}>#{item.id} - {item.subject.name}</option>)}
               </select>
@@ -264,48 +278,78 @@ export function GradePage() {
                 </div>
               </div>
             ) : null}
+            </div>
           </section>
 
           <section className="grid gap-4">
             {selected?.aiResponse ? (
-              <Suspense fallback={<ResultLoadingState />}>
-                <ExplanationResultCard aiResponse={selected.aiResponse} />
-              </Suspense>
+              <StepBlock
+                step="1"
+                title="Review the answer key"
+                description="This is the AI solution saved from the question image. It is used as the reference for grading."
+              >
+                <Suspense fallback={<ResultLoadingState />}>
+                  <ExplanationResultCard aiResponse={selected.aiResponse} titleOverride="AI solution reference" />
+                </Suspense>
+              </StepBlock>
             ) : null}
 
-            <div className="focus-panel app-card p-4 sm:p-5">
-              <h3 className="text-lg font-extrabold">Student answer</h3>
-              <div className="mt-3 grid grid-cols-2 gap-2 rounded-full bg-slate-100/90 p-1.5">
-                <button type="button" onClick={() => setMode('text')} className={`tap-target rounded-full px-3 text-sm font-extrabold ${mode === 'text' ? 'bg-white text-ocean shadow-sm' : 'text-slate-600'}`}>Type answer</button>
-                <button type="button" onClick={() => setMode('image')} className={`tap-target rounded-full px-3 text-sm font-extrabold ${mode === 'image' ? 'bg-white text-ocean shadow-sm' : 'text-slate-600'}`}>Upload image</button>
-              </div>
-              {mode === 'text' ? (
-                <textarea value={answer} onChange={(event) => setAnswer(event.target.value)} rows={7} placeholder="Paste or type the student's answer" className="textarea-field mt-3 w-full" />
-              ) : (
-                <div className="mt-3">
-                  <ImageScannerInput
-                    value={answerImage}
-                    onChange={setAnswerImage}
-                    onError={setError}
-                    label="Answer scan"
-                    helperText="Scan only the student's answer for this already-explained question."
-                    emptyTitle="Scan student answer"
-                    emptyDescription="Use a clear close-up of the answer. AI will read the handwriting before checking the work."
-                    kindLabel="answer image"
-                  />
+            <StepBlock
+              step="2"
+              title="Add the student's answer"
+              description="Type the answer or upload a close-up of the student's work for this saved question."
+            >
+              <div className="focus-panel workspace-card">
+                <div className="workspace-core p-4 sm:p-5">
+                  <div className="grid grid-cols-2 gap-2 rounded-[1.35rem] bg-slate-100/90 p-1.5">
+                    <button type="button" onClick={() => setMode('text')} className={`tap-target rounded-full px-3 text-sm font-extrabold ${mode === 'text' ? 'bg-white text-ocean shadow-sm' : 'text-slate-600'}`}>Type answer</button>
+                    <button type="button" onClick={() => setMode('image')} className={`tap-target rounded-full px-3 text-sm font-extrabold ${mode === 'image' ? 'bg-white text-ocean shadow-sm' : 'text-slate-600'}`}>Upload image</button>
+                  </div>
+                  {mode === 'text' ? (
+                    <textarea value={answer} onChange={(event) => setAnswer(event.target.value)} rows={6} placeholder="Paste or type the student's answer" className="textarea-field mt-3 w-full" />
+                  ) : (
+                    <div className="mt-3">
+                      <ImageScannerInput
+                        value={answerImage}
+                        onChange={setAnswerImage}
+                        onError={setError}
+                        label="Answer scan"
+                        helperText="Scan only the student's answer for this already-explained question."
+                        emptyTitle="Scan student answer"
+                        emptyDescription="Use a clear close-up of the answer. AI will read the handwriting before checking the work."
+                        kindLabel="answer image"
+                      />
+                    </div>
+                  )}
+                  <button disabled={grading || !canGradeExisting || !online} className="primary-button mt-3">
+                    {grading ? <Sparkles size={18} className="animate-pulse" /> : <ClipboardCheck size={18} />}
+                    {grading ? 'Checking...' : !online ? 'Reconnect to check' : mode === 'image' ? 'Check answer image' : 'Check this answer'}
+                  </button>
                 </div>
-              )}
-              <button disabled={grading || !canGradeExisting || !online} className="primary-button mt-3">
-                {grading ? <Sparkles size={18} className="animate-pulse" /> : <ClipboardCheck size={18} />}
-                {grading ? 'Checking...' : !online ? 'Reconnect to check' : mode === 'image' ? 'Check answer image' : 'Check this answer'}
-              </button>
-            </div>
+              </div>
+            </StepBlock>
+
+            {selected?.gradingResults?.length ? (
+              <StepBlock
+                step="3"
+                title="Review feedback"
+                description="The newest grading result appears first, with score, detected answer, mistakes, and improvement tips."
+              >
+                <div className="grid gap-3">
+                  {selected.gradingResults.map((result) => (
+                    <Suspense key={result.id} fallback={<ResultLoadingState />}>
+                      <GradingResultCard result={result} />
+                    </Suspense>
+                  ))}
+                </div>
+              </StepBlock>
+            ) : null}
           </section>
           </form>
         )}
       </div>
 
-      {selected?.gradingResults?.length ? (
+      {workflow === 'new' && selected?.gradingResults?.length ? (
         <div className="mt-4 grid gap-3">
           {selected.gradingResults.map((result) => (
             <Suspense key={result.id} fallback={<ResultLoadingState />}>
@@ -325,8 +369,27 @@ function isReadyForGrading(submission) {
 
 function ResultLoadingState() {
   return (
-    <div className="app-card border-dashed p-5 text-sm font-bold text-slate-500">
-      Loading result...
+    <div className="workspace-card border-dashed">
+      <div className="workspace-core p-5 text-sm font-bold text-slate-500">
+        Loading result...
+      </div>
     </div>
+  );
+}
+
+function StepBlock({ step, title, description, children }) {
+  return (
+    <section className="grid gap-3">
+      <div className="flex items-start gap-3">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-sea text-sm font-extrabold text-white shadow-[0_14px_30px_rgba(37,99,235,0.22)]">
+          {step}
+        </span>
+        <div>
+          <h2 className="text-lg font-extrabold tracking-[-0.025em] text-ink">{title}</h2>
+          <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">{description}</p>
+        </div>
+      </div>
+      {children}
+    </section>
   );
 }

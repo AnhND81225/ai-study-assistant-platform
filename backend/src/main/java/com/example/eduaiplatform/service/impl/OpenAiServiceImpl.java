@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -27,6 +28,7 @@ public class OpenAiServiceImpl implements AiService {
     private final OpenAiProperties properties;
     private final AiResponseValidator responseValidator;
 
+    @Autowired
     public OpenAiServiceImpl(
             WebClient.Builder builder,
             ObjectMapper objectMapper,

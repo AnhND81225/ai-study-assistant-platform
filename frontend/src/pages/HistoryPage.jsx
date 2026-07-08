@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Check, Pencil, Plus, Search, Star, X } from 'lucide-react';
+import { ArrowRight, Check, ClipboardCheck, Pencil, Plus, Search, Star, X } from 'lucide-react';
 import { submissionApi } from '../api/submissionApi';
 import { subjectApi } from '../api/subjectApi';
 import { apiMessage } from '../api/client';
@@ -30,6 +30,12 @@ export function HistoryPage() {
   const [updatingFavoriteId, setUpdatingFavoriteId] = useState(null);
 
   const filterKey = useMemo(() => `${search}|${subjectId}|${status}|${favoriteOnly}`, [search, subjectId, status, favoriteOnly]);
+  const pageStats = useMemo(() => ({
+    shown: items.length,
+    favorites: items.filter((item) => item.favorite).length,
+    checked: items.filter((item) => item.gradingResults?.length).length,
+    solved: items.filter((item) => item.aiResponse).length,
+  }), [items]);
 
   useEffect(() => {
     subjectApi.list()
@@ -130,19 +136,26 @@ export function HistoryPage() {
         </div>
       ) : null}
 
-      <section className="app-card mb-5 grid gap-4 p-4 sm:p-5">
-        <div className="grid grid-cols-2 gap-2 rounded-full bg-slate-100/90 p-1.5" aria-label="Saved homework view">
+      <section className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <HistoryMetric label="Shown" value={pageStats.shown} detail="Loaded on this page" />
+        <HistoryMetric label="Solved" value={pageStats.solved} detail="Has AI explanation" />
+        <HistoryMetric label="Checked" value={pageStats.checked} detail="Has grading feedback" />
+        <HistoryMetric label="Favorites" value={pageStats.favorites} detail="Pinned in current view" />
+      </section>
+
+      <section className="control-panel mb-5 grid gap-4">
+        <div className="grid grid-cols-2 gap-2 rounded-[1.35rem] bg-slate-100/90 p-1.5" aria-label="Saved homework view">
           <button
             type="button"
             onClick={() => setFavoriteOnly(false)}
-            className={`tap-target rounded-full px-3 text-sm font-extrabold transition ${!favoriteOnly ? 'bg-white text-ocean shadow-sm' : 'text-slate-600'}`}
+            className={`tap-target rounded-full px-3 text-sm font-extrabold transition ${!favoriteOnly ? 'bg-white text-ocean shadow-[0_10px_24px_rgba(15,23,42,0.08)]' : 'text-slate-600'}`}
           >
             All homework
           </button>
           <button
             type="button"
             onClick={() => setFavoriteOnly(true)}
-            className={`tap-target inline-flex items-center justify-center gap-2 rounded-full px-3 text-sm font-extrabold transition ${favoriteOnly ? 'bg-white text-ocean shadow-sm' : 'text-slate-600'}`}
+            className={`tap-target inline-flex items-center justify-center gap-2 rounded-full px-3 text-sm font-extrabold transition ${favoriteOnly ? 'bg-white text-ocean shadow-[0_10px_24px_rgba(15,23,42,0.08)]' : 'text-slate-600'}`}
           >
             <Star size={15} fill={favoriteOnly ? 'currentColor' : 'none'} />
             Favorites
@@ -212,10 +225,11 @@ function HistoryItem({ item, editing, editForm, setEditForm, beginEdit, cancelEd
   const title = item.title || item.aiResponse?.detectedQuestion || `${item.subject.name} submission`;
 
   return (
-    <article className={`smooth-card app-card p-4 sm:p-5 ${item.favorite ? 'border-blue-200 bg-blue-50/20' : ''}`}>
+    <article className={`smooth-card workspace-card ${item.favorite ? 'border-blue-200 bg-blue-50/30' : ''}`}>
+      <div className="workspace-core p-4 sm:p-5">
       <div className="flex items-start gap-3">
         <Link to={`/submissions/${item.id}`} className="shrink-0">
-          <img src={item.imageUrl} alt={`Submission ${item.id}`} className="h-20 w-20 rounded-2xl object-cover shadow-[0_10px_24px_rgba(15,23,42,0.10)]" />
+          <img src={item.imageUrl} alt={`Submission ${item.id}`} className="h-24 w-24 rounded-[1.25rem] object-cover shadow-[0_14px_32px_rgba(15,23,42,0.12)]" />
         </Link>
         <div className="min-w-0 flex-1">
           {editing ? (
@@ -233,6 +247,7 @@ function HistoryItem({ item, editing, editForm, setEditForm, beginEdit, cancelEd
                 <h3 className="line-clamp-1 font-extrabold">{title}</h3>
                 <StatusPill status={item.status} />
                 {item.favorite ? <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-bold text-ocean"><Star size={12} fill="currentColor" />Favorite</span> : null}
+                {item.gradingResults?.length ? <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700"><ClipboardCheck size={12} />Checked</span> : null}
               </div>
               <p className="mt-1 text-sm font-bold text-slate-500">{item.subject.name}</p>
               <p className="mt-1 line-clamp-2 text-sm font-medium leading-6 text-slate-600">{item.note || item.aiResponse?.detectedQuestion || 'Tap to view details'}</p>
@@ -252,6 +267,19 @@ function HistoryItem({ item, editing, editForm, setEditForm, beginEdit, cancelEd
             </Link>
           </div>
         ) : null}
+      </div>
+      </div>
+    </article>
+  );
+}
+
+function HistoryMetric({ label, value, detail }) {
+  return (
+    <article className="workspace-card">
+      <div className="workspace-core p-4">
+        <p className="text-sm font-extrabold text-slate-500">{label}</p>
+        <p className="mt-2 text-3xl font-extrabold tracking-[-0.045em] text-ink">{value}</p>
+        <p className="mt-1 text-xs font-bold text-slate-500">{detail}</p>
       </div>
     </article>
   );

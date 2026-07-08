@@ -1,22 +1,23 @@
 import { AlertTriangle, CheckCircle, HelpCircle, Lightbulb, ListChecks, Target } from 'lucide-react';
 import { RichText } from './RichText';
 
-export function ExplanationResultCard({ aiResponse }) {
+export function ExplanationResultCard({ aiResponse, titleOverride }) {
   if (!aiResponse) return null;
   const finalAnswer = readFinalAnswer(aiResponse.finalAnswer);
   const malformedFinalAnswer = Boolean(aiResponse.finalAnswer) && !finalAnswer;
-  const title = resultTitle(aiResponse.resultStatus);
+  const title = titleOverride || resultTitle(aiResponse.resultStatus);
   const warningTitle = aiResponse.resultStatus === 'INCOMPLETE_IMAGE'
     ? 'Upload a clearer photo to continue'
     : 'We used the image as the main question';
   return (
-    <article className="app-card overflow-hidden">
-      <div className="border-b border-slate-200/80 bg-gradient-to-r from-slate-50 to-blue-50/50 px-4 py-4 sm:px-5">
+    <article className="workspace-card overflow-hidden">
+      <div className="workspace-core overflow-hidden">
+      <div className="border-b border-slate-200/80 bg-gradient-to-r from-white to-blue-50/70 px-4 py-4 sm:px-5">
       <div className="flex items-center gap-2">
-        <span className="grid h-10 w-10 place-items-center rounded-2xl bg-blue-50 text-ocean shadow-inner">
+        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-blue-50 text-ocean shadow-inner">
           <Lightbulb size={19} />
         </span>
-        <h2 className="text-lg font-extrabold text-ink">{title}</h2>
+        <h2 className="text-xl font-extrabold tracking-[-0.025em] text-ink">{title}</h2>
       </div>
       </div>
       <div className="grid gap-3 p-4 sm:p-5">
@@ -49,6 +50,7 @@ export function ExplanationResultCard({ aiResponse }) {
           </div>
         ) : null}
       </div>
+      </div>
     </article>
   );
 }
@@ -80,7 +82,8 @@ export function GradingResultCard({ result }) {
   const scoreStyle = score >= 80 ? 'text-ocean bg-sky-50 border-sky-200' : score >= 50 ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-red-700 bg-red-50 border-red-200';
 
   return (
-    <article className="fade-in smooth-card app-card p-4 sm:p-5">
+    <article className="fade-in smooth-card workspace-card">
+      <div className="workspace-core p-4 sm:p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm font-bold text-slate-500">Your score</p>
@@ -111,13 +114,14 @@ export function GradingResultCard({ result }) {
           </ResultSection>
         ) : null}
       </div>
+      </div>
     </article>
   );
 }
 
 function ResultSection({ icon: Icon, title, children, accent = false }) {
   return (
-    <section className={`rounded-2xl border p-4 ${accent ? 'border-emerald-200 bg-emerald-50/70' : 'border-slate-200/90 bg-slate-50/90'}`}>
+    <section className={`rounded-[1.25rem] border p-4 ${accent ? 'border-emerald-200 bg-emerald-50/70' : 'border-slate-200/90 bg-slate-50/90'}`}>
       <div className="mb-2 flex items-center gap-2 text-sm font-extrabold text-ink">
         <Icon size={16} className={accent ? 'text-emerald-700' : 'text-ocean'} />
         {title}

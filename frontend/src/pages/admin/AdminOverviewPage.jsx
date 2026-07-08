@@ -22,10 +22,12 @@ const tones = {
 
 function Metric({ icon: Icon, label, value, tone }) {
   return (
-    <div className="app-card p-5">
-      <span className={`grid h-11 w-11 place-items-center rounded-lg ${tones[tone]}`}><Icon size={20} /></span>
+    <div className="smooth-card workspace-card">
+      <div className="workspace-core p-5">
+      <span className={`grid h-12 w-12 place-items-center rounded-2xl ${tones[tone]}`}><Icon size={20} /></span>
       <p className="mt-4 text-sm font-bold text-slate-500">{label}</p>
       <p className="mt-1 text-2xl font-extrabold text-ink">{value}</p>
+      </div>
     </div>
   );
 }
