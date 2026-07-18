@@ -141,7 +141,7 @@ Connect to local PostgreSQL:
 docker compose exec postgres psql -U eduaidb_user -d eduaidb
 ```
 
-From host tools, use port `55432` because Compose maps PostgreSQL to `localhost:55432` to avoid conflicts with a local PostgreSQL install.
+From host tools, use port `55433` because Compose maps PostgreSQL to `localhost:55433` by default to avoid conflicts with a local PostgreSQL install. If that port is already used, set `COMPOSE_POSTGRES_PORT` before starting Compose.
 
 Docker is for local development convenience. Production deployment targets Vercel, Render, Neon Postgres, and Cloudinary.
 
@@ -158,7 +158,7 @@ Recommended configs:
 | `Docker Compose - Database Only` | Runs only PostgreSQL for local backend debugging |
 | `Docker Compose - Down` | Stops the local Docker stack |
 | `Full Stack - Verify` | Builds Docker services, runs frontend build, backend tests, and prints service status |
-| `Backend - Spring Boot` | Runs backend locally with Maven against Docker PostgreSQL on `localhost:55432` |
+| `Backend - Spring Boot` | Runs backend locally with Maven against Docker PostgreSQL on `localhost:55433` |
 | `Backend - Tests` | Runs backend Maven tests |
 | `Frontend - Vite Dev` | Runs the Vite dev server from `frontend/` |
 | `Frontend - Build` | Runs the frontend production build |
