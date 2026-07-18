@@ -11,10 +11,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
-    @EntityGraph(attributePaths = {"user", "subject", "aiResponse", "gradingResults"})
+    @EntityGraph(attributePaths = {"user", "subject", "aiResponse"})
     Page<Submission> findByUserId(Long userId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"user", "subject", "aiResponse", "gradingResults"})
+    @EntityGraph(attributePaths = {"user", "subject", "aiResponse"})
     @Query("""
             select distinct s
             from Submission s
@@ -40,7 +40,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
             Pageable pageable
     );
 
-    @EntityGraph(attributePaths = {"user", "subject", "aiResponse", "gradingResults"})
+    @EntityGraph(attributePaths = {"user", "subject", "aiResponse"})
     Page<Submission> findAll(Pageable pageable);
 
     @EntityGraph(attributePaths = {"user", "subject", "aiResponse", "gradingResults"})

@@ -1,6 +1,7 @@
 package com.example.eduaiplatform.service;
 
 import com.example.eduaiplatform.dto.request.GradeRequest;
+import com.example.eduaiplatform.dto.request.SolveQuestionsRequest;
 import com.example.eduaiplatform.dto.request.SubmissionUpdateRequest;
 import com.example.eduaiplatform.dto.response.GradingResultResponse;
 import com.example.eduaiplatform.dto.response.SubmissionResponse;
@@ -16,8 +17,9 @@ public interface SubmissionService {
     SubmissionResponse updateSubmission(Long id, SubmissionUpdateRequest request);
     void deleteOwnSubmission(Long id);
     SubmissionResponse explainSubmission(Long id, Integer questionNumber, AiSolveMode solveMode);
+    SubmissionResponse solveQuestions(Long id, SolveQuestionsRequest request);
     GradingResultResponse gradeSubmission(Long id, GradeRequest request);
-    GradingResultResponse gradeSubmissionImage(Long id, MultipartFile image);
+    GradingResultResponse gradeSubmissionImage(Long id, Long questionSolutionId, MultipartFile image);
     SubmissionResponse gradeNewWorkImage(Long subjectId, String note, MultipartFile image);
     Page<SubmissionResponse> getAllSubmissions(Pageable pageable);
     SubmissionResponse getAdminSubmission(Long id);

@@ -1,15 +1,16 @@
 package com.example.eduaiplatform.controller;
 
 import com.example.eduaiplatform.dto.request.GradeRequest;
+import com.example.eduaiplatform.dto.request.SolveQuestionsRequest;
 import com.example.eduaiplatform.dto.request.SubmissionUpdateRequest;
 import com.example.eduaiplatform.dto.response.ApiResponse;
 import com.example.eduaiplatform.dto.response.GradingResultResponse;
+import com.example.eduaiplatform.dto.response.PageResponse;
 import com.example.eduaiplatform.dto.response.SubmissionResponse;
 import com.example.eduaiplatform.entity.AiSolveMode;
 import com.example.eduaiplatform.service.SubmissionService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -34,14 +35,17 @@ public class SubmissionController {
     }
 
     @GetMapping("/api/submissions/me")
-    public ApiResponse<Page<SubmissionResponse>> mine(
+    public ApiResponse<PageResponse<SubmissionResponse>> mine(
             Pageable pageable,
             @RequestParam(required = false) Long subjectId,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Boolean favorite,
             @RequestParam(required = false) String search
     ) {
-        return ApiResponse.success("My submissions", submissionService.getMySubmissions(pageable, subjectId, status, favorite, search));
+        return ApiResponse.success(
+                "My submissions",
+                PageResponse.from(submissionService.getMySubmissions(pageable, subjectId, status, favorite, search))
+        );
     }
 
     @GetMapping("/api/submissions/{id}")
@@ -69,6 +73,14 @@ public class SubmissionController {
         return ApiResponse.success("Explanation generated", submissionService.explainSubmission(id, questionNumber, solveMode));
     }
 
+    @PostMapping("/api/submissions/{id}/questions/solve")
+    public ApiResponse<SubmissionResponse> solveQuestions(
+            @PathVariable Long id,
+            @Valid @RequestBody SolveQuestionsRequest request
+    ) {
+        return ApiResponse.success("Selected questions solved", submissionService.solveQuestions(id, request));
+    }
+
     @PostMapping("/api/submissions/{id}/grade")
     public ApiResponse<GradingResultResponse> grade(@PathVariable Long id, @Valid @RequestBody GradeRequest request) {
         return ApiResponse.success("Answer graded", submissionService.gradeSubmission(id, request));
@@ -77,9 +89,10 @@ public class SubmissionController {
     @PostMapping("/api/submissions/{id}/grade-image")
     public ApiResponse<GradingResultResponse> gradeImage(
             @PathVariable Long id,
+            @RequestParam(required = false) Long questionSolutionId,
             @RequestPart("image") MultipartFile image
     ) {
-        return ApiResponse.success("Answer image graded", submissionService.gradeSubmissionImage(id, image));
+        return ApiResponse.success("Answer image graded", submissionService.gradeSubmissionImage(id, questionSolutionId, image));
     }
 
     @PostMapping("/api/gradings/image")
@@ -92,8 +105,8 @@ public class SubmissionController {
     }
 
     @GetMapping("/api/admin/submissions")
-    public ApiResponse<Page<SubmissionResponse>> all(Pageable pageable) {
-        return ApiResponse.success("Submissions", submissionService.getAllSubmissions(pageable));
+    public ApiResponse<PageResponse<SubmissionResponse>> all(Pageable pageable) {
+        return ApiResponse.success("Submissions", PageResponse.from(submissionService.getAllSubmissions(pageable)));
     }
 
     @GetMapping("/api/admin/submissions/{id}")

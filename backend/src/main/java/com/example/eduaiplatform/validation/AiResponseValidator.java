@@ -10,7 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class AiResponseValidator {
@@ -89,6 +91,30 @@ public class AiResponseValidator {
                 optionalText(parsed, "mistakes"),
                 optionalText(parsed, "improvementSuggestions")
         );
+    }
+
+    public List<QuestionSolutionPayload> validateQuestionSolutions(JsonNode parsed, List<Integer> requestedNumbers) {
+        JsonNode solutions = parsed.path("solutions");
+        if (!solutions.isArray() || solutions.size() != requestedNumbers.size()) {
+            throw invalidResponse();
+        }
+
+        Set<Integer> requested = new HashSet<>(requestedNumbers);
+        Set<Integer> returned = new HashSet<>();
+        List<QuestionSolutionPayload> result = new ArrayList<>();
+        solutions.forEach(solution -> {
+            int questionNumber = solution.path("questionNumber").asInt(-1);
+            if (!requested.contains(questionNumber) || !returned.add(questionNumber)) {
+                throw invalidResponse();
+            }
+            result.add(new QuestionSolutionPayload(
+                    questionNumber,
+                    requiredText(solution, "detectedQuestion"),
+                    requiredText(solution, "explanation"),
+                    requiredText(solution, "finalAnswer")
+            ));
+        });
+        return result.stream().sorted((left, right) -> Integer.compare(left.questionNumber(), right.questionNumber())).toList();
     }
 
     public NewWorkPayload validateNewWork(JsonNode parsed) {
@@ -222,6 +248,14 @@ public class AiResponseValidator {
             String mistakes,
             String improvementSuggestions,
             String inputWarning
+    ) {
+    }
+
+    public record QuestionSolutionPayload(
+            Integer questionNumber,
+            String detectedQuestion,
+            String explanation,
+            String finalAnswer
     ) {
     }
 }

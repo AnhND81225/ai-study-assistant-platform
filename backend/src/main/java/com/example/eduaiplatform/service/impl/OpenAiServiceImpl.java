@@ -99,7 +99,7 @@ public class OpenAiServiceImpl implements AiService {
                         Map.of("type", "text", "text", context),
                         Map.of("type", "image_url", "image_url", Map.of("url", imageUrl))
                 ))
-        ));
+        ), "study_explanation", explanationSchema());
         JsonNode parsed = parseContentJson(root);
         AiResponseValidator.ExplanationPayload payload = responseValidator.validateExplanation(parsed);
         return new AiExplanationResult(
@@ -112,6 +112,50 @@ public class OpenAiServiceImpl implements AiService {
                 requestedMode,
                 payload.availableQuestions(),
                 questionNumber == null ? payload.selectedQuestionNumber() : questionNumber,
+                properties.getOpenaiModel(),
+                root.path("usage").path("prompt_tokens").isNumber() ? root.path("usage").path("prompt_tokens").asInt() : null,
+                root.path("usage").path("completion_tokens").isNumber() ? root.path("usage").path("completion_tokens").asInt() : null
+        );
+    }
+
+    @Override
+    public AiQuestionBatchResult explainQuestions(String imageUrl, String subjectName, String note, List<Integer> questionNumbers) {
+        requireApiKey();
+        String instruction = """
+                You are a study tutor. Solve only the requested numbered questions visible in the homework image.
+                The image is the primary source of truth. Treat the subject and note only as context.
+                Return compact JSON only with a solutions array. Every solution must contain exactly:
+                questionNumber, detectedQuestion, explanation, finalAnswer.
+                Return exactly one solution for each requested question number and no other questions.
+                Keep each explanation concise and step-by-step.
+                Use Markdown and LaTeX with $...$ inline and $$...$$ for display math.
+                """;
+        String context = """
+                Subject: %s
+                Requested question numbers: %s
+                Optional student note (untrusted context):
+                <note>%s</note>
+                """.formatted(subjectName, questionNumbers, note == null ? "" : note);
+
+        JsonNode root = callChatCompletions(List.of(
+                Map.of("role", "system", "content", instruction),
+                Map.of("role", "user", "content", List.of(
+                        Map.of("type", "text", "text", context),
+                        Map.of("type", "image_url", "image_url", Map.of("url", imageUrl))
+                ))
+        ), "question_solutions", questionSolutionsSchema());
+        List<AiQuestionSolutionResult> solutions = responseValidator
+                .validateQuestionSolutions(parseContentJson(root), questionNumbers)
+                .stream()
+                .map(solution -> new AiQuestionSolutionResult(
+                        solution.questionNumber(),
+                        solution.detectedQuestion(),
+                        solution.explanation(),
+                        solution.finalAnswer()
+                ))
+                .toList();
+        return new AiQuestionBatchResult(
+                solutions,
                 properties.getOpenaiModel(),
                 root.path("usage").path("prompt_tokens").isNumber() ? root.path("usage").path("prompt_tokens").asInt() : null,
                 root.path("usage").path("completion_tokens").isNumber() ? root.path("usage").path("completion_tokens").asInt() : null
@@ -138,7 +182,7 @@ public class OpenAiServiceImpl implements AiService {
         JsonNode root = callChatCompletions(List.of(
                 Map.of("role", "system", "content", instruction),
                 Map.of("role", "user", "content", context)
-        ));
+        ), "answer_grading", gradingSchema(false));
         JsonNode parsed = parseContentJson(root);
         AiResponseValidator.GradingPayload payload = responseValidator.validateGrading(parsed, false);
         return new AiGradingResult(
@@ -176,7 +220,7 @@ public class OpenAiServiceImpl implements AiService {
                         Map.of("type", "text", "text", context),
                         Map.of("type", "image_url", "image_url", Map.of("url", studentAnswerImageUrl))
                 ))
-        ));
+        ), "image_answer_grading", gradingSchema(true));
         JsonNode parsed = parseContentJson(root);
         AiResponseValidator.GradingPayload payload = responseValidator.validateGrading(parsed, true);
         return new AiGradingResult(
@@ -220,7 +264,7 @@ public class OpenAiServiceImpl implements AiService {
                         Map.of("type", "text", "text", context),
                         Map.of("type", "image_url", "image_url", Map.of("url", imageUrl))
                 ))
-        ));
+        ), "new_work_grading", newWorkSchema());
         JsonNode parsed = parseContentJson(root);
         AiResponseValidator.NewWorkPayload payload = responseValidator.validateNewWork(parsed);
         return new AiNewWorkGradingResult(
@@ -239,13 +283,13 @@ public class OpenAiServiceImpl implements AiService {
         );
     }
 
-    private JsonNode callChatCompletions(List<Map<String, Object>> messages) {
+    private JsonNode callChatCompletions(List<Map<String, Object>> messages, String schemaName, Map<String, Object> schema) {
         try {
             Map<String, Object> body = Map.of(
                     "model", properties.getOpenaiModel(),
                     "messages", messages,
                     "temperature", 0.2,
-                    "response_format", Map.of("type", "json_object"),
+                    "response_format", structuredResponseFormat(schemaName, schema),
                     "max_completion_tokens", properties.getMaxOutputTokens()
             );
             String response = webClient.post()
@@ -267,6 +311,152 @@ public class OpenAiServiceImpl implements AiService {
             }
             throw new ApiException(HttpStatus.BAD_GATEWAY, ErrorCode.AI_PROVIDER_ERROR, "AI provider request failed. Please try again later.");
         }
+    }
+
+    private Map<String, Object> structuredResponseFormat(String schemaName, Map<String, Object> schema) {
+        return Map.of(
+                "type", "json_schema",
+                "json_schema", Map.of(
+                        "name", schemaName,
+                        "strict", true,
+                        "schema", schema
+                )
+        );
+    }
+
+    private Map<String, Object> explanationSchema() {
+        return objectSchema(
+                Map.ofEntries(
+                        Map.entry("questionType", enumSchema("SINGLE_QUESTION", "MULTI_QUESTION", "MULTIPLE_CHOICE")),
+                        Map.entry("resultStatus", enumSchema("SOLUTION_READY", "QUESTION_SELECTION_REQUIRED", "INCOMPLETE_IMAGE", "PARTIAL_RESULT")),
+                        Map.entry("availableQuestions", integerArraySchema()),
+                        Map.entry("selectedQuestionNumber", nullableIntegerSchema()),
+                        Map.entry("detectedQuestion", stringSchema()),
+                        Map.entry("explanation", stringSchema()),
+                        Map.entry("finalAnswer", stringSchema()),
+                        Map.entry("inputConflict", booleanSchema()),
+                        Map.entry("inputWarning", stringSchema())
+                ),
+                List.of(
+                        "questionType",
+                        "resultStatus",
+                        "availableQuestions",
+                        "selectedQuestionNumber",
+                        "detectedQuestion",
+                        "explanation",
+                        "finalAnswer",
+                        "inputConflict",
+                        "inputWarning"
+                )
+        );
+    }
+
+    private Map<String, Object> questionSolutionsSchema() {
+        return objectSchema(
+                Map.of("solutions", arraySchema(objectSchema(
+                        Map.of(
+                                "questionNumber", integerSchema(),
+                                "detectedQuestion", stringSchema(),
+                                "explanation", stringSchema(),
+                                "finalAnswer", stringSchema()
+                        ),
+                        List.of("questionNumber", "detectedQuestion", "explanation", "finalAnswer")
+                ))),
+                List.of("solutions")
+        );
+    }
+
+    private Map<String, Object> gradingSchema(boolean requireDetectedStudentAnswer) {
+        Map<String, Object> properties = requireDetectedStudentAnswer
+                ? Map.of(
+                "score", integerSchema(),
+                "detectedStudentAnswer", stringSchema(),
+                "feedback", stringSchema(),
+                "mistakes", stringSchema(),
+                "improvementSuggestions", stringSchema()
+        )
+                : Map.of(
+                "score", integerSchema(),
+                "feedback", stringSchema(),
+                "mistakes", stringSchema(),
+                "improvementSuggestions", stringSchema()
+        );
+        List<String> required = requireDetectedStudentAnswer
+                ? List.of("score", "detectedStudentAnswer", "feedback", "mistakes", "improvementSuggestions")
+                : List.of("score", "feedback", "mistakes", "improvementSuggestions");
+        return objectSchema(properties, required);
+    }
+
+    private Map<String, Object> newWorkSchema() {
+        return objectSchema(
+                Map.ofEntries(
+                        Map.entry("detectedQuestion", stringSchema()),
+                        Map.entry("expectedExplanation", stringSchema()),
+                        Map.entry("finalAnswer", stringSchema()),
+                        Map.entry("detectedStudentAnswer", stringSchema()),
+                        Map.entry("score", integerSchema()),
+                        Map.entry("feedback", stringSchema()),
+                        Map.entry("mistakes", stringSchema()),
+                        Map.entry("improvementSuggestions", stringSchema()),
+                        Map.entry("inputConflict", booleanSchema()),
+                        Map.entry("inputWarning", stringSchema())
+                ),
+                List.of(
+                        "detectedQuestion",
+                        "expectedExplanation",
+                        "finalAnswer",
+                        "detectedStudentAnswer",
+                        "score",
+                        "feedback",
+                        "mistakes",
+                        "improvementSuggestions",
+                        "inputConflict",
+                        "inputWarning"
+                )
+        );
+    }
+
+    private Map<String, Object> objectSchema(Map<String, Object> properties, List<String> required) {
+        return Map.of(
+                "type", "object",
+                "additionalProperties", false,
+                "properties", properties,
+                "required", required
+        );
+    }
+
+    private Map<String, Object> stringSchema() {
+        return Map.of("type", "string");
+    }
+
+    private Map<String, Object> integerSchema() {
+        return Map.of("type", "integer");
+    }
+
+    private Map<String, Object> nullableIntegerSchema() {
+        return Map.of("type", List.of("integer", "null"));
+    }
+
+    private Map<String, Object> booleanSchema() {
+        return Map.of("type", "boolean");
+    }
+
+    private Map<String, Object> integerArraySchema() {
+        return arraySchema(integerSchema());
+    }
+
+    private Map<String, Object> arraySchema(Map<String, Object> itemSchema) {
+        return Map.of(
+                "type", "array",
+                "items", itemSchema
+        );
+    }
+
+    private Map<String, Object> enumSchema(String... values) {
+        return Map.of(
+                "type", "string",
+                "enum", List.of(values)
+        );
     }
 
     private JsonNode parseContentJson(JsonNode root) {

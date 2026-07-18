@@ -1,6 +1,7 @@
 package com.example.eduaiplatform.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,8 +48,14 @@ public class Submission extends Auditable {
     @OneToOne(mappedBy = "submission", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private AiResponse aiResponse;
 
+    @BatchSize(size = 20)
     @OneToMany(mappedBy = "submission", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GradingResult> gradingResults = new ArrayList<>();
+
+    @BatchSize(size = 20)
+    @OrderBy("questionNumber ASC")
+    @OneToMany(mappedBy = "submission", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuestionSolution> questionSolutions = new ArrayList<>();
 
     protected Submission() {
     }
@@ -110,6 +117,10 @@ public class Submission extends Auditable {
         return gradingResults;
     }
 
+    public List<QuestionSolution> getQuestionSolutions() {
+        return questionSolutions;
+    }
+
     public void markAiResult(AiResponse response, AiResultStatus resultStatus) {
         this.aiResponse = response;
         this.status = switch (resultStatus) {
@@ -122,6 +133,10 @@ public class Submission extends Auditable {
 
     public void markAiFailed() {
         this.status = SubmissionStatus.AI_FAILED;
+    }
+
+    public void markQuestionsSolved() {
+        this.status = SubmissionStatus.EXPLAINED;
     }
 
     public void updateStudyMetadata(String title, String note, Boolean favorite) {
