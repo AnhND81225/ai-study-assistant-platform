@@ -92,6 +92,14 @@ export function DashboardPage() {
             </div>
             {loading ? (
               <ChartSkeleton />
+            ) : !stats.hasWeeklyActivity ? (
+              <div className="mt-6 flex min-h-44 flex-col items-center justify-center rounded-[1.4rem] border border-dashed border-slate-200 bg-slate-50/80 px-5 text-center">
+                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-slate-400 shadow-sm">
+                  <BarChart3 size={20} />
+                </span>
+                <p className="mt-3 text-sm font-extrabold text-ink">No saved work this week</p>
+                <p className="mt-1 max-w-sm text-sm font-semibold leading-6 text-slate-500">Solve or check a question to begin a new weekly study rhythm.</p>
+              </div>
             ) : (
               <div className="mt-6 grid grid-cols-7 items-end gap-1.5 sm:gap-3">
                 {stats.weeklyActivity.map((day) => (
@@ -101,8 +109,8 @@ export function DashboardPage() {
                     </span>
                     <div className="flex h-28 items-end rounded-full bg-slate-100 p-1.5">
                       <div
-                        className="w-full rounded-full bg-gradient-to-t from-sea to-sky-300"
-                        style={{ height: `${Math.max(12, day.percent)}%` }}
+                        className={`w-full rounded-full bg-gradient-to-t from-sea to-sky-300 transition-[height,opacity] duration-300 ${day.count ? 'opacity-100' : 'opacity-0'}`}
+                        style={{ height: `${day.count ? Math.max(12, day.percent) : 0}%` }}
                         title={`${day.count} item${day.count === 1 ? '' : 's'}`}
                       />
                     </div>
@@ -261,6 +269,7 @@ function buildDashboardStats(items, totalWork) {
     favorites,
     averageScore,
     weeklyActivity,
+    hasWeeklyActivity: weeklyActivity.some((day) => day.count > 0),
     subjectBreakdown,
     recent,
     tip: pickStudyTip({ totalWork, averageScore, favorites, recentCount: recent.length }),
