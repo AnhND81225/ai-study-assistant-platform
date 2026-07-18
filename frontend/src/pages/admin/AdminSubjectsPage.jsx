@@ -39,10 +39,16 @@ export function AdminSubjectsPage() {
     <div>
       <PageHeader title="Subjects" description="Manage supported homework subjects." />
       <ErrorBanner message={error} />
-      <form onSubmit={submit} className="app-card mb-5 grid gap-3 p-4 md:grid-cols-[1fr_1fr_auto]">
-        <input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Subject name" className="input-field" aria-label="Subject name" />
-        <input value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Description" className="input-field" aria-label="Subject description" />
-        <button className="primary-button">Add subject</button>
+      <form onSubmit={submit} className="control-panel mb-5 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+        <label className="grid gap-1.5 text-sm font-bold text-slate-700">
+          Subject name
+          <input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Math" className="input-field" />
+        </label>
+        <label className="grid gap-1.5 text-sm font-bold text-slate-700">
+          Description
+          <input value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Optional short description" className="input-field" />
+        </label>
+        <button className="primary-button self-end">Add subject</button>
       </form>
       {loading ? (
         <div className="surface-panel border-dashed p-4 text-sm font-bold text-slate-500">Loading subjects...</div>
@@ -51,9 +57,11 @@ export function AdminSubjectsPage() {
       ) : (
         <div className="grid gap-3">
           {subjects.map((subject) => (
-            <article key={subject.id} className="app-card p-4">
+            <article key={subject.id} className="smooth-card workspace-card">
+              <div className="workspace-core p-4">
               <h3 className="font-extrabold">{subject.name}</h3>
               <p className="mt-1 text-sm font-medium leading-6 text-slate-600">{subject.description}</p>
+              </div>
             </article>
           ))}
         </div>

@@ -34,16 +34,17 @@ export function LoginPage() {
 
 function AuthForm({ title, subtitle, submitLabel, form, setForm, submit, loading, error, dismissError, footer }) {
   return (
-    <main className="grid min-h-[100dvh] place-items-center bg-[#f5f7fb] px-4 py-8">
-      <form onSubmit={submit} className="w-full max-w-md rounded-lg border border-slate-200 bg-white/95 p-5 shadow-[0_24px_60px_rgba(15,23,42,0.12)] sm:p-7">
+    <main className="landing-page grid min-h-[100dvh] place-items-center px-4 py-8">
+      <form onSubmit={submit} className="auth-card">
+        <div className="auth-card-core">
         <Link to="/" className="mb-8 inline-flex items-center gap-2.5 font-extrabold text-ink">
-          <span className="grid h-10 w-10 place-items-center rounded-lg bg-sea text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)]">
+          <span className="grid h-11 w-11 place-items-center rounded-[1.05rem] bg-sea text-white shadow-[0_18px_34px_rgba(37,99,235,0.24)]">
             <BookOpen size={19} />
           </span>
           StudyAI
         </Link>
-        <h1 className="text-3xl font-extrabold text-ink">{title}</h1>
-        <p className="mt-2 text-sm font-medium text-slate-600">{subtitle}</p>
+        <h1 className="text-4xl font-extrabold tracking-[-0.035em] text-ink">{title}</h1>
+        <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{subtitle}</p>
         <div className="mt-6 grid gap-4">
           <ErrorBanner message={error} onDismiss={dismissError} />
           <label className="grid gap-1.5 text-sm font-bold text-slate-700">
@@ -64,6 +65,7 @@ function AuthForm({ title, subtitle, submitLabel, form, setForm, submit, loading
             {loading ? 'Please wait...' : submitLabel}
           </button>
           <div className="border-t border-slate-100 pt-4 text-center text-sm font-medium text-slate-600">{footer}</div>
+        </div>
         </div>
       </form>
     </main>

@@ -74,7 +74,8 @@ export function SubmissionDetailPage() {
       <ErrorBanner message={error} />
       {submission ? (
         <div className="grid gap-5 lg:grid-cols-[360px_1fr]">
-          <section className="focus-panel app-card h-fit p-4 sm:p-5 lg:sticky lg:top-28">
+          <section className="focus-panel workspace-card h-fit lg:sticky lg:top-28">
+            <div className="workspace-core p-4 sm:p-5">
             <img src={submission.imageUrl} alt="Uploaded homework" className="w-full rounded-2xl object-contain shadow-[0_18px_38px_rgba(15,23,42,0.10)]" />
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <StatusPill status={submission.status} />
@@ -97,6 +98,7 @@ export function SubmissionDetailPage() {
                 {explaining ? 'Retrying explanation...' : online ? 'Retry explanation' : 'Reconnect to retry'}
               </button>
             ) : null}
+            </div>
           </section>
           <section className="grid gap-4">
             {shouldShowQuestionScope(submission.aiResponse) ? (
@@ -111,19 +113,33 @@ export function SubmissionDetailPage() {
               />
             ) : null}
             {submission.aiResponse ? (
-              <ExplanationResultCard aiResponse={submission.aiResponse} />
+              <DetailStep
+                step="1"
+                title="AI solution reference"
+                description="This is the saved explanation generated from the uploaded question."
+              >
+                <ExplanationResultCard aiResponse={submission.aiResponse} titleOverride="AI solution reference" />
+              </DetailStep>
             ) : (
-              <div className="app-card border-dashed p-5">
+              <div className="workspace-card border-dashed">
+                <div className="workspace-core p-5">
                 <h3 className="text-lg font-extrabold">No explanation yet</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">The image is saved. Retry AI explanation when your connection and provider quota are ready.</p>
+                </div>
               </div>
             )}
             {submission.gradingResults?.length ? (
-              <div className="grid gap-3">
+              <DetailStep
+                step="2"
+                title="Checked answers"
+                description="Newest grading feedback appears first so you can review score and mistakes quickly."
+              >
+                <div className="grid gap-3">
                 {submission.gradingResults.map((result) => (
                   <GradingResultCard key={result.id} result={result} />
                 ))}
-              </div>
+                </div>
+              </DetailStep>
             ) : null}
           </section>
         </div>
@@ -160,7 +176,8 @@ function QuestionScopePanel({
   const multipleChoice = aiResponse.questionType === 'MULTIPLE_CHOICE';
 
   return (
-    <section className="app-card border-violet-200 bg-violet-50/50 p-4 sm:p-5">
+    <section className="workspace-card border-violet-200 bg-violet-50/50">
+      <div className="workspace-core p-4 sm:p-5">
       <div className="flex items-start gap-3">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-violet-100 text-violet-700">
           <ScanSearch size={20} />
@@ -219,6 +236,24 @@ function QuestionScopePanel({
       <p className="mt-3 text-xs font-semibold leading-5 text-slate-500">
         Explaining a full page takes longer and may return a partial result when part of the photo is cropped.
       </p>
+      </div>
+    </section>
+  );
+}
+
+function DetailStep({ step, title, description, children }) {
+  return (
+    <section className="grid gap-3">
+      <div className="flex items-start gap-3">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-sea text-sm font-extrabold text-white shadow-[0_14px_30px_rgba(37,99,235,0.22)]">
+          {step}
+        </span>
+        <div>
+          <h2 className="text-lg font-extrabold tracking-[-0.025em] text-ink">{title}</h2>
+          <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">{description}</p>
+        </div>
+      </div>
+      {children}
     </section>
   );
 }

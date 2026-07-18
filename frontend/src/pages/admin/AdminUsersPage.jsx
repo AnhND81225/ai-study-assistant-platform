@@ -29,13 +29,15 @@ export function AdminUsersPage() {
       ) : (
         <div className="grid gap-3">
           {users.map((user) => (
-            <article key={user.id} className="app-card p-4">
+            <article key={user.id} className="smooth-card workspace-card">
+              <div className="workspace-core p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <h3 className="font-extrabold">{user.fullName}</h3>
                   <p className="mt-1 text-sm font-medium text-slate-600">{user.email}</p>
                 </div>
                 <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-ocean">{roleLabel(user.role)}</span>
+              </div>
               </div>
             </article>
           ))}

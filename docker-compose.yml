@@ -3,15 +3,15 @@ services:
     image: postgres:16-alpine
     container_name: studyai-postgres
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-eduaidb}
-      POSTGRES_USER: ${POSTGRES_USER:-eduaidb_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+      POSTGRES_DB: ${COMPOSE_POSTGRES_DB:-eduaidb}
+      POSTGRES_USER: ${COMPOSE_POSTGRES_USER:-eduaidb_user}
+      POSTGRES_PASSWORD: ${COMPOSE_POSTGRES_PASSWORD:-change_me}
     ports:
-      - "55432:5432"
+      - "${COMPOSE_POSTGRES_PORT:-55433}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-eduaidb_user} -d ${POSTGRES_DB:-eduaidb}"]
+      test: ["CMD-SHELL", "pg_isready -U ${COMPOSE_POSTGRES_USER:-eduaidb_user} -d ${COMPOSE_POSTGRES_DB:-eduaidb}"]
       interval: 10s
       timeout: 5s
       retries: 5
