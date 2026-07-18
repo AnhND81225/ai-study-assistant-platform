@@ -174,6 +174,24 @@ class AiResponseValidatorTest {
     }
 
     @Test
+    void validateQuestionSolutions_rejectsMissingRequestedQuestion() throws Exception {
+        JsonNode parsed = objectMapper.readTree("""
+                {
+                  "solutions":[
+                    {"questionNumber":1,"detectedQuestion":"Question 1","explanation":"Steps","finalAnswer":"Answer"}
+                  ]
+                }
+                """);
+
+        ApiException exception = assertThrows(
+                ApiException.class,
+                () -> validator.validateQuestionSolutions(parsed, java.util.List.of(1, 2))
+        );
+
+        assertEquals(ErrorCode.AI_RESPONSE_PARSE_ERROR, exception.getErrorCode());
+    }
+
+    @Test
     void validateNewWork_acceptsCompleteWorksheetGradingContract() throws Exception {
         JsonNode parsed = objectMapper.readTree("""
                 {

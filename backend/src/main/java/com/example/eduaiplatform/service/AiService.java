@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface AiService {
     AiExplanationResult explain(String imageUrl, String subjectName, String note, Integer questionNumber, AiSolveMode solveMode);
+    AiQuestionBatchResult explainQuestions(String imageUrl, String subjectName, String note, List<Integer> questionNumbers);
     AiGradingResult grade(String detectedQuestion, String explanation, String finalAnswer, String userAnswer);
     AiGradingResult gradeImage(String detectedQuestion, String explanation, String finalAnswer, String studentAnswerImageUrl);
     AiNewWorkGradingResult gradeNewWorkImage(String imageUrl, String subjectName, String note);
@@ -22,6 +23,22 @@ public interface AiService {
             AiSolveMode solveMode,
             List<Integer> availableQuestions,
             Integer selectedQuestionNumber,
+            String modelName,
+            Integer inputTokens,
+            Integer outputTokens
+    ) {
+    }
+
+    record AiQuestionSolutionResult(
+            Integer questionNumber,
+            String detectedQuestion,
+            String explanation,
+            String finalAnswer
+    ) {
+    }
+
+    record AiQuestionBatchResult(
+            List<AiQuestionSolutionResult> solutions,
             String modelName,
             Integer inputTokens,
             Integer outputTokens

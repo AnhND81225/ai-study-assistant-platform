@@ -8,6 +8,7 @@ public record AiUsageLogResponse(
         String modelName,
         Integer inputTokens,
         Integer outputTokens,
+        Integer creditsUsed,
         String status,
         String errorMessage,
         Instant createdAt

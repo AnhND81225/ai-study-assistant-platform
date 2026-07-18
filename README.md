@@ -15,7 +15,7 @@ This project is designed to demonstrate fullstack development, backend architect
 - Validate and store images with Cloudinary.
 - AI explanation workflow with Markdown and LaTeX-ready responses.
 - AI grading workflow for typed answers, answer images, or a new image containing both the question and student work.
-- Daily AI explanation quota with user-visible remaining usage.
+- Daily solve-credit quota with free multi-question scanning, cached question solutions, and user-visible remaining usage.
 - Submission history with search, filters, favorites, editable notes, pagination, and delete-own-submission flow.
 - Admin-ready API structure.
 - PostgreSQL persistence.

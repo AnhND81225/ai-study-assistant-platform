@@ -29,6 +29,7 @@ export function GradePage() {
   const [note, setNote] = useState('');
   const [selectedId, setSelectedId] = useState(initialSubmissionId);
   const [selected, setSelected] = useState(null);
+  const [selectedSolutionId, setSelectedSolutionId] = useState('');
   const [mode, setMode] = useState('text');
   const [answer, setAnswer] = useState('');
   const [answerImage, setAnswerImage] = useState(null);
@@ -48,8 +49,17 @@ export function GradePage() {
   ];
 
   const explainedItems = useMemo(() => items.filter(isReadyForGrading), [items]);
-  const canGradeExisting = isReadyForGrading(selected) && (mode === 'image' ? Boolean(answerImage) : Boolean(answer.trim()));
-  const latestResult = selected?.gradingResults?.[0] || null;
+  const selectedSolution = selected?.questionSolutions?.find(
+    (solution) => String(solution.id) === selectedSolutionId,
+  ) || null;
+  const answerKey = selectedSolution || selected?.aiResponse || null;
+  const relevantResults = (selected?.gradingResults || []).filter((result) => (
+    selectedSolution
+      ? result.questionNumber === selectedSolution.questionNumber
+      : result.questionNumber == null
+  ));
+  const canGradeExisting = Boolean(answerKey) && (mode === 'image' ? Boolean(answerImage) : Boolean(answer.trim()));
+  const latestResult = relevantResults[0] || null;
 
   useEffect(() => {
     subjectApi.list()
@@ -87,6 +97,9 @@ export function GradePage() {
     submissionApi.detail(selectedId)
       .then((detail) => {
         setSelected(detail);
+        setSelectedSolutionId(detail.questionSolutions?.[0]?.id
+          ? String(detail.questionSolutions[0].id)
+          : '');
         if (workflow === 'existing') {
           setSearchParams({ view: 'saved', submissionId: String(detail.id) }, { replace: true });
         }
@@ -129,7 +142,7 @@ export function GradePage() {
       return;
     }
 
-    if (!isReadyForGrading(selected)) {
+    if (!answerKey) {
       setError('Choose a submission with a complete or partial solution first.');
       return;
     }
@@ -147,8 +160,8 @@ export function GradePage() {
     try {
       setActiveStep(1);
       const result = mode === 'image'
-        ? await submissionApi.gradeImage(selected.id, answerImage)
-        : await submissionApi.grade(selected.id, answer.trim());
+        ? await submissionApi.gradeImage(selected.id, answerImage, selectedSolution?.id)
+        : await submissionApi.grade(selected.id, answer.trim(), selectedSolution?.id);
       setSelected((current) => ({
         ...current,
         gradingResults: [result, ...(current?.gradingResults || [])],
@@ -211,7 +224,7 @@ export function GradePage() {
               onChange={setNewWorkImage}
               onError={setError}
               label="Full work scan"
-              helperText="Scan one image that contains both the question and the student's written solution."
+              helperText="Scan one image that contains both the question and the student's written solution. Crop first if the page has extra questions."
               emptyTitle="Scan full student work"
               emptyDescription="Keep the question and answer visible in one frame. Rotate the photo if it was captured sideways."
               kindLabel="student work image"
@@ -271,6 +284,22 @@ export function GradePage() {
                 {explainedItems.map((item) => <option key={item.id} value={item.id}>#{item.id} - {item.subject.name}</option>)}
               </select>
             </label>
+            {selected?.questionSolutions?.length ? (
+              <label className="mt-3 grid gap-1.5 text-sm font-bold text-slate-700">
+                Question to check
+                <select
+                  value={selectedSolutionId}
+                  onChange={(event) => setSelectedSolutionId(event.target.value)}
+                  className="input-field"
+                >
+                  {selected.questionSolutions.map((solution) => (
+                    <option key={solution.id} value={solution.id}>
+                      Question {solution.questionNumber}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
             {selected ? (
               <div className="mt-4">
                 <img src={selected.imageUrl} alt="Selected homework" className="media-lift w-full rounded-2xl object-contain" />
@@ -290,14 +319,17 @@ export function GradePage() {
               </Suspense>
             ) : null}
 
-            {selected?.aiResponse && !latestResult ? (
+            {answerKey && !latestResult ? (
               <StepBlock
                 step="1"
                 title="Review the answer key"
                 description="This is the AI solution saved from the question image. It is used as the reference for grading."
               >
                 <Suspense fallback={<ResultLoadingState />}>
-                  <ExplanationResultCard aiResponse={selected.aiResponse} titleOverride="AI solution reference" />
+                  <ExplanationResultCard
+                    aiResponse={answerKey}
+                    titleOverride={selectedSolution ? `Question ${selectedSolution.questionNumber} answer key` : 'AI solution reference'}
+                  />
                 </Suspense>
               </StepBlock>
             ) : null}
@@ -322,7 +354,7 @@ export function GradePage() {
                         onChange={setAnswerImage}
                         onError={setError}
                         label="Answer scan"
-                        helperText="Scan only the student's answer for this already-explained question."
+                        helperText="Scan only the student's answer for this already-explained question. Crop out unrelated work if needed."
                         emptyTitle="Scan student answer"
                         emptyDescription="Use a clear close-up of the answer. AI will read the handwriting before checking the work."
                         kindLabel="answer image"
@@ -337,14 +369,14 @@ export function GradePage() {
               </div>
             </StepBlock>
 
-            {selected?.gradingResults?.length ? (
+            {relevantResults.length ? (
               <StepBlock
                 step={latestResult ? '2' : '3'}
                 title="Review feedback"
                 description="The newest grading result appears first, with score, detected answer, mistakes, and improvement tips."
               >
                 <div className="grid gap-3">
-                  {selected.gradingResults.map((result, index) => (
+                  {relevantResults.map((result, index) => (
                     <Suspense key={result.id} fallback={<ResultLoadingState />}>
                       <GradingResultCard result={result} hideScoreSummary={index === 0} />
                     </Suspense>
@@ -353,14 +385,17 @@ export function GradePage() {
               </StepBlock>
             ) : null}
 
-            {selected?.aiResponse && latestResult ? (
+            {answerKey && latestResult ? (
               <StepBlock
                 step="3"
                 title="Reference solution"
                 description="Use the saved solution as the answer key when reviewing feedback or checking another response."
               >
                 <Suspense fallback={<ResultLoadingState />}>
-                  <ExplanationResultCard aiResponse={selected.aiResponse} titleOverride="AI solution reference" />
+                  <ExplanationResultCard
+                    aiResponse={answerKey}
+                    titleOverride={selectedSolution ? `Question ${selectedSolution.questionNumber} answer key` : 'AI solution reference'}
+                  />
                 </Suspense>
               </StepBlock>
             ) : null}
@@ -383,6 +418,7 @@ export function GradePage() {
 }
 
 function isReadyForGrading(submission) {
+  if (submission?.questionSolutions?.length) return true;
   if (!submission?.aiResponse) return false;
   return ['SOLUTION_READY', 'PARTIAL_RESULT'].includes(submission.aiResponse.resultStatus || 'SOLUTION_READY');
 }

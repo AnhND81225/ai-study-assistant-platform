@@ -21,9 +21,22 @@ public final class SubmissionMapper {
                 submission.getNote(),
                 submission.isFavorite(),
                 toAiResponse(submission.getAiResponse()),
+                submission.getQuestionSolutions().stream().map(SubmissionMapper::toQuestionSolutionResponse).toList(),
                 submission.getGradingResults().stream().map(SubmissionMapper::toGradingResponse).toList(),
                 submission.getCreatedAt(),
                 submission.getUpdatedAt()
+        );
+    }
+
+    public static QuestionSolutionResponse toQuestionSolutionResponse(QuestionSolution solution) {
+        return new QuestionSolutionResponse(
+                solution.getId(),
+                solution.getQuestionNumber(),
+                solution.getDetectedQuestion(),
+                solution.getExplanation(),
+                solution.getFinalAnswer(),
+                solution.getModelName(),
+                solution.getCreatedAt()
         );
     }
 
@@ -51,6 +64,7 @@ public final class SubmissionMapper {
                 result.getId(),
                 result.getUserAnswer(),
                 result.getUserAnswerImageUrl(),
+                result.getQuestionSolution() == null ? null : result.getQuestionSolution().getQuestionNumber(),
                 result.getScore(),
                 result.getFeedback(),
                 result.getMistakes(),

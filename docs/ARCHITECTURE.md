@@ -47,18 +47,18 @@ Explanation flow:
 5. Backend sends the image URL, subject, optional note, and requested solve scope to the AI provider.
 6. AI classifies the image as a single question, multi-question page, or multiple-choice page.
 7. When several questions are detected without a selected scope, backend stores `QUESTION_SELECTION_REQUIRED` instead of a generic solution.
-8. User selects one question, requests answer-only multiple-choice output, or explicitly requests all readable explanations.
-9. Backend validates completion status, result status, and structured response fields.
-10. Backend stores only valid solutions, partial results, selection metadata, or user-facing incomplete-image warnings.
-11. Backend returns the result to the frontend.
+8. User selects up to three detected questions.
+9. Backend reuses already-saved question solutions and sends only missing questions to the provider in one image request.
+10. Backend validates that every requested question has exactly one structured result.
+11. Backend stores each solution independently and returns the updated submission.
 
 Grading flow:
 
 1. User submits an answer for their own submission.
-2. Backend loads the submission and existing AI explanation.
+2. Backend loads the submission and the selected saved question solution, or the legacy single-question explanation.
 3. Backend sends compact context to the AI provider.
 4. Backend validates the score and structured response fields.
-5. Backend stores score, feedback, mistakes, and suggestions.
+5. Backend stores score, feedback, mistakes, suggestions, and the associated question solution.
 
 The uploaded image is the primary source of truth. Notes are optional context and may identify a target such as "solve question 5." Unrelated notes are ignored with a user-facing warning, while unresolved image-note conflicts are rejected before data is stored.
 
@@ -76,9 +76,12 @@ The uploaded image is the primary source of truth. Notes are optional context an
 Usage quota flow:
 
 1. Backend logs AI requests with request type, model, status, and timestamp.
-2. Successful explanation requests are counted per user per UTC day.
-3. The frontend reads `/api/ai-usage/me` to show the remaining daily explanation quota.
-4. The backend enforces the configured limit before starting another explanation request.
+2. A multi-question detection scan is logged with zero solve credits.
+3. Successful scans have a separate daily cap to prevent unlimited zero-credit provider calls.
+4. Each newly generated question solution costs one credit, including questions solved together in one provider request.
+5. Previously saved question solutions are reused without another provider call or credit.
+6. The frontend reads `/api/ai-usage/me` to show the remaining daily solve quota.
+7. The backend enforces available credits before generating missing solutions.
 
 ## Upload Workflow
 
@@ -102,7 +105,9 @@ Register creates a USER account with BCrypt password hash. Login returns a JWT. 
 - Role 1-n User
 - Subject 1-n Submission
 - Submission 1-1 AiResponse
+- Submission 1-n QuestionSolution
 - Submission 1-n GradingResult
+- QuestionSolution 1-n GradingResult
 - User 1-n AiUsageLog
 
 ## Deployment Architecture

@@ -29,6 +29,9 @@ public class AiUsageLog extends Auditable {
     private Integer inputTokens;
     private Integer outputTokens;
 
+    @Column(nullable = false)
+    private Integer creditsUsed = 1;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 40)
     private AiUsageStatus status;
@@ -40,6 +43,10 @@ public class AiUsageLog extends Auditable {
     }
 
     public AiUsageLog(User user, Submission submission, AiRequestType requestType, String modelName, Integer inputTokens, Integer outputTokens, AiUsageStatus status, String errorMessage) {
+        this(user, submission, requestType, modelName, inputTokens, outputTokens, status, errorMessage, 1);
+    }
+
+    public AiUsageLog(User user, Submission submission, AiRequestType requestType, String modelName, Integer inputTokens, Integer outputTokens, AiUsageStatus status, String errorMessage, Integer creditsUsed) {
         this.user = user;
         this.submission = submission;
         this.requestType = requestType;
@@ -48,6 +55,7 @@ public class AiUsageLog extends Auditable {
         this.outputTokens = outputTokens;
         this.status = status;
         this.errorMessage = errorMessage;
+        this.creditsUsed = creditsUsed;
     }
 
     public Long getId() {
@@ -68,6 +76,10 @@ public class AiUsageLog extends Auditable {
 
     public Integer getOutputTokens() {
         return outputTokens;
+    }
+
+    public Integer getCreditsUsed() {
+        return creditsUsed;
     }
 
     public AiUsageStatus getStatus() {

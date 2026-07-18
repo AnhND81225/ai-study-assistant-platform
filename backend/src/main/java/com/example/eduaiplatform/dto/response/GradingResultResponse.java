@@ -6,6 +6,7 @@ public record GradingResultResponse(
         Long id,
         String userAnswer,
         String userAnswerImageUrl,
+        Integer questionNumber,
         Integer score,
         String feedback,
         String mistakes,

@@ -9,22 +9,31 @@ import com.example.eduaiplatform.exception.ErrorCode;
 import com.example.eduaiplatform.service.AiService;
 import com.example.eduaiplatform.validation.AiResponseValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
+import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class OpenAiServiceImplTest {
@@ -33,7 +42,7 @@ class OpenAiServiceImplTest {
     private final AiResponseValidator validator = new AiResponseValidator(objectMapper);
 
     @Test
-    void explain_sendsRequestToChatCompletionsAndParsesStructuredOutput() {
+    void explain_sendsRequestToChatCompletionsAndParsesStructuredOutput() throws Exception {
         List<ClientRequest> requests = new ArrayList<>();
         OpenAiServiceImpl service = serviceWithResponse(requests, okChatResponse("""
                 {
@@ -68,6 +77,12 @@ class OpenAiServiceImplTest {
         assertEquals(HttpMethod.POST, requests.getFirst().method());
         assertEquals("/chat/completions", requests.getFirst().url().getPath());
         assertEquals("Bearer test-api-key", requests.getFirst().headers().getFirst(HttpHeaders.AUTHORIZATION));
+        JsonNode requestBody = requestBodyJson(requests.getFirst());
+        JsonNode responseFormat = requestBody.path("response_format");
+        assertEquals("json_schema", responseFormat.path("type").asText());
+        assertEquals("study_explanation", responseFormat.path("json_schema").path("name").asText());
+        assertTrue(responseFormat.path("json_schema").path("strict").asBoolean());
+        assertTrue(requiredFields(responseFormat).contains("finalAnswer"));
     }
 
     @Test
@@ -93,6 +108,29 @@ class OpenAiServiceImplTest {
         assertEquals("The student wrote $x = 4$.", result.detectedStudentAnswer());
         assertEquals("Mostly correct.", result.feedback());
         assertEquals("test-model", result.modelName());
+    }
+
+    @Test
+    void explainQuestions_parsesOneSolutionPerRequestedQuestion() {
+        OpenAiServiceImpl service = serviceWithResponse(new ArrayList<>(), okChatResponse("""
+                {
+                  "solutions":[
+                    {"questionNumber":2,"detectedQuestion":"Question 2","explanation":"Steps 2","finalAnswer":"Answer 2"},
+                    {"questionNumber":1,"detectedQuestion":"Question 1","explanation":"Steps 1","finalAnswer":"Answer 1"}
+                  ]
+                }
+                """));
+
+        AiService.AiQuestionBatchResult result = service.explainQuestions(
+                "https://res.cloudinary.com/demo/image/upload/worksheet.png",
+                "Math",
+                "",
+                List.of(1, 2)
+        );
+
+        assertEquals(List.of(1, 2), result.solutions().stream().map(AiService.AiQuestionSolutionResult::questionNumber).toList());
+        assertEquals("Answer 1", result.solutions().getFirst().finalAnswer());
+        assertEquals(123, result.inputTokens());
     }
 
     @Test
@@ -256,6 +294,36 @@ class OpenAiServiceImplTest {
                 .header(HttpHeaders.CONTENT_TYPE, "application/json")
                 .body(body)
                 .build();
+    }
+
+    private JsonNode requestBodyJson(ClientRequest request) throws Exception {
+        MockClientHttpRequest httpRequest = new MockClientHttpRequest(request.method(), request.url());
+        request.body().insert(httpRequest, new BodyInserter.Context() {
+            @Override
+            public List<HttpMessageWriter<?>> messageWriters() {
+                return ExchangeStrategies.withDefaults().messageWriters();
+            }
+
+            @Override
+            public Optional<org.springframework.http.server.reactive.ServerHttpRequest> serverRequest() {
+                return Optional.empty();
+            }
+
+            @Override
+            public Map<String, Object> hints() {
+                return Map.of();
+            }
+        }).block();
+        return objectMapper.readTree(httpRequest.getBodyAsString().block());
+    }
+
+    private List<String> requiredFields(JsonNode responseFormat) {
+        return StreamSupport.stream(
+                        responseFormat.path("json_schema").path("schema").path("required").spliterator(),
+                        false
+                )
+                .map(JsonNode::asText)
+                .toList();
     }
 
     private String okChatResponse(String contentJson) {

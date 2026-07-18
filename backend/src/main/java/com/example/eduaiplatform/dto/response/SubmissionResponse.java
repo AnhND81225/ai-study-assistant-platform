@@ -15,6 +15,7 @@ public record SubmissionResponse(
         String note,
         boolean favorite,
         AiExplanationResponse aiResponse,
+        List<QuestionSolutionResponse> questionSolutions,
         List<GradingResultResponse> gradingResults,
         Instant createdAt,
         Instant updatedAt
