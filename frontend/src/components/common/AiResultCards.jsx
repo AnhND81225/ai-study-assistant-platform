@@ -77,24 +77,24 @@ function readFinalAnswer(value) {
   }
 }
 
-export function GradingResultCard({ result }) {
+export function GradingResultCard({ result, hideScoreSummary = false }) {
   const score = Number(result.score || 0);
   const scoreStyle = score >= 80 ? 'text-ocean bg-sky-50 border-sky-200' : score >= 50 ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-red-700 bg-red-50 border-red-200';
 
   return (
     <article className="fade-in smooth-card workspace-card">
       <div className="workspace-core p-4 sm:p-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="text-sm font-bold text-slate-500">Your score</p>
-          <p className="mt-1 text-3xl font-extrabold text-ink">{score}<span className="text-lg text-slate-400">/100</span></p>
+      {!hideScoreSummary ? (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-sm font-bold text-slate-500">Your score</p>
+            <p className="mt-1 text-3xl font-extrabold text-ink">{score}<span className="text-lg text-slate-400">/100</span></p>
+          </div>
+          <ScoreStatus score={score} scoreStyle={scoreStyle} />
         </div>
-        <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-bold ${scoreStyle}`}>
-          {score >= 80 ? 'Strong work' : score >= 50 ? 'Needs review' : 'Needs correction'}
-        </span>
-      </div>
-      {result.userAnswerImageUrl ? <img src={result.userAnswerImageUrl} alt="Graded student answer" className="mt-4 max-h-72 w-full rounded-2xl object-contain shadow-[0_14px_34px_rgba(15,23,42,0.10)]" /> : null}
-      <div className="mt-4 grid gap-3">
+      ) : null}
+      {result.userAnswerImageUrl ? <img src={result.userAnswerImageUrl} alt="Graded student answer" className={`${hideScoreSummary ? '' : 'mt-4 '}max-h-72 w-full rounded-2xl object-contain shadow-[0_14px_34px_rgba(15,23,42,0.10)]`} /> : null}
+      <div className={`${hideScoreSummary ? '' : 'mt-4 '}grid gap-3`}>
         {result.userAnswer ? (
           <ResultSection icon={HelpCircle} title="Student answer">
             <RichText>{result.userAnswer}</RichText>
@@ -116,6 +116,42 @@ export function GradingResultCard({ result }) {
       </div>
       </div>
     </article>
+  );
+}
+
+export function LatestGradeSummary({ result }) {
+  if (!result) return null;
+  const score = Number(result.score || 0);
+  const scoreStyle = score >= 80 ? 'border-sky-200 bg-sky-50 text-ocean' : score >= 50 ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-red-200 bg-red-50 text-red-700';
+
+  return (
+    <section className="workspace-card overflow-hidden">
+      <div className="workspace-core bg-gradient-to-br from-white via-white to-blue-50/70 p-5 sm:p-6">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="eyebrow border-blue-100 bg-blue-50 text-ocean">Latest check</p>
+            <p className="mt-4 text-sm font-bold text-slate-500">Student result</p>
+            <p className="mt-1 text-5xl font-extrabold tracking-[-0.05em] text-ink sm:text-6xl">
+              {score}<span className="text-2xl text-slate-400 sm:text-3xl">/100</span>
+            </p>
+          </div>
+          <div className="sm:text-right">
+            <ScoreStatus score={score} scoreStyle={scoreStyle} />
+            <p className="mt-3 max-w-sm text-sm font-semibold leading-6 text-slate-600 sm:ml-auto">
+              {score >= 80 ? 'The answer matches the reference well. Review the feedback to keep the approach consistent.' : score >= 50 ? 'Review the feedback below, then try another answer to strengthen the weak points.' : 'Start with the feedback below, then correct the answer and check it again.'}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ScoreStatus({ score, scoreStyle }) {
+  return (
+    <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-bold ${scoreStyle}`}>
+      {score >= 80 ? 'Strong work' : score >= 50 ? 'Needs review' : 'Needs correction'}
+    </span>
   );
 }
 

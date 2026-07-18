@@ -15,6 +15,7 @@ import { ProcessProgress } from '../components/common/ProcessProgress';
 const lazyNamed = (loader, name) => lazy(() => loader().then((module) => ({ default: module[name] })));
 const ExplanationResultCard = lazyNamed(() => import('../components/common/AiResultCards'), 'ExplanationResultCard');
 const GradingResultCard = lazyNamed(() => import('../components/common/AiResultCards'), 'GradingResultCard');
+const LatestGradeSummary = lazyNamed(() => import('../components/common/AiResultCards'), 'LatestGradeSummary');
 
 export function GradePage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,6 +49,7 @@ export function GradePage() {
 
   const explainedItems = useMemo(() => items.filter(isReadyForGrading), [items]);
   const canGradeExisting = isReadyForGrading(selected) && (mode === 'image' ? Boolean(answerImage) : Boolean(answer.trim()));
+  const latestResult = selected?.gradingResults?.[0] || null;
 
   useEffect(() => {
     subjectApi.list()
@@ -255,8 +257,8 @@ export function GradePage() {
             action={<Link to="/upload" className="primary-button">Solve a question</Link>}
           />
         ) : (
-          <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[340px_1fr]">
-          <section className="focus-panel workspace-card h-fit lg:sticky lg:top-28">
+          <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)]">
+          <section className="focus-panel workspace-card h-fit min-w-0 lg:sticky lg:top-28">
             <div className="workspace-core p-4 sm:p-5">
             <div className="mb-4">
               <p className="eyebrow border-blue-100 bg-blue-50 text-ocean">Question context</p>
@@ -281,8 +283,14 @@ export function GradePage() {
             </div>
           </section>
 
-          <section className="grid gap-4">
-            {selected?.aiResponse ? (
+          <section className="grid min-w-0 gap-5">
+            {latestResult ? (
+              <Suspense fallback={<ResultLoadingState />}>
+                <LatestGradeSummary result={latestResult} />
+              </Suspense>
+            ) : null}
+
+            {selected?.aiResponse && !latestResult ? (
               <StepBlock
                 step="1"
                 title="Review the answer key"
@@ -295,9 +303,9 @@ export function GradePage() {
             ) : null}
 
             <StepBlock
-              step="2"
-              title="Add the student's answer"
-              description="Type the answer or upload a close-up of the student's work for this saved question."
+              step={latestResult ? '1' : '2'}
+              title={latestResult ? 'Check another answer' : "Add the student's answer"}
+              description={latestResult ? 'Use the same answer key to check a new response or a corrected version of the work.' : "Type the answer or upload a close-up of the student's work for this saved question."}
             >
               <div className="focus-panel workspace-card">
                 <div className="workspace-core p-4 sm:p-5">
@@ -331,17 +339,29 @@ export function GradePage() {
 
             {selected?.gradingResults?.length ? (
               <StepBlock
-                step="3"
+                step={latestResult ? '2' : '3'}
                 title="Review feedback"
                 description="The newest grading result appears first, with score, detected answer, mistakes, and improvement tips."
               >
                 <div className="grid gap-3">
-                  {selected.gradingResults.map((result) => (
+                  {selected.gradingResults.map((result, index) => (
                     <Suspense key={result.id} fallback={<ResultLoadingState />}>
-                      <GradingResultCard result={result} />
+                      <GradingResultCard result={result} hideScoreSummary={index === 0} />
                     </Suspense>
                   ))}
                 </div>
+              </StepBlock>
+            ) : null}
+
+            {selected?.aiResponse && latestResult ? (
+              <StepBlock
+                step="3"
+                title="Reference solution"
+                description="Use the saved solution as the answer key when reviewing feedback or checking another response."
+              >
+                <Suspense fallback={<ResultLoadingState />}>
+                  <ExplanationResultCard aiResponse={selected.aiResponse} titleOverride="AI solution reference" />
+                </Suspense>
               </StepBlock>
             ) : null}
           </section>
