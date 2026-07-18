@@ -32,7 +32,7 @@ export function DashboardPage() {
     <div className="motion-page">
       <PageHeader title="Study home" description="Start a question, check completed work, or return to saved homework when you need it." />
       <ErrorBanner message={error} onDismiss={() => setError('')} />
-      <div className="mb-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="mb-6 grid items-stretch gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section className="hero-card p-6 sm:p-8">
           <div className="absolute right-0 top-0 h-56 w-56 -translate-y-20 translate-x-14 rounded-full bg-blue-100/80 blur-2xl" aria-hidden="true" />
           <div className="absolute bottom-0 right-24 h-40 w-40 translate-y-16 rounded-full bg-emerald-100/70 blur-2xl" aria-hidden="true" />
@@ -78,7 +78,7 @@ export function DashboardPage() {
         <MetricCard label="Avg score" value={stats.averageScore === null ? '-' : `${stats.averageScore}/100`} detail="From graded work" />
       </div>
 
-      <div className="mb-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="mb-6 grid items-stretch gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
         <section className="workspace-card">
           <div className="workspace-core p-5">
             <div className="flex items-center justify-between gap-3">
@@ -93,9 +93,12 @@ export function DashboardPage() {
             {loading ? (
               <ChartSkeleton />
             ) : (
-              <div className="mt-6 grid grid-cols-7 items-end gap-3">
+              <div className="mt-6 grid grid-cols-7 items-end gap-1.5 sm:gap-3">
                 {stats.weeklyActivity.map((day) => (
-                  <div key={day.label} className="grid gap-2 text-center">
+                  <div key={day.label} className="grid min-w-0 gap-2 text-center">
+                    <span className="text-xs font-extrabold tabular-nums text-slate-400" aria-label={`${day.count} saved item${day.count === 1 ? '' : 's'}`}>
+                      {day.count}
+                    </span>
                     <div className="flex h-28 items-end rounded-full bg-slate-100 p-1.5">
                       <div
                         className="w-full rounded-full bg-gradient-to-t from-sea to-sky-300"
@@ -143,25 +146,25 @@ export function DashboardPage() {
         </section>
       </div>
 
-      <div className="mb-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="workspace-card">
+      <div className="mb-6 grid items-stretch gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="workspace-card min-w-0 overflow-hidden">
           <div className="workspace-core p-5">
             <div className="flex items-center justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <p className="eyebrow border-blue-100 bg-blue-50 text-ocean">Recent homework</p>
                 <h2 className="mt-3 text-xl font-extrabold tracking-[-0.025em] text-ink">Continue where you left off</h2>
               </div>
-              <Link to="/submissions" className="secondary-button px-3 text-sm">View all</Link>
+              <Link to="/submissions" className="secondary-button shrink-0 px-3 text-sm">View all</Link>
             </div>
             <div className="mt-5 grid gap-3">
               {loading ? <RecentSkeleton /> : stats.recent.length ? stats.recent.map((item) => (
-                <Link key={item.id} to={`/submissions/${item.id}`} className="group flex items-center gap-3 rounded-[1.25rem] border border-slate-200/80 bg-slate-50/80 p-3 transition-colors hover:border-blue-200 hover:bg-blue-50/50">
-                  <img src={item.imageUrl} alt="" className="h-14 w-14 rounded-2xl object-cover shadow-sm" />
+                <Link key={item.id} to={`/submissions/${item.id}`} className="group flex min-w-0 items-center gap-3 overflow-hidden rounded-[1.25rem] border border-slate-200/80 bg-slate-50/80 p-3 transition-colors hover:border-blue-200 hover:bg-blue-50/50">
+                  <img src={item.imageUrl} alt="" className="h-14 w-14 shrink-0 rounded-2xl object-cover shadow-sm" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-extrabold text-ink">{item.title || item.aiResponse?.detectedQuestion || `${item.subject.name} homework`}</p>
                     <p className="mt-1 text-xs font-bold text-slate-500">{item.subject.name} · {formatRelativeDate(item.createdAt)}</p>
                   </div>
-                  <ArrowRight size={17} className="text-slate-400 transition-colors group-hover:text-ocean" />
+                  <ArrowRight size={17} className="shrink-0 text-slate-400 transition-colors group-hover:text-ocean" />
                 </Link>
               )) : (
                 <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm font-semibold leading-6 text-slate-500">
@@ -172,7 +175,7 @@ export function DashboardPage() {
           </div>
         </section>
 
-        <section className="workspace-card">
+        <section className="workspace-card min-w-0">
           <div className="workspace-core p-5">
             <p className="eyebrow border-amber-100 bg-amber-50 text-amber-700">Study tip</p>
             <h2 className="mt-3 text-xl font-extrabold tracking-[-0.025em] text-ink">{stats.tip.title}</h2>
@@ -202,7 +205,7 @@ const tones = {
 
 function ActionCard({ to, icon: Icon, title, detail, tone }) {
   return (
-    <Link to={to} className="smooth-card workspace-card group">
+    <Link to={to} className="smooth-card workspace-card group min-w-0">
       <div className="workspace-core p-5">
       <span className={`grid h-12 w-12 place-items-center rounded-2xl ${tones[tone]}`}>
         <Icon size={23} />
@@ -230,7 +233,7 @@ function MiniStep({ icon: Icon, label }) {
 
 function MetricCard({ label, value, detail }) {
   return (
-    <article className="workspace-card">
+    <article className="workspace-card min-w-0">
       <div className="workspace-core p-4">
         <p className="text-sm font-extrabold text-slate-500">{label}</p>
         <p className="mt-2 text-3xl font-extrabold tracking-[-0.045em] text-ink">{value}</p>
@@ -350,9 +353,10 @@ function formatRelativeDate(value) {
 
 function ChartSkeleton() {
   return (
-    <div className="mt-6 grid grid-cols-7 items-end gap-3">
+    <div className="mt-6 grid grid-cols-7 items-end gap-1.5 sm:gap-3">
       {[32, 48, 76, 42, 64, 28, 54].map((height, index) => (
-        <div key={index} className="grid gap-2 text-center">
+        <div key={index} className="grid min-w-0 gap-2 text-center">
+          <span className="mx-auto h-3 w-4 rounded-full bg-slate-100" />
           <div className="flex h-28 items-end rounded-full bg-slate-100 p-1.5">
             <div className="w-full animate-pulse rounded-full bg-slate-200" style={{ height: `${height}%` }} />
           </div>
