@@ -14,45 +14,111 @@ concurrency:
 
 jobs:
   deploy-backend:
-    name: Deploy backend container
+    name: Deploy backend container to EC2
     runs-on: ubuntu-latest
+    env:
+      EC2_HOST: ${{ secrets.EC2_HOST }}
+      EC2_USER: ${{ secrets.EC2_USER }}
+      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+      APP_DIR: ~/ai-study-assistant-platform
+      DEPLOY_BRANCH: main
+      CONTAINER_NAME: studyai-backend
+      IMAGE_NAME: studyai-backend
 
     steps:
-      - name: Deploy on EC2 through SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -euo pipefail
+      - name: Validate deployment secrets
+        shell: bash
+        run: |
+          set -euo pipefail
 
-            cd ~/ai-study-assistant-platform
+          missing=0
+          for name in EC2_HOST EC2_USER EC2_SSH_KEY; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing GitHub Actions secret: ${name}"
+              missing=1
+            fi
+          done
 
-            git fetch origin main
-            git reset --hard origin/main
-
-            docker build -t studyai-backend ./backend
-
-            docker stop studyai-backend || true
-            docker rm studyai-backend || true
-
-            docker run -d \
-              --name studyai-backend \
-              --env-file backend/.env \
-              -p 8080:8080 \
-              studyai-backend
-
-            for attempt in $(seq 1 30); do
-              if curl -fsS http://127.0.0.1:8080/healthz; then
-                echo "Backend is healthy after deploy."
-                exit 0
-              fi
-
-              echo "Waiting for backend health check (${attempt}/30)..."
-              sleep 3
-            done
-
-            echo "Backend failed health check after deploy."
-            docker logs --tail=120 studyai-backend || true
+          if [ "${missing}" -ne 0 ]; then
             exit 1
+          fi
+
+          if ! grep -q "BEGIN .*PRIVATE KEY" <<< "${EC2_SSH_KEY}"; then
+            echo "::error::EC2_SSH_KEY must contain the full private key, including BEGIN/END lines."
+            exit 1
+          fi
+
+      - name: Prepare SSH key
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p ~/.ssh
+          printf '%s\n' "${EC2_SSH_KEY}" > ~/.ssh/studyai_ec2
+          chmod 600 ~/.ssh/studyai_ec2
+          ssh-keyscan -H "${EC2_HOST}" >> ~/.ssh/known_hosts
+
+      - name: Verify SSH connection
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ssh \
+            -i ~/.ssh/studyai_ec2 \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=20 \
+            "${EC2_USER}@${EC2_HOST}" \
+            "echo 'SSH connection ready on EC2.'"
+
+      - name: Deploy backend on EC2
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ssh \
+            -i ~/.ssh/studyai_ec2 \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            "${EC2_USER}@${EC2_HOST}" \
+            "APP_DIR='${APP_DIR}' DEPLOY_BRANCH='${DEPLOY_BRANCH}' CONTAINER_NAME='${CONTAINER_NAME}' IMAGE_NAME='${IMAGE_NAME}' bash -s" <<'REMOTE'
+          set -euo pipefail
+
+          APP_DIR="${APP_DIR/#\~/${HOME}}"
+          cd "${APP_DIR}"
+
+          if [ ! -f backend/.env ]; then
+            echo "backend/.env is missing on EC2. Create it on the server before deploying."
+            exit 1
+          fi
+
+          git fetch origin "${DEPLOY_BRANCH}"
+          git checkout -B "${DEPLOY_BRANCH}" "origin/${DEPLOY_BRANCH}"
+
+          docker build -t "${IMAGE_NAME}" ./backend
+
+          docker stop "${CONTAINER_NAME}" || true
+          docker rm "${CONTAINER_NAME}" || true
+
+          docker run -d \
+            --name "${CONTAINER_NAME}" \
+            --env-file backend/.env \
+            --restart unless-stopped \
+            -p 8080:8080 \
+            "${IMAGE_NAME}"
+
+          for attempt in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:8080/healthz; then
+              echo "Backend container is healthy."
+              exit 0
+            fi
+
+            echo "Waiting for backend health check (${attempt}/45)..."
+            sleep 2
+          done
+
+          echo "Backend failed health check after deploy."
+          docker ps -a --filter "name=${CONTAINER_NAME}"
+          docker logs --tail=160 "${CONTAINER_NAME}" || true
+          exit 1
+          REMOTE
