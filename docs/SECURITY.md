@@ -18,7 +18,7 @@ USER deletion requires authentication and ownership. Non-owned submission deleti
 
 ## CORS
 
-CORS must use explicit allowed origins from environment variables. Do not use wildcard origins with credentials.
+CORS must use explicit frontend origins from environment variables. Do not use wildcard origins with credentials. Backend API origins such as `https://api.ducanh.space` belong in the frontend `VITE_API_BASE_URL`; frontend origins such as Vercel or `https://ducanh.space` belong in backend `CORS_ALLOWED_ORIGINS`.
 
 ## File Upload Validation
 

@@ -143,7 +143,7 @@ docker compose exec postgres psql -U eduaidb_user -d eduaidb
 
 From host tools, use port `55433` because Compose maps PostgreSQL to `localhost:55433` by default to avoid conflicts with a local PostgreSQL install. If that port is already used, set `COMPOSE_POSTGRES_PORT` before starting Compose.
 
-Docker is for local development convenience. Production deployment targets Vercel, Render, Neon Postgres, and Cloudinary.
+Docker is for local development convenience. Production deployment can target Vercel for the frontend, Render or EC2 with Nginx for the backend, Neon Postgres for the database, and Cloudinary for media storage.
 
 ## IntelliJ IDEA Run Configurations
 
@@ -246,9 +246,21 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 ## Deployment
 
 - Frontend: Vercel
-- Backend: Render
+- Backend: Render or EC2 with Nginx HTTPS reverse proxy
 - Database: Neon Postgres
 - Media storage: Cloudinary
+
+When the backend runs on EC2, the Vercel frontend should call the HTTPS API domain:
+
+```text
+VITE_API_BASE_URL=https://api.ducanh.space/api
+```
+
+The backend CORS setting should list frontend origins, for example:
+
+```text
+CORS_ALLOWED_ORIGINS=https://ai-study-assistant-platform-nine.vercel.app,https://ducanh.space,https://www.ducanh.space,http://localhost:5173
+```
 
 See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
