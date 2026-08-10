@@ -48,7 +48,11 @@ export function AuthProvider({ children }) {
   }
 
   async function register(payload) {
-    persistSession(await authApi.register(payload));
+    return authApi.register(payload);
+  }
+
+  async function googleLogin(credential) {
+    persistSession(await authApi.googleLogin(credential));
   }
 
   function logout(notice = '') {
@@ -69,6 +73,7 @@ export function AuthProvider({ children }) {
     isAdmin: user?.role === 'ROLE_ADMIN',
     login,
     register,
+    googleLogin,
     logout,
   }), [token, user, booting]);
 

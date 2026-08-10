@@ -31,6 +31,17 @@ spring:
     multipart:
       max-file-size: ${MAX_UPLOAD_SIZE_MB:5}MB
       max-request-size: ${MAX_UPLOAD_SIZE_MB:5}MB
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS_ENABLE:true}
 
 server:
   port: ${PORT:8080}
@@ -49,6 +60,14 @@ app:
     timeout-seconds: ${AI_TIMEOUT_SECONDS:45}
     max-output-tokens: ${AI_MAX_OUTPUT_TOKENS:700}
     explain-limit-per-user: ${AI_EXPLAIN_LIMIT_PER_USER:10}
+  auth:
+    frontend-url: ${APP_FRONTEND_URL:http://localhost:5173}
+    email-verification-minutes: ${EMAIL_VERIFICATION_TOKEN_MINUTES:1440}
+    password-reset-minutes: ${PASSWORD_RESET_TOKEN_MINUTES:15}
+  mail:
+    from: ${MAIL_FROM:no-reply@studyai.local}
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:}
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME:}

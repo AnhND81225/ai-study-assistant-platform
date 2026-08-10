@@ -8,17 +8,19 @@ Docker Compose is used for local development. Cloud deployment should use Vercel
 
 - Build command: `npm run build`
 - Output directory: `dist`
-- Required env var: `VITE_API_BASE_URL`
+- Required env vars: `VITE_API_BASE_URL`, `VITE_GOOGLE_CLIENT_ID`
 - Root directory: `frontend`
 - Keep `frontend/vercel.json` so React Router routes such as `/dashboard` and `/submissions` rewrite to `index.html` when refreshed.
 - Verify PWA manifest and service worker after deployment.
 - Confirm the deployed frontend can call the configured HTTPS backend.
+- Do not put backend-only secrets such as `OPENAI_API_KEY`, `JWT_SECRET`, or `MAIL_PASSWORD` in Vercel frontend environment variables.
 
 Production frontend API base URL examples:
 
 ```text
 VITE_API_BASE_URL=https://api.ducanh.space/api
 VITE_API_BASE_URL=https://ai-study-assistant-backend-t7gs.onrender.com/api
+VITE_GOOGLE_CLIENT_ID=your-google-oauth-web-client-id.apps.googleusercontent.com
 ```
 
 ## Render Backend
@@ -30,6 +32,8 @@ VITE_API_BASE_URL=https://ai-study-assistant-backend-t7gs.onrender.com/api
 - Required env vars: database, JWT, Cloudinary, AI provider, and CORS settings.
 - Set `CORS_ALLOWED_ORIGINS` to the frontend origins, not the backend API origin.
 - Set OpenAI variables only on the backend service: `OPENAI_API_KEY`, `OPENAI_MODEL`, `AI_TIMEOUT_SECONDS`, `AI_MAX_OUTPUT_TOKENS`, and `AI_EXPLAIN_LIMIT_PER_USER`.
+- Set auth email variables on the backend only: `APP_FRONTEND_URL`, `GOOGLE_CLIENT_ID`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM`, `MAIL_SMTP_AUTH`, `MAIL_SMTP_STARTTLS_ENABLE`, `EMAIL_VERIFICATION_TOKEN_MINUTES`, and `PASSWORD_RESET_TOKEN_MINUTES`.
+- `APP_FRONTEND_URL` must be the public frontend URL, for example `https://www.ducanh.space` or the active Vercel URL. Verification and password reset emails use this value to build links.
 
 ## EC2 Backend With Nginx
 
@@ -41,9 +45,12 @@ VITE_API_BASE_URL=https://ai-study-assistant-backend-t7gs.onrender.com/api
 
 ```text
 CORS_ALLOWED_ORIGINS=https://ai-study-assistant-platform-nine.vercel.app,https://ducanh.space,https://www.ducanh.space,http://localhost:5173
+APP_FRONTEND_URL=https://www.ducanh.space
 ```
 
 `https://api.ducanh.space` is the backend origin. It is normally used in `VITE_API_BASE_URL`, not in `CORS_ALLOWED_ORIGINS`.
+
+Email verification, Google sign-in, and password reset require the same backend environment variables as Render. Keep them in the EC2 backend `.env` file or another secret mechanism loaded by the container. Do not commit that file.
 
 ## GitHub Actions Deployment Check
 
@@ -89,7 +96,22 @@ Uploads are validated by file type and size before sending to Cloudinary.
 
 Never commit real values. Use platform secrets in Vercel and Render.
 
-Frontend deployments should only receive `VITE_API_BASE_URL`. Do not set `OPENAI_API_KEY` on Vercel frontend projects.
+Frontend deployments should only receive browser-safe values:
+
+- `VITE_API_BASE_URL`
+- `VITE_GOOGLE_CLIENT_ID`
+
+Backend deployments should receive private values:
+
+- Database: `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`
+- Auth: `JWT_SECRET`, `JWT_EXPIRATION`, `APP_FRONTEND_URL`, `GOOGLE_CLIENT_ID`
+- Email: `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM`, `MAIL_SMTP_AUTH`, `MAIL_SMTP_STARTTLS_ENABLE`
+- Auth token TTLs: `EMAIL_VERIFICATION_TOKEN_MINUTES`, `PASSWORD_RESET_TOKEN_MINUTES`
+- Cloudinary: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+- OpenAI: `OPENAI_API_KEY`, `OPENAI_MODEL`, `AI_TIMEOUT_SECONDS`, `AI_MAX_OUTPUT_TOKENS`, `AI_EXPLAIN_LIMIT_PER_USER`
+- CORS/upload: `CORS_ALLOWED_ORIGINS`, `MAX_UPLOAD_SIZE_MB`
+
+Do not set `OPENAI_API_KEY`, `MAIL_PASSWORD`, `JWT_SECRET`, or database credentials on Vercel frontend projects.
 
 ## Common Issues
 
