@@ -97,7 +97,13 @@ Users can search and filter their own submissions by subject, status, favorite f
 
 ## Auth Workflow
 
-Register creates a USER account with BCrypt password hash. Login returns a JWT. Backend extracts identity from Spring Security context. Frontend stores token for MVP simplicity and clears it on logout or unauthorized responses.
+Local registration creates a USER account with a BCrypt password hash and `emailVerified=false`. The backend creates a random verification token, stores only the token hash, and sends the raw token by email. Local login is blocked until the email is verified.
+
+Google sign-in uses a browser Google ID credential, but trust is established on the backend. The backend verifies the Google token audience and verified-email claim, links or creates a verified USER account, then issues the app JWT.
+
+Password reset creates a random expiring token, stores only the hash, and emails a frontend reset link. Reset succeeds only once and updates the BCrypt password hash.
+
+Backend extracts identity from Spring Security context for protected routes. Frontend stores the JWT for MVP simplicity and clears it on logout or unauthorized responses.
 
 ## Database Relationship Overview
 

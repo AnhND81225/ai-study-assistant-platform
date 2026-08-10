@@ -27,9 +27,51 @@ Error:
 
 | Method | Path | Description | Auth |
 |---|---|---|---|
-| POST | `/api/auth/register` | Register a user | Public |
+| POST | `/api/auth/register` | Register a local user and send verification email | Public |
 | POST | `/api/auth/login` | Login and receive JWT | Public |
+| POST | `/api/auth/google` | Login/register with Google credential verified by backend | Public |
+| POST | `/api/auth/verify-email?token=...` | Verify a local account email | Public |
+| POST | `/api/auth/resend-verification` | Resend verification email with generic response | Public |
+| POST | `/api/auth/forgot-password` | Send password reset email with generic response | Public |
+| POST | `/api/auth/reset-password` | Reset password with email token | Public |
 | GET | `/api/auth/me` | Current profile | USER/ADMIN |
+
+Local registration returns a message instead of a JWT. The user must verify their email before signing in.
+
+Register request:
+
+```json
+{
+  "fullName": "Student One",
+  "email": "student@example.com",
+  "password": "Password123!"
+}
+```
+
+Register response:
+
+```json
+{
+  "success": true,
+  "message": "Registration successful. Check your email to verify your account.",
+  "data": {
+    "email": "student@example.com",
+    "message": "Check your email to verify your account before signing in."
+  },
+  "errorCode": null,
+  "details": []
+}
+```
+
+Login for an unverified local account returns `EMAIL_NOT_VERIFIED`. Google sign-in sends only the Google ID credential to the backend:
+
+```json
+{
+  "credential": "GOOGLE_ID_TOKEN_FROM_BROWSER"
+}
+```
+
+Forgot-password and resend-verification endpoints intentionally return generic messages so the API does not reveal whether an email exists.
 
 ## Health
 

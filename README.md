@@ -9,6 +9,7 @@ This project is designed to demonstrate fullstack development, backend architect
 ## Key Features
 
 - Register and login with JWT authentication.
+- Email verification for local accounts, Google sign-in, and password reset by email.
 - Role-based access control for `GUEST`, `USER`, and `ADMIN`.
 - Mobile-first React UI.
 - Scan homework images from camera or gallery with preview, rotate, and clear controls.
@@ -198,6 +199,31 @@ Required OpenAI backend variables:
 | `AI_TIMEOUT_SECONDS` | OpenAI request timeout |
 | `AI_MAX_OUTPUT_TOKENS` | Output token cap for cost control |
 | `AI_EXPLAIN_LIMIT_PER_USER` | Maximum successful explanation requests per user per day |
+
+Authentication and email variables:
+
+| Variable | Purpose |
+|---|---|
+| `APP_FRONTEND_URL` | Frontend base URL used to build verification and password reset links |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID verified by the backend |
+| `MAIL_HOST` | SMTP host for verification and reset emails |
+| `MAIL_PORT` | SMTP port, commonly `587` |
+| `MAIL_USERNAME` | SMTP username |
+| `MAIL_PASSWORD` | SMTP password or app password |
+| `MAIL_FROM` | Sender address for auth emails |
+| `MAIL_SMTP_AUTH` | Enables SMTP authentication |
+| `MAIL_SMTP_STARTTLS_ENABLE` | Enables STARTTLS for SMTP |
+| `EMAIL_VERIFICATION_TOKEN_MINUTES` | Email verification link lifetime |
+| `PASSWORD_RESET_TOKEN_MINUTES` | Password reset link lifetime |
+
+Frontend authentication variables:
+
+| Variable | Purpose |
+|---|---|
+| `VITE_API_BASE_URL` | Public backend API base URL |
+| `VITE_GOOGLE_CLIENT_ID` | Public Google OAuth client ID used by the browser Google sign-in button |
+
+For local development, configure an SMTP sandbox such as Mailtrap or a provider-specific app password before testing local account registration. `VITE_GOOGLE_CLIENT_ID` is public, but backend secrets such as `MAIL_PASSWORD`, `JWT_SECRET`, and `OPENAI_API_KEY` must stay only on the backend.
 
 Never commit real `.env` files.
 

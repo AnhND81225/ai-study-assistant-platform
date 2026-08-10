@@ -1,9 +1,10 @@
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { BookOpen, LockKeyhole, Mail } from 'lucide-react';
 import { consumeSessionNotice, useAuth } from '../auth/AuthContext';
 import { apiMessage } from '../api/client';
 import { ErrorBanner } from '../components/common/ErrorBanner';
+import { GoogleSignInButton } from '../components/common/GoogleSignInButton';
 
 export function LoginPage() {
   const auth = useAuth();
@@ -29,10 +30,23 @@ export function LoginPage() {
     }
   }
 
-  return <AuthForm title="Welcome back" subtitle="Continue your study session." submitLabel="Sign in" form={form} setForm={setForm} submit={submit} loading={loading} error={error} dismissError={() => setError('')} footer={<Link to="/register" className="font-bold text-ocean">Create an account</Link>} />;
+  const handleGoogleCredential = useCallback(async (credential) => {
+    setError('');
+    setLoading(true);
+    try {
+      await auth.googleLogin(credential);
+      navigate(location.state?.from?.pathname || '/dashboard', { replace: true });
+    } catch (err) {
+      setError(apiMessage(err, 'Google sign in failed'));
+    } finally {
+      setLoading(false);
+    }
+  }, [auth, location.state?.from?.pathname, navigate]);
+
+  return <AuthForm title="Welcome back" subtitle="Continue your study session." submitLabel="Sign in" form={form} setForm={setForm} submit={submit} loading={loading} error={error} dismissError={() => setError('')} onGoogleCredential={handleGoogleCredential} onGoogleError={setError} footer={<><Link to="/forgot-password" className="font-bold text-ocean">Forgot password?</Link><span className="mx-2 text-slate-300">/</span><Link to="/register" className="font-bold text-ocean">Create an account</Link></>} />;
 }
 
-function AuthForm({ title, subtitle, submitLabel, form, setForm, submit, loading, error, dismissError, footer }) {
+function AuthForm({ title, subtitle, submitLabel, form, setForm, submit, loading, error, dismissError, onGoogleCredential, onGoogleError, footer }) {
   return (
     <main className="landing-page grid min-h-[100dvh] place-items-center px-4 py-8">
       <form onSubmit={submit} className="auth-card">
@@ -64,6 +78,12 @@ function AuthForm({ title, subtitle, submitLabel, form, setForm, submit, loading
           <button disabled={loading} className="primary-button">
             {loading ? 'Please wait...' : submitLabel}
           </button>
+          <div className="flex items-center gap-3 text-xs font-extrabold uppercase tracking-[0.18em] text-slate-400">
+            <span className="h-px flex-1 bg-slate-100" />
+            or
+            <span className="h-px flex-1 bg-slate-100" />
+          </div>
+          <GoogleSignInButton onCredential={onGoogleCredential} onError={onGoogleError} />
           <div className="border-t border-slate-100 pt-4 text-center text-sm font-medium text-slate-600">{footer}</div>
         </div>
         </div>
