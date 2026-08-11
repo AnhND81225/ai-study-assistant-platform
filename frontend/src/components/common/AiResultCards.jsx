@@ -10,14 +10,14 @@ export function ExplanationResultCard({ aiResponse, titleOverride }) {
     ? 'Upload a clearer photo to continue'
     : 'We used the image as the main question';
   return (
-    <article className="workspace-card overflow-hidden">
+    <article className="fade-in smooth-card workspace-card overflow-hidden">
       <div className="workspace-core overflow-hidden">
-      <div className="border-b border-slate-200/80 bg-gradient-to-r from-white to-blue-50/70 px-4 py-4 sm:px-5">
+      <div className="border-b border-slate-200/80 bg-gradient-to-r from-white to-blue-50/60 px-4 py-4 sm:px-5">
       <div className="flex items-center gap-2">
-        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-blue-50 text-ocean shadow-inner">
+        <span className="grid h-10 w-10 place-items-center rounded-2xl bg-blue-50 text-ocean shadow-inner">
           <Lightbulb size={19} />
         </span>
-        <h2 className="text-xl font-extrabold tracking-[-0.025em] text-ink">{title}</h2>
+        <h2 className="text-xl font-bold text-ink">{title}</h2>
       </div>
       </div>
       <div className="grid gap-3 p-4 sm:p-5">
@@ -35,12 +35,12 @@ export function ExplanationResultCard({ aiResponse, titleOverride }) {
         </ResultSection>
         {aiResponse.explanation ? (
           <ResultSection icon={ListChecks} title={aiResponse.resultStatus === 'QUESTION_SELECTION_REQUIRED' ? 'What to do next' : 'Step-by-step solution'}>
-            <RichText>{aiResponse.explanation}</RichText>
+            <StepByStepContent text={aiResponse.explanation} />
           </ResultSection>
         ) : null}
         {finalAnswer ? (
           <ResultSection icon={Target} title="Final answer" accent>
-            <RichText>{finalAnswer}</RichText>
+            <FinalAnswerContent answer={finalAnswer} />
           </ResultSection>
         ) : null}
         {malformedFinalAnswer ? (
@@ -125,19 +125,19 @@ export function LatestGradeSummary({ result }) {
   const scoreStyle = score >= 80 ? 'border-sky-200 bg-sky-50 text-ocean' : score >= 50 ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-red-200 bg-red-50 text-red-700';
 
   return (
-    <section className="workspace-card overflow-hidden">
+    <section className="fade-in smooth-card workspace-card overflow-hidden">
       <div className="workspace-core bg-gradient-to-br from-white via-white to-blue-50/70 p-5 sm:p-6">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="eyebrow border-blue-100 bg-blue-50 text-ocean">Latest check</p>
-            <p className="mt-4 text-sm font-bold text-slate-500">Student result</p>
-            <p className="mt-1 text-5xl font-extrabold tracking-[-0.05em] text-ink sm:text-6xl">
+            <p className="mt-4 text-sm font-semibold text-slate-500">Student result</p>
+            <p className="mt-1 text-5xl font-extrabold text-ink sm:text-6xl">
               {score}<span className="text-2xl text-slate-400 sm:text-3xl">/100</span>
             </p>
           </div>
           <div className="sm:text-right">
             <ScoreStatus score={score} scoreStyle={scoreStyle} />
-            <p className="mt-3 max-w-sm text-sm font-semibold leading-6 text-slate-600 sm:ml-auto">
+            <p className="mt-3 max-w-sm text-sm font-medium leading-6 text-slate-600 sm:ml-auto">
               {score >= 80 ? 'The answer matches the reference well. Review the feedback to keep the approach consistent.' : score >= 50 ? 'Review the feedback below, then try another answer to strengthen the weak points.' : 'Start with the feedback below, then correct the answer and check it again.'}
             </p>
           </div>
@@ -149,7 +149,7 @@ export function LatestGradeSummary({ result }) {
 
 function ScoreStatus({ score, scoreStyle }) {
   return (
-    <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-bold ${scoreStyle}`}>
+    <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${scoreStyle}`}>
       {score >= 80 ? 'Strong work' : score >= 50 ? 'Needs review' : 'Needs correction'}
     </span>
   );
@@ -157,12 +157,128 @@ function ScoreStatus({ score, scoreStyle }) {
 
 function ResultSection({ icon: Icon, title, children, accent = false }) {
   return (
-    <section className={`rounded-[1.25rem] border p-4 ${accent ? 'border-emerald-200 bg-emerald-50/70' : 'border-slate-200/90 bg-slate-50/90'}`}>
-      <div className="mb-2 flex items-center gap-2 text-sm font-extrabold text-ink">
+    <section className={`result-section rounded-[1.15rem] border p-3.5 sm:p-4 ${accent ? 'border-emerald-200 bg-emerald-50/70' : 'border-slate-200/90 bg-slate-50/90'}`}>
+      <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-ink">
         <Icon size={16} className={accent ? 'text-emerald-700' : 'text-ocean'} />
         {title}
       </div>
       {children}
     </section>
   );
+}
+
+function StepByStepContent({ text }) {
+  const normalizedText = normalizeAiText(text);
+  const steps = splitExplanationSteps(normalizedText);
+
+  if (!steps.length) {
+    return <RichText>{normalizedText}</RichText>;
+  }
+
+  return (
+    <div className="ai-step-list">
+      {steps.map((step, index) => {
+        const label = stepLabel(step, index);
+        return (
+          <div key={`${label}-${index}`} className="ai-step-item" style={{ '--step-index': index }}>
+            <span className="ai-step-index">{label}</span>
+            <RichText className="ai-step-copy">{stripStepLabel(step)}</RichText>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Normalize dense AI text into readable blocks without changing the saved answer. */
+function splitExplanationSteps(value) {
+  const text = normalizeAiText(value);
+  if (!text) {
+    return [];
+  }
+
+  const lineSteps = text.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+  if (lineSteps.length > 1 && lineSteps.some(isStepStart)) {
+    return groupStepLines(lineSteps);
+  }
+
+  const parts = text
+    .split(/\s(?=(?:\d{1,2}[.)]\s|Câu\s*\d{1,2}[:.)]\s*|Question\s*\d{1,2}[:.)]\s*))/gi)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  return parts.length >= 2 ? parts : [];
+}
+
+function normalizeAiText(value) {
+  return String(value || '')
+    .replace(/\r/g, '')
+    .replace(/\\n/g, '\n')
+    .trim();
+}
+
+function isStepStart(value) {
+  return /^(?:\d{1,2}[.)]\s|Câu\s*\d{1,2}[:.)]\s*|Question\s*\d{1,2}[:.)]\s*)/i.test(value);
+}
+
+function groupStepLines(lines) {
+  const grouped = [];
+  lines.forEach((line) => {
+    if (isStepStart(line) || !grouped.length) {
+      grouped.push(line);
+      return;
+    }
+    grouped[grouped.length - 1] = `${grouped[grouped.length - 1]} ${line}`;
+  });
+  return grouped;
+}
+
+function stepLabel(value, index) {
+  const match = String(value).match(/^(?:Câu|Question)?\s*(\d{1,2})/i);
+  return match?.[1] || index + 1;
+}
+
+function stripStepLabel(value) {
+  return String(value).replace(/^(?:\d{1,2}[.)]\s*|(?:Câu|Question)\s*\d{1,2}[:.)]\s*)/i, '').trim();
+}
+
+function FinalAnswerContent({ answer }) {
+  const choices = parseAnswerChoices(answer);
+
+  if (!choices.length) {
+    return <RichText>{answer}</RichText>;
+  }
+
+  const compactChoicesOnly = String(answer)
+    .replace(/(?:(?:Câu|Question)\s*)?\d{1,2}\s*[:.)-]?\s*[A-D]/gi, '')
+    .replace(/[,\s.;:-]/g, '')
+    .length === 0;
+
+  return (
+    <div className="grid gap-3">
+      <div className="answer-choice-grid">
+        {choices.map((choice) => (
+          <span key={choice.question} className="answer-choice-card">
+            <span className="answer-choice-label">Question {choice.question}</span>
+            <span className="answer-choice-value">{choice.answer}</span>
+          </span>
+        ))}
+      </div>
+      {!compactChoicesOnly ? <RichText>{answer}</RichText> : null}
+    </div>
+  );
+}
+
+function parseAnswerChoices(answer) {
+  const matches = [...String(answer || '').matchAll(/(?:^|[\s,;])(?:(?:Câu|Question)\s*)?(\d{1,2})\s*[:.)-]?\s*([A-D])(?=$|[\s,.;])/gi)];
+  const seen = new Set();
+
+  return matches.reduce((items, match) => {
+    if (seen.has(match[1])) {
+      return items;
+    }
+    seen.add(match[1]);
+    items.push({ question: match[1], answer: match[2].toUpperCase() });
+    return items;
+  }, []);
 }

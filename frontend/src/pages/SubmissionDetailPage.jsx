@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ClipboardCheck, ListChecks, RefreshCw, ScanSearch, Star, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ClipboardCheck, ListChecks, RefreshCw, ScanSearch, Star, Trash2 } from 'lucide-react';
 import { submissionApi } from '../api/submissionApi';
 import { apiMessage } from '../api/client';
 import { PageHeader } from '../components/common/PageHeader';
@@ -18,12 +18,22 @@ export function SubmissionDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const [explaining, setExplaining] = useState(false);
   const [selectedQuestions, setSelectedQuestions] = useState([]);
+  const [solvedQuestionPage, setSolvedQuestionPage] = useState(0);
 
   useEffect(() => {
     submissionApi.detail(id)
       .then(setSubmission)
       .catch((err) => setError(apiMessage(err, 'Could not load submission')));
   }, [id]);
+
+  useEffect(() => {
+    setSolvedQuestionPage(0);
+  }, [id]);
+
+  useEffect(() => {
+    const count = submission?.questionSolutions?.length || 0;
+    setSolvedQuestionPage((current) => (count ? Math.min(current, count - 1) : 0));
+  }, [submission?.questionSolutions?.length]);
 
   async function remove() {
     if (!window.confirm('Delete this submission and related AI results?')) return;
@@ -86,14 +96,16 @@ export function SubmissionDetailPage() {
       <PageHeader title={submission?.title || 'Submission detail'} description="Review the uploaded image, AI explanation, and grading results." action={<Link to="/submissions" className="secondary-button">Back</Link>} />
       <ErrorBanner message={error} />
       {submission ? (
-        <div className="grid gap-5 lg:grid-cols-[360px_1fr]">
-          <section className="focus-panel workspace-card h-fit lg:sticky lg:top-28">
+        <div className="submission-detail-shell grid items-start gap-4 lg:grid-cols-[minmax(300px,0.9fr)_minmax(0,1.35fr)] xl:grid-cols-[minmax(360px,0.95fr)_minmax(0,1.45fr)]">
+          <section className="focus-panel smooth-card workspace-card h-fit lg:sticky lg:top-28">
             <div className="workspace-core p-4 sm:p-5">
-            <img src={submission.imageUrl} alt="Uploaded homework" className="w-full rounded-2xl object-contain shadow-[0_18px_38px_rgba(15,23,42,0.10)]" />
+            <div className="submission-media-frame">
+              <img src={submission.imageUrl} alt="Uploaded homework" className="submission-media w-full rounded-2xl object-contain" />
+            </div>
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <StatusPill status={submission.status} />
-              {submission.favorite ? <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-bold text-ocean"><Star size={13} fill="currentColor" />Favorite</span> : null}
-              <span className="text-sm font-semibold text-slate-600">{submission.subject.name}</span>
+              {submission.favorite ? <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-ocean"><Star size={13} fill="currentColor" />Favorite</span> : null}
+              <span className="text-sm font-medium text-slate-600">{submission.subject.name}</span>
             </div>
             {submission.note ? <p className="mt-3 text-sm leading-6 text-slate-600">{submission.note}</p> : null}
             <button disabled={deleting} onClick={remove} className="danger-button mt-4 w-full">
@@ -113,7 +125,7 @@ export function SubmissionDetailPage() {
             ) : null}
             </div>
           </section>
-          <section className="grid gap-4">
+          <section className="detail-result-stream grid min-w-0 gap-4">
             {shouldShowQuestionScope(submission.aiResponse) ? (
               <QuestionScopePanel
                 aiResponse={submission.aiResponse}
@@ -126,20 +138,22 @@ export function SubmissionDetailPage() {
               />
             ) : null}
             {submission.questionSolutions?.length ? (
+              <QuickAnswersPanel solutions={submission.questionSolutions} />
+            ) : null}
+          </section>
+
+          <section className="submission-wide-results grid gap-4">
+            {submission.questionSolutions?.length ? (
               <DetailStep
                 step="1"
                 title="Solved questions"
                 description="Each saved solution stays attached to its question, so solving another one will not replace it."
               >
-                <div className="grid gap-4">
-                  {submission.questionSolutions.map((solution) => (
-                    <ExplanationResultCard
-                      key={solution.id}
-                      aiResponse={solution}
-                      titleOverride={`Question ${solution.questionNumber}`}
-                    />
-                  ))}
-                </div>
+                <SolvedQuestionsPager
+                  solutions={submission.questionSolutions}
+                  page={solvedQuestionPage}
+                  setPage={setSolvedQuestionPage}
+                />
               </DetailStep>
             ) : null}
             {submission.aiResponse && submission.aiResponse.resultStatus !== 'QUESTION_SELECTION_REQUIRED' ? (
@@ -151,10 +165,10 @@ export function SubmissionDetailPage() {
                 <ExplanationResultCard aiResponse={submission.aiResponse} titleOverride="AI solution reference" />
               </DetailStep>
             ) : !submission.aiResponse ? (
-              <div className="workspace-card border-dashed">
+              <div className="fade-in workspace-card border-dashed">
                 <div className="workspace-core p-5">
-                <h3 className="text-lg font-extrabold">No explanation yet</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">The image is saved. Retry AI explanation when your connection and provider quota are ready.</p>
+                <h3 className="text-lg font-bold">No explanation yet</h3>
+                <p className="mt-2 text-sm font-medium leading-6 text-slate-600">The image is saved. Retry AI explanation when your connection and provider quota are ready.</p>
                 </div>
               </div>
             ) : null}
@@ -217,14 +231,14 @@ function QuestionScopePanel({
   }
 
   return (
-    <section className="workspace-card border-violet-200 bg-violet-50/50">
+    <section className="question-scope-card fade-in smooth-card workspace-card border-blue-200 bg-blue-50/45">
       <div className="workspace-core p-4 sm:p-5">
       <div className="flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-violet-100 text-violet-700">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-blue-100 text-ocean">
           <ScanSearch size={20} />
         </span>
         <div>
-          <h2 className="font-extrabold text-ink">Choose what you want to solve</h2>
+          <h2 className="font-bold text-ink">Choose what you want to solve</h2>
           <p className="mt-1 text-sm font-medium leading-6 text-slate-600">
             Select up to three questions. Daily solves are charged per new question, not per button click.
           </p>
@@ -239,7 +253,7 @@ function QuestionScopePanel({
               type="button"
               aria-pressed={selectedQuestions.includes(number)}
               onClick={() => toggleQuestion(number)}
-              className={`relative grid h-11 min-w-11 place-items-center rounded-2xl border px-3 text-sm font-extrabold transition ${selectedQuestions.includes(number) ? 'border-violet-500 bg-violet-600 text-white' : 'border-violet-200 bg-white text-violet-700 hover:border-violet-400'}`}
+              className={`choice-toggle relative grid h-11 min-w-11 place-items-center rounded-2xl border px-3 text-sm font-bold ${selectedQuestions.includes(number) ? 'border-blue-500 bg-sea text-white' : 'border-blue-200 bg-white text-ocean hover:border-blue-400'}`}
             >
               {number}
               {solvedNumbers.has(number) ? <span className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-emerald-500 text-[9px] text-white">✓</span> : null}
@@ -248,9 +262,9 @@ function QuestionScopePanel({
         </div>
       ) : null}
 
-      <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-violet-100 bg-white/80 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-blue-100 bg-white/80 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-extrabold text-ink">
+          <p className="text-sm font-bold text-ink">
             {selectedQuestions.length ? `${selectedQuestions.length} selected` : 'No questions selected'}
           </p>
           <p className="mt-1 text-xs font-semibold text-slate-500">
@@ -274,16 +288,148 @@ function QuestionScopePanel({
   );
 }
 
+function QuickAnswersPanel({ solutions }) {
+  const answers = solutions
+    .map((solution) => ({
+      questionNumber: solution.questionNumber,
+      answer: summarizeFinalAnswer(solution.finalAnswer),
+    }))
+    .filter((item) => item.answer);
+
+  if (!answers.length) return null;
+
+  return (
+    <section className="quick-answer-panel fade-in smooth-card workspace-card">
+      <div className="workspace-core p-4 sm:p-5">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-base font-bold text-ink">Quick answers</h2>
+            <p className="mt-1 text-sm font-medium leading-6 text-slate-600">
+              Scan the saved answers here, then review the detailed solution below.
+            </p>
+          </div>
+          <span className="text-xs font-semibold text-slate-500">{answers.length} saved</span>
+        </div>
+        <div className="quick-answer-grid mt-4">
+          {answers.map((item) => (
+            <div
+              key={item.questionNumber}
+              className="quick-answer-chip"
+            >
+              <span className="quick-answer-question">{item.questionNumber}</span>
+              <span className="quick-answer-value">{item.answer}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function summarizeFinalAnswer(value) {
+  const answer = readFinalAnswerText(value);
+  if (!answer) return '';
+  const multipleChoice = answer.match(/(?:^|[\s,;:.])([A-D])(?:$|[\s,.;:])/i);
+  if (multipleChoice) return multipleChoice[1].toUpperCase();
+  return answer
+    .replace(/\s+/g, ' ')
+    .replace(/^answer\s*[:.)-]\s*/i, '')
+    .trim()
+    .slice(0, 42);
+}
+
+function readFinalAnswerText(value) {
+  if (!value) return '';
+  const trimmed = String(value).trim();
+  const candidate = trimmed.startsWith('```json')
+    ? trimmed.slice(7).replace(/```\s*$/, '').trim()
+    : trimmed;
+  if (!candidate.startsWith('{')) return trimmed;
+  try {
+    const parsed = JSON.parse(candidate);
+    return typeof parsed.finalAnswer === 'string' ? parsed.finalAnswer.trim() : '';
+  } catch {
+    return trimmed;
+  }
+}
+
+function SolvedQuestionsPager({ solutions, page, setPage }) {
+  const count = solutions.length;
+  const activePage = Math.min(page, count - 1);
+  const activeSolution = solutions[activePage];
+
+  function goToPage(nextPage) {
+    setPage(Math.max(0, Math.min(nextPage, count - 1)));
+  }
+
+  return (
+    <div className="solved-question-pager">
+      <div className="solved-question-nav">
+        <div className="solved-question-toolbar">
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-ink">Question {activeSolution.questionNumber}</p>
+            <p className="mt-0.5 text-xs font-medium text-slate-500">
+              {activePage + 1} of {count} saved solutions
+            </p>
+          </div>
+        </div>
+
+        <div className="solved-question-tabs" aria-label="Solved question pages">
+          {solutions.map((solution, index) => (
+            <button
+              key={solution.id}
+              type="button"
+              aria-current={index === activePage ? 'page' : undefined}
+              onClick={() => goToPage(index)}
+              className={`solved-question-tab ${index === activePage ? 'solved-question-tab-active' : ''}`}
+            >
+              {solution.questionNumber}
+            </button>
+          ))}
+        </div>
+
+        <div className="solved-question-arrows">
+          <button
+            type="button"
+            aria-label="Previous solved question"
+            disabled={activePage === 0}
+            onClick={() => goToPage(activePage - 1)}
+            className="pager-icon-button"
+          >
+            <ChevronLeft size={17} />
+          </button>
+          <button
+            type="button"
+            aria-label="Next solved question"
+            disabled={activePage === count - 1}
+            onClick={() => goToPage(activePage + 1)}
+            className="pager-icon-button"
+          >
+            <ChevronRight size={17} />
+          </button>
+        </div>
+      </div>
+
+      <div key={activeSolution.id} className="solved-question-page">
+        <ExplanationResultCard
+          aiResponse={activeSolution}
+          titleOverride={`Question ${activeSolution.questionNumber}`}
+        />
+      </div>
+    </div>
+  );
+}
+
 function DetailStep({ step, title, description, children }) {
   return (
-    <section className="grid gap-3">
+    <section className="detail-step fade-in grid gap-3">
       <div className="flex items-start gap-3">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-sea text-sm font-extrabold text-white shadow-[0_14px_30px_rgba(37,99,235,0.22)]">
+        <span className="detail-step-index grid h-8 w-8 shrink-0 place-items-center rounded-2xl bg-sea text-sm font-bold text-white shadow-[0_12px_26px_rgba(37,99,235,0.20)]">
           {step}
         </span>
-        <div>
-          <h2 className="text-lg font-extrabold tracking-[-0.025em] text-ink">{title}</h2>
-          <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">{description}</p>
+        <div className="min-w-0">
+          <h2 className="text-lg font-bold text-ink">{title}</h2>
+          <p className="mt-1 max-w-2xl text-sm font-medium leading-6 text-slate-600">{description}</p>
         </div>
       </div>
       {children}
