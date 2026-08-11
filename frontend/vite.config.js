@@ -9,7 +9,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['offline.html'],
       workbox: {
-        navigateFallback: '/offline.html',
+        navigateFallback: '/index.html',
         runtimeCaching: [],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
       },
