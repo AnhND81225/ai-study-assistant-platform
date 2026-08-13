@@ -1,16 +1,49 @@
 import { Gauge } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { aiUsageApi } from '../../api/aiUsageApi';
+import { useAuth } from '../../auth/AuthContext';
+
+const AI_USAGE_CACHE_TTL_MS = 60_000;
+const aiUsageCache = new Map();
 
 export function AiUsageCard({ compact = false }) {
-  const [quota, setQuota] = useState(null);
+  const { user } = useAuth();
+  const cacheKey = aiUsageCacheKey(user);
+  const cachedQuota = readAiUsageCache(cacheKey);
+  const [quota, setQuota] = useState(() => cachedQuota?.quota || null);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    let ignore = false;
+    const cached = readAiUsageCache(cacheKey);
+
+    if (cached) {
+      setQuota(cached.quota);
+    }
+
+    if (cached && Date.now() - cached.savedAt < AI_USAGE_CACHE_TTL_MS) {
+      return () => {
+        ignore = true;
+      };
+    }
+
     aiUsageApi.mine()
-      .then(setQuota)
-      .catch(() => setError('AI quota unavailable'));
-  }, []);
+      .then((nextQuota) => {
+        if (ignore) return;
+        setQuota(nextQuota);
+        aiUsageCache.set(cacheKey, {
+          quota: nextQuota,
+          savedAt: Date.now(),
+        });
+      })
+      .catch(() => {
+        if (!ignore && !cached) setError('AI quota unavailable');
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [cacheKey]);
 
   if (error) {
     return (
@@ -54,4 +87,12 @@ export function AiUsageCard({ compact = false }) {
       </div>
     </div>
   );
+}
+
+function aiUsageCacheKey(user) {
+  return user?.id ?? user?.email ?? user?.username ?? 'current-user';
+}
+
+function readAiUsageCache(cacheKey) {
+  return aiUsageCache.get(cacheKey) || null;
 }
