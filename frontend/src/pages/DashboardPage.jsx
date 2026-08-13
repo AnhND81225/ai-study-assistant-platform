@@ -8,23 +8,61 @@ import { PageHeader } from '../components/common/PageHeader';
 import { AiUsageCard } from '../components/common/AiUsageCard';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 
+const DASHBOARD_CACHE_TTL_MS = 60_000;
+const dashboardCache = new Map();
+
 export function DashboardPage() {
   const { user } = useAuth();
-  const [submissions, setSubmissions] = useState([]);
-  const [totalWork, setTotalWork] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = dashboardCacheKey(user);
+  const cachedDashboard = readDashboardCache(cacheKey);
+  const [submissions, setSubmissions] = useState(() => cachedDashboard?.submissions || []);
+  const [totalWork, setTotalWork] = useState(() => cachedDashboard?.totalWork || 0);
+  const [loading, setLoading] = useState(() => !cachedDashboard);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    setLoading(true);
+    let ignore = false;
+    const cached = readDashboardCache(cacheKey);
+
+    if (cached) {
+      setSubmissions(cached.submissions);
+      setTotalWork(cached.totalWork);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+
+    if (cached && Date.now() - cached.savedAt < DASHBOARD_CACHE_TTL_MS) {
+      return () => {
+        ignore = true;
+      };
+    }
+
     submissionApi.mine({ size: 100 })
       .then((page) => {
-        setSubmissions(page.content || []);
-        setTotalWork(page.totalElements ?? page.content?.length ?? 0);
+        if (ignore) return;
+        const nextSubmissions = page.content || [];
+        const nextTotalWork = page.totalElements ?? page.content?.length ?? 0;
+
+        setSubmissions(nextSubmissions);
+        setTotalWork(nextTotalWork);
+        dashboardCache.set(cacheKey, {
+          submissions: nextSubmissions,
+          totalWork: nextTotalWork,
+          savedAt: Date.now(),
+        });
       })
-      .catch((err) => setError(apiMessage(err, 'Could not load your study dashboard')))
-      .finally(() => setLoading(false));
-  }, []);
+      .catch((err) => {
+        if (!ignore) setError(apiMessage(err, 'Could not load your study dashboard'));
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [cacheKey]);
 
   const stats = useMemo(() => buildDashboardStats(submissions, totalWork), [submissions, totalWork]);
 
@@ -249,6 +287,14 @@ function MetricCard({ label, value, detail }) {
       </div>
     </article>
   );
+}
+
+function dashboardCacheKey(user) {
+  return user?.id ?? user?.email ?? user?.username ?? 'current-user';
+}
+
+function readDashboardCache(cacheKey) {
+  return dashboardCache.get(cacheKey) || null;
 }
 
 function buildDashboardStats(items, totalWork) {
