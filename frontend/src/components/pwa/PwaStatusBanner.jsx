@@ -22,7 +22,7 @@ export function PwaStatusBanner() {
   return (
     <div className="border-b border-blue-100 bg-blue-50 px-4 py-2 text-sm font-bold text-ocean">
       <div className="mx-auto flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <span>Install StudyAI for a faster mobile app experience.</span>
+        <span>Install AI-Learning for a faster mobile app experience.</span>
         <button type="button" onClick={install} className="primary-button px-3 text-sm">
           <Download size={16} />
           Install app

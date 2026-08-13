@@ -33,7 +33,7 @@ export function ForgotPasswordPage() {
             <span className="grid h-11 w-11 place-items-center rounded-[1.05rem] bg-sea text-white shadow-[0_18px_34px_rgba(37,99,235,0.24)]">
               <BookOpen size={19} />
             </span>
-            StudyAI
+            AI-Learning
           </Link>
 
           {sent ? (

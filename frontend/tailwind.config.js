@@ -3,18 +3,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: '#122033',
-        sea: '#2563EB',
-        ocean: '#1D4ED8',
-        mint: '#ECFDF5',
-        lilac: '#F3F0FF',
-        coral: '#F97316',
-        paper: '#F8FAFC',
+        ink: '#143C5A',
+        sea: '#0284C7',
+        ocean: '#2563EB',
+        mint: '#E9FFF7',
+        lilac: '#EEF2FF',
+        coral: '#F43F5E',
+        paper: '#F6FAFF',
         warn: '#B45309',
       },
       boxShadow: {
         soft: '0 12px 32px rgba(15, 23, 42, 0.08)',
-        glow: '0 16px 36px rgba(37, 99, 235, 0.22)',
+        glow: '0 16px 36px rgba(2, 132, 199, 0.22)',
       },
     },
   },

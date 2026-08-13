@@ -76,14 +76,14 @@ export function DashboardPage() {
           <div className="absolute bottom-0 right-24 h-40 w-40 translate-y-16 rounded-full bg-emerald-100/70 blur-2xl" aria-hidden="true" />
           <div className="relative grid gap-6 lg:grid-cols-[1fr_220px] lg:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/78 px-3 py-1.5 text-xs font-extrabold text-ocean">
+              <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/78 px-3 py-1.5 text-xs font-bold text-ocean">
                 <Sparkles size={14} />
                 Best next step
               </div>
-              <h2 className="mt-5 max-w-2xl text-3xl font-extrabold leading-[1.04] tracking-[-0.035em] text-ink sm:text-5xl">
+              <h2 className="mt-5 max-w-2xl text-3xl font-bold leading-[1.08] tracking-[-0.025em] text-ink sm:text-[3.25rem]">
                 Welcome back{user?.fullName ? `, ${firstName(user.fullName)}` : ''}. What do you want to study?
               </h2>
-              <p className="mt-4 max-w-xl text-sm font-semibold leading-7 text-slate-600 sm:text-base">
+              <p className="mt-4 max-w-xl text-sm font-medium leading-7 text-slate-500 sm:text-base">
                 Scan homework, check completed work, and use your saved history to keep study progress organized.
               </p>
               <div className="mt-6 grid gap-3 sm:flex">
@@ -268,7 +268,7 @@ function ActionCard({ to, icon: Icon, title, detail, tone }) {
 
 function MiniStep({ icon: Icon, label }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-3 text-sm font-extrabold text-slate-700">
+    <div className="flex items-center gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-3 text-sm font-semibold text-slate-700">
       <span className="grid h-10 w-10 place-items-center rounded-2xl bg-blue-50 text-ocean">
         <Icon size={18} />
       </span>
@@ -281,9 +281,9 @@ function MetricCard({ label, value, detail }) {
   return (
     <article className="workspace-card min-w-0">
       <div className="workspace-core p-4">
-        <p className="text-sm font-extrabold text-slate-500">{label}</p>
-        <p className="mt-2 text-3xl font-extrabold tracking-[-0.045em] text-ink">{value}</p>
-        <p className="mt-1 text-xs font-bold text-slate-500">{detail}</p>
+        <p className="text-sm font-semibold text-slate-500">{label}</p>
+        <p className="mt-2 text-3xl font-bold tracking-[-0.025em] text-ink">{value}</p>
+        <p className="mt-1 text-xs font-medium text-slate-500">{detail}</p>
       </div>
     </article>
   );
