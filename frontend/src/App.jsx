@@ -30,7 +30,7 @@ const NotFoundPage = lazyNamed(() => import('./pages/NotFoundPage'), 'NotFoundPa
 
 export default function App() {
   return (
-    <Suspense fallback={<LoadingState label="Opening StudyAI..." />}>
+    <Suspense fallback={<LoadingState label="Opening AI-Learning..." />}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />

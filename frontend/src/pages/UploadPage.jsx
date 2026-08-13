@@ -67,7 +67,7 @@ export function UploadPage() {
 
   return (
     <div className="motion-page">
-      <PageHeader title="Solve homework" description="Scan one question or a worksheet, then choose exactly what you want StudyAI to explain." />
+      <PageHeader title="Solve homework" description="Scan one question or a worksheet, then choose exactly what you want AI-Learning to explain." />
       <ProcessProgress title="Creating your solution" steps={progressSteps} activeStep={activeStep} />
       <section className="mb-6 grid gap-3 sm:grid-cols-3">
         <WorkflowMiniCard icon={ScanLine} title="1. Scan" detail="Take one clear photo." />
@@ -98,7 +98,7 @@ export function UploadPage() {
             <AiUsageCard compact />
             <div className="rounded-[1.35rem] border border-blue-100 bg-blue-50/70 p-4">
               <p className="text-sm font-extrabold text-ocean">Better scan, better answer</p>
-              <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">Use a clear photo. For large worksheets, crop to the exact question or let StudyAI detect readable question numbers.</p>
+              <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">Use a clear photo. For large worksheets, crop to the exact question or let AI-Learning detect readable question numbers.</p>
             </div>
             <label className="grid gap-1.5 text-sm font-bold text-slate-700">
               Subject

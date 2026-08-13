@@ -67,7 +67,7 @@ export function RegisterPage() {
               <span className="grid h-11 w-11 place-items-center rounded-[1.05rem] bg-sea text-white shadow-[0_18px_34px_rgba(37,99,235,0.24)]">
                 <BookOpen size={19} />
               </span>
-              StudyAI
+              AI-Learning
             </Link>
             <div className="mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
               <CheckCircle2 size={26} />
@@ -97,7 +97,7 @@ export function RegisterPage() {
           <span className="grid h-11 w-11 place-items-center rounded-[1.05rem] bg-sea text-white shadow-[0_18px_34px_rgba(37,99,235,0.24)]">
             <BookOpen size={19} />
           </span>
-          StudyAI
+          AI-Learning
         </Link>
         <h1 className="text-4xl font-extrabold tracking-[-0.035em] text-ink">Create account</h1>
         <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">Start saving explanations and grading results.</p>

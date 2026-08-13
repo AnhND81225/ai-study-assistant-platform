@@ -7,6 +7,7 @@ import { PageHeader } from '../components/common/PageHeader';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { StatusPill } from '../components/common/StatusPill';
 import { ExplanationResultCard, GradingResultCard } from '../components/common/AiResultCards';
+import { RichText } from '../components/common/RichText';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 export function SubmissionDetailPage() {
@@ -96,51 +97,55 @@ export function SubmissionDetailPage() {
       <PageHeader title={submission?.title || 'Submission detail'} description="Review the uploaded image, AI explanation, and grading results." action={<Link to="/submissions" className="secondary-button">Back</Link>} />
       <ErrorBanner message={error} />
       {submission ? (
-        <div className="submission-detail-shell grid items-start gap-4 lg:grid-cols-[minmax(300px,0.9fr)_minmax(0,1.35fr)] xl:grid-cols-[minmax(360px,0.95fr)_minmax(0,1.45fr)]">
-          <section className="focus-panel smooth-card workspace-card h-fit lg:sticky lg:top-28">
-            <div className="workspace-core p-4 sm:p-5">
-            <div className="submission-media-frame">
-              <img src={submission.imageUrl} alt="Uploaded homework" className="submission-media w-full rounded-2xl object-contain" />
-            </div>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <StatusPill status={submission.status} />
-              {submission.favorite ? <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-ocean"><Star size={13} fill="currentColor" />Favorite</span> : null}
-              <span className="text-sm font-medium text-slate-600">{submission.subject.name}</span>
-            </div>
-            {submission.note ? <p className="mt-3 text-sm leading-6 text-slate-600">{submission.note}</p> : null}
-            <button disabled={deleting} onClick={remove} className="danger-button mt-4 w-full">
-              <Trash2 size={17} />
-              {deleting ? 'Deleting...' : 'Delete submission'}
-            </button>
-            {canGrade(submission) ? (
-              <Link to={`/grade?submissionId=${submission.id}`} className="primary-button mt-3 w-full">
-                <ClipboardCheck size={17} />
-                Check student answer
-              </Link>
-            ) : canRetryExplanation(submission) ? (
-              <button disabled={explaining || !online} onClick={() => runExplain()} className="primary-button mt-3 w-full">
-                <RefreshCw size={17} className={explaining ? 'animate-spin' : ''} />
-                {explaining ? 'Retrying explanation...' : online ? 'Retry explanation' : 'Reconnect to retry'}
-              </button>
-            ) : null}
-            </div>
-          </section>
-          <section className="detail-result-stream grid min-w-0 gap-4">
-            {shouldShowQuestionScope(submission.aiResponse) ? (
-              <QuestionScopePanel
-                aiResponse={submission.aiResponse}
-                questionSolutions={submission.questionSolutions || []}
-                selectedQuestions={selectedQuestions}
-                setSelectedQuestions={setSelectedQuestions}
-                explaining={explaining}
-                online={online}
-                solveSelectedQuestions={solveSelectedQuestions}
-              />
-            ) : null}
-            {submission.questionSolutions?.length ? (
-              <QuickAnswersPanel solutions={submission.questionSolutions} />
-            ) : null}
-          </section>
+        <div className="submission-detail-shell grid gap-4">
+          <div className="submission-top-grid grid items-stretch gap-4 lg:grid-cols-[minmax(300px,0.9fr)_minmax(0,1.35fr)] xl:grid-cols-[minmax(360px,0.95fr)_minmax(0,1.45fr)]">
+            <section className="submission-summary-card focus-panel smooth-card workspace-card">
+              <div className="workspace-core flex h-full flex-col p-4 sm:p-5">
+                <div className="submission-media-frame">
+                  <img src={submission.imageUrl} alt="Uploaded homework" className="submission-media w-full rounded-2xl object-contain" />
+                </div>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <StatusPill status={submission.status} />
+                  {submission.favorite ? <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-ocean"><Star size={13} fill="currentColor" />Favorite</span> : null}
+                  <span className="text-sm font-medium text-slate-600">{submission.subject.name}</span>
+                </div>
+                {submission.note ? <p className="mt-3 text-sm leading-6 text-slate-600">{submission.note}</p> : null}
+                <div className="mt-auto pt-4">
+                  <button disabled={deleting} onClick={remove} className="danger-button w-full">
+                    <Trash2 size={17} />
+                    {deleting ? 'Deleting...' : 'Delete submission'}
+                  </button>
+                  {canGrade(submission) ? (
+                    <Link to={`/grade?submissionId=${submission.id}`} className="primary-button mt-3 w-full">
+                      <ClipboardCheck size={17} />
+                      Check student answer
+                    </Link>
+                  ) : canRetryExplanation(submission) ? (
+                    <button disabled={explaining || !online} onClick={() => runExplain()} className="primary-button mt-3 w-full">
+                      <RefreshCw size={17} className={explaining ? 'animate-spin' : ''} />
+                      {explaining ? 'Retrying explanation...' : online ? 'Retry explanation' : 'Reconnect to retry'}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            </section>
+            <section className="detail-result-stream grid min-w-0 gap-4">
+              {shouldShowQuestionScope(submission.aiResponse) ? (
+                <QuestionScopePanel
+                  aiResponse={submission.aiResponse}
+                  questionSolutions={submission.questionSolutions || []}
+                  selectedQuestions={selectedQuestions}
+                  setSelectedQuestions={setSelectedQuestions}
+                  explaining={explaining}
+                  online={online}
+                  solveSelectedQuestions={solveSelectedQuestions}
+                />
+              ) : null}
+              {submission.questionSolutions?.length ? (
+                <QuickAnswersPanel solutions={submission.questionSolutions} />
+              ) : null}
+            </section>
+          </div>
 
           <section className="submission-wide-results grid gap-4">
             {submission.questionSolutions?.length ? (
@@ -293,14 +298,16 @@ function QuickAnswersPanel({ solutions }) {
     .map((solution) => ({
       questionNumber: solution.questionNumber,
       answer: summarizeFinalAnswer(solution.finalAnswer),
+      isLong: isLongQuickAnswer(solution.finalAnswer),
     }))
     .filter((item) => item.answer);
 
   if (!answers.length) return null;
+  const shouldUseList = answers.some((item) => item.isLong) || answers.length > 6;
 
   return (
     <section className="quick-answer-panel fade-in smooth-card workspace-card">
-      <div className="workspace-core p-4 sm:p-5">
+      <div className="workspace-core flex h-full min-h-0 flex-col p-4 sm:p-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-base font-bold text-ink">Quick answers</h2>
@@ -310,14 +317,14 @@ function QuickAnswersPanel({ solutions }) {
           </div>
           <span className="text-xs font-semibold text-slate-500">{answers.length} saved</span>
         </div>
-        <div className="quick-answer-grid mt-4">
+        <div className={`quick-answer-grid mt-4 ${shouldUseList ? 'quick-answer-list-mode' : ''}`}>
           {answers.map((item) => (
             <div
               key={item.questionNumber}
               className="quick-answer-chip"
             >
               <span className="quick-answer-question">{item.questionNumber}</span>
-              <span className="quick-answer-value">{item.answer}</span>
+              <RichText className="quick-answer-value">{item.answer}</RichText>
             </div>
           ))}
         </div>
@@ -332,10 +339,28 @@ function summarizeFinalAnswer(value) {
   const multipleChoice = answer.match(/(?:^|[\s,;:.])([A-D])(?:$|[\s,.;:])/i);
   if (multipleChoice) return multipleChoice[1].toUpperCase();
   return answer
-    .replace(/\s+/g, ' ')
+    .replace(/\\n/g, ' ')
     .replace(/^answer\s*[:.)-]\s*/i, '')
-    .trim()
-    .slice(0, 42);
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function plainAnswerPreview(value) {
+  return String(value || '')
+    .replace(/\\n/g, ' ')
+    .replace(/\\(?:text|mathrm)\{([^}]*)\}/g, '$1')
+    .replace(/\\frac\{([^}]*)\}\{([^}]*)\}/g, '$1/$2')
+    .replace(/\\[,;:!]/g, ' ')
+    .replace(/\\_/g, '_')
+    .replace(/\$/g, '')
+    .replace(/([A-Za-z])_\{?(\d+)\}?/g, '$1$2')
+    .replace(/\s+/g, ' ');
+}
+
+function isLongQuickAnswer(value) {
+  const rawAnswer = readFinalAnswerText(value);
+  const plainAnswer = plainAnswerPreview(rawAnswer);
+  return plainAnswer.length > 58 || /(?:\\n|\n|[.;:]\s|\\begin|\\frac|\\times|\\text)/.test(rawAnswer);
 }
 
 function readFinalAnswerText(value) {

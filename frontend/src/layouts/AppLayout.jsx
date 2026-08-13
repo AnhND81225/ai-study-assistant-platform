@@ -28,7 +28,7 @@ export function AppLayout() {
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-sea text-white shadow-[0_18px_34px_rgba(37,99,235,0.24)]">
               <BookOpen size={19} />
             </span>
-            <span className="text-lg">StudyAI</span>
+            <span className="text-lg">AI-Learning</span>
           </NavLink>
           <nav className="hidden items-center gap-1 rounded-full border border-slate-200/80 bg-slate-100/80 p-1 md:flex" aria-label="Primary navigation">
             {userNav.map((item) => <DesktopNavItem key={item.to} item={item} />)}

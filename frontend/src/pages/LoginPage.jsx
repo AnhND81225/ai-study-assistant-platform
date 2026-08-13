@@ -55,7 +55,7 @@ function AuthForm({ title, subtitle, submitLabel, form, setForm, submit, loading
           <span className="grid h-11 w-11 place-items-center rounded-[1.05rem] bg-sea text-white shadow-[0_18px_34px_rgba(37,99,235,0.24)]">
             <BookOpen size={19} />
           </span>
-          StudyAI
+          AI-Learning
         </Link>
         <h1 className="text-4xl font-extrabold tracking-[-0.035em] text-ink">{title}</h1>
         <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{subtitle}</p>

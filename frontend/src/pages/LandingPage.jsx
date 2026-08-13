@@ -19,7 +19,7 @@ const steps = [
     number: '01',
     icon: Camera,
     title: 'Take a clear photo',
-    description: 'Use your phone camera or gallery. Keep the full question visible so StudyAI can read it well.',
+    description: 'Use your phone camera or gallery. Keep the full question visible so AI-Learning can read it well.',
   },
   {
     number: '02',
@@ -52,11 +52,11 @@ export function LandingPage() {
     <main className="landing-page min-h-[100dvh] overflow-hidden text-ink">
       <section className="mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col px-5 pb-12 pt-5 sm:px-6 lg:pb-16">
         <header className="landing-nav flex items-center justify-between gap-3">
-          <Link to="/" className="flex items-center gap-2.5 font-extrabold" aria-label="StudyAI home">
+          <Link to="/" className="flex items-center gap-2.5 font-extrabold" aria-label="AI-Learning home">
             <span className="grid h-11 w-11 place-items-center rounded-[1.05rem] bg-sea text-white shadow-[0_18px_34px_rgba(37,99,235,0.24)]">
               <BookOpen size={20} strokeWidth={2.1} />
             </span>
-            <span className="text-lg tracking-[-0.02em]">StudyAI</span>
+            <span className="text-lg tracking-[-0.02em]">AI-Learning</span>
           </Link>
 
           <nav className="hidden items-center gap-2 rounded-full border border-white/70 bg-white/75 p-1 text-sm font-extrabold shadow-[0_14px_40px_rgba(15,23,42,0.08)] sm:flex">
@@ -114,7 +114,7 @@ export function LandingPage() {
 
       <section id="how-it-works" className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-6 lg:py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-extrabold tracking-[-0.035em] text-ink sm:text-5xl">How StudyAI helps</h2>
+          <h2 className="text-3xl font-extrabold tracking-[-0.035em] text-ink sm:text-5xl">How AI-Learning helps</h2>
           <p className="mt-4 text-base font-semibold leading-7 text-slate-600">
             A simple flow for everyday homework: capture the question, learn the steps, then improve your answer.
           </p>
@@ -141,7 +141,7 @@ export function LandingPage() {
               <WorkflowCard
                 icon={BookOpen}
                 title="Solve a question"
-                description="Upload the question image and StudyAI explains the solution in clear steps."
+                description="Upload the question image and AI-Learning explains the solution in clear steps."
                 action="Try Solve"
                 to="/register"
               />

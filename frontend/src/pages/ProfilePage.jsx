@@ -11,7 +11,7 @@ export function ProfilePage() {
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
         <ProfileSignal icon={UserRound} label="Account" value={user?.enabled ? 'Active' : 'Disabled'} />
         <ProfileSignal icon={ShieldCheck} label="Role" value={roleLabel(user?.role)} />
-        <ProfileSignal icon={BookOpen} label="Workspace" value="StudyAI" />
+        <ProfileSignal icon={BookOpen} label="Workspace" value="AI-Learning" />
       </div>
       <section className="workspace-card max-w-3xl overflow-hidden">
         <div className="workspace-core overflow-hidden">
