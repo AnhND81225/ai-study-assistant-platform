@@ -247,8 +247,8 @@ export function GradePage() {
             action={<Link to="/upload" className="primary-button">Solve a question</Link>}
           />
         ) : (
-          <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[340px_1fr]">
-          <section className="app-card h-fit p-4 sm:p-5 lg:sticky lg:top-24">
+          <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
+          <section className="app-card h-fit min-w-0 p-4 sm:p-5 lg:sticky lg:top-24">
             <label className="grid gap-1.5 text-sm font-bold text-slate-700">
               Explained question
               <select value={selectedId} onChange={(event) => setSelectedId(event.target.value)} className="input-field">
@@ -266,7 +266,7 @@ export function GradePage() {
             ) : null}
           </section>
 
-          <section className="grid gap-4">
+          <section className="grid min-w-0 gap-4">
             {selected?.aiResponse ? (
               <Suspense fallback={<ResultLoadingState />}>
                 <ExplanationResultCard aiResponse={selected.aiResponse} />
@@ -300,20 +300,20 @@ export function GradePage() {
                 {grading ? 'Checking...' : !online ? 'Reconnect to check' : mode === 'image' ? 'Check answer image' : 'Check this answer'}
               </button>
             </div>
+
+            {selected?.gradingResults?.length ? (
+              <div className="grid min-w-0 gap-3" aria-label="Checking results">
+                {selected.gradingResults.map((result) => (
+                  <Suspense key={result.id} fallback={<ResultLoadingState />}>
+                    <GradingResultCard result={result} />
+                  </Suspense>
+                ))}
+              </div>
+            ) : null}
           </section>
           </form>
         )}
       </div>
-
-      {selected?.gradingResults?.length ? (
-        <div className="mt-4 grid gap-3">
-          {selected.gradingResults.map((result) => (
-            <Suspense key={result.id} fallback={<ResultLoadingState />}>
-              <GradingResultCard result={result} />
-            </Suspense>
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 }
