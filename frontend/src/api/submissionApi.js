@@ -17,10 +17,18 @@ export const submissionApi = {
   detail: (id) => api.get(`/submissions/${id}`).then((res) => res.data.data),
   update: (id, payload) => api.patch(`/submissions/${id}`, payload).then((res) => res.data.data),
   explain: (id, params = {}) => api.post(`/submissions/${id}/explain`, null, { params }).then((res) => res.data.data),
-  grade: (id, userAnswer) => api.post(`/submissions/${id}/grade`, { userAnswer }).then((res) => res.data.data),
-  gradeImage: (id, image) => {
+  solveQuestions: (id, questionNumbers) => api.post(
+    `/submissions/${id}/questions/solve`,
+    { questionNumbers },
+  ).then((res) => res.data.data),
+  grade: (id, userAnswer, questionSolutionId) => api.post(
+    `/submissions/${id}/grade`,
+    { userAnswer, ...(questionSolutionId ? { questionSolutionId } : {}) },
+  ).then((res) => res.data.data),
+  gradeImage: (id, image, questionSolutionId) => {
     const formData = new FormData();
     formData.append('image', image);
+    if (questionSolutionId) formData.append('questionSolutionId', questionSolutionId);
     return api.post(`/submissions/${id}/grade-image`, formData).then((res) => res.data.data);
   },
   gradeNewImage: ({ subjectId, note, image }) => {

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Check, Pencil, Plus, Search, Star, X } from 'lucide-react';
+import { ArrowRight, Check, ClipboardCheck, Pencil, Plus, Search, Star, X } from 'lucide-react';
 import { submissionApi } from '../api/submissionApi';
 import { subjectApi } from '../api/subjectApi';
 import { apiMessage } from '../api/client';
@@ -30,6 +30,12 @@ export function HistoryPage() {
   const [updatingFavoriteId, setUpdatingFavoriteId] = useState(null);
 
   const filterKey = useMemo(() => `${search}|${subjectId}|${status}|${favoriteOnly}`, [search, subjectId, status, favoriteOnly]);
+  const pageStats = useMemo(() => ({
+    shown: items.length,
+    favorites: items.filter((item) => item.favorite).length,
+    checked: items.filter((item) => item.gradingResults?.length).length,
+    solved: items.filter((item) => item.aiResponse).length,
+  }), [items]);
 
   useEffect(() => {
     subjectApi.list()
@@ -124,25 +130,32 @@ export function HistoryPage() {
       <PageHeader title="Saved homework" description="Review past questions, solutions, and feedback whenever you need them." action={<Link to="/upload" className="primary-button"><Plus size={17} />New homework</Link>} />
       <ErrorBanner message={error} onRetry={() => setRetryKey((current) => current + 1)} onDismiss={() => setError('')} />
       {notice ? (
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-bold text-ocean" role="status">
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-bold text-ocean" role="status">
           <span className="inline-flex items-center gap-2"><Star size={16} fill="currentColor" />{notice}</span>
-          <button type="button" onClick={() => setNotice('')} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ocean" aria-label="Dismiss message"><X size={16} /></button>
+          <button type="button" onClick={() => setNotice('')} className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ocean" aria-label="Dismiss message"><X size={16} /></button>
         </div>
       ) : null}
 
-      <section className="app-card mb-5 grid gap-4 p-4 sm:p-5">
-        <div className="grid grid-cols-2 gap-2 rounded-lg bg-slate-100 p-1" aria-label="Saved homework view">
+      <section className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <HistoryMetric label="Shown" value={pageStats.shown} detail="Loaded on this page" />
+        <HistoryMetric label="Solved" value={pageStats.solved} detail="Has AI explanation" />
+        <HistoryMetric label="Checked" value={pageStats.checked} detail="Has grading feedback" />
+        <HistoryMetric label="Favorites" value={pageStats.favorites} detail="Pinned in current view" />
+      </section>
+
+      <section className="control-panel mb-5 grid gap-4">
+        <div className="grid grid-cols-2 gap-2 rounded-[1.35rem] bg-slate-100/90 p-1.5" aria-label="Saved homework view">
           <button
             type="button"
             onClick={() => setFavoriteOnly(false)}
-            className={`tap-target rounded-lg px-3 text-sm font-bold transition ${!favoriteOnly ? 'bg-white text-ocean shadow-sm' : 'text-slate-600'}`}
+            className={`tap-target rounded-full px-3 text-sm font-extrabold transition ${!favoriteOnly ? 'bg-white text-ocean shadow-[0_10px_24px_rgba(15,23,42,0.08)]' : 'text-slate-600'}`}
           >
             All homework
           </button>
           <button
             type="button"
             onClick={() => setFavoriteOnly(true)}
-            className={`tap-target inline-flex items-center justify-center gap-2 rounded-lg px-3 text-sm font-bold transition ${favoriteOnly ? 'bg-white text-ocean shadow-sm' : 'text-slate-600'}`}
+            className={`tap-target inline-flex items-center justify-center gap-2 rounded-full px-3 text-sm font-extrabold transition ${favoriteOnly ? 'bg-white text-ocean shadow-[0_10px_24px_rgba(15,23,42,0.08)]' : 'text-slate-600'}`}
           >
             <Star size={15} fill={favoriteOnly ? 'currentColor' : 'none'} />
             Favorites
@@ -212,10 +225,11 @@ function HistoryItem({ item, editing, editForm, setEditForm, beginEdit, cancelEd
   const title = item.title || item.aiResponse?.detectedQuestion || `${item.subject.name} submission`;
 
   return (
-    <article className={`smooth-card app-card p-4 sm:p-5 ${item.favorite ? 'border-blue-200 bg-blue-50/20' : ''}`}>
+    <article className={`smooth-card workspace-card ${item.favorite ? 'border-blue-200 bg-blue-50/30' : ''}`}>
+      <div className="workspace-core p-4 sm:p-5">
       <div className="flex items-start gap-3">
         <Link to={`/submissions/${item.id}`} className="shrink-0">
-          <img src={item.imageUrl} alt={`Submission ${item.id}`} className="h-20 w-20 rounded-lg object-cover" />
+          <img src={item.imageUrl} alt={`Submission ${item.id}`} className="h-24 w-24 rounded-[1.25rem] object-cover shadow-[0_14px_32px_rgba(15,23,42,0.12)]" />
         </Link>
         <div className="min-w-0 flex-1">
           {editing ? (
@@ -233,6 +247,7 @@ function HistoryItem({ item, editing, editForm, setEditForm, beginEdit, cancelEd
                 <h3 className="line-clamp-1 font-extrabold">{title}</h3>
                 <StatusPill status={item.status} />
                 {item.favorite ? <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-bold text-ocean"><Star size={12} fill="currentColor" />Favorite</span> : null}
+                {item.gradingResults?.length ? <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700"><ClipboardCheck size={12} />Checked</span> : null}
               </div>
               <p className="mt-1 text-sm font-bold text-slate-500">{item.subject.name}</p>
               <p className="mt-1 line-clamp-2 text-sm font-medium leading-6 text-slate-600">{item.note || item.aiResponse?.detectedQuestion || 'Tap to view details'}</p>
@@ -241,17 +256,30 @@ function HistoryItem({ item, editing, editForm, setEditForm, beginEdit, cancelEd
         </div>
         {!editing ? (
           <div className="grid shrink-0 gap-2">
-            <button type="button" disabled={updatingFavorite} onClick={() => toggleFavorite(item)} className={`grid h-10 w-10 place-items-center rounded-lg border transition-colors ${item.favorite ? 'border-blue-200 bg-blue-50 text-ocean' : 'border-slate-200 bg-white text-slate-400 hover:text-ocean'}`} aria-label={item.favorite ? 'Remove from favorites' : 'Add to favorites'} title={item.favorite ? 'Remove from favorites' : 'Add to favorites'}>
+            <button type="button" disabled={updatingFavorite} onClick={() => toggleFavorite(item)} className={`grid h-10 w-10 place-items-center rounded-2xl border transition-colors ${item.favorite ? 'border-blue-200 bg-blue-50 text-ocean' : 'border-slate-200 bg-white text-slate-400 hover:text-ocean'}`} aria-label={item.favorite ? 'Remove from favorites' : 'Add to favorites'} title={item.favorite ? 'Remove from favorites' : 'Add to favorites'}>
               <Star size={17} fill={item.favorite ? 'currentColor' : 'none'} />
             </button>
-            <button type="button" onClick={() => beginEdit(item)} className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:text-ocean" aria-label="Edit submission">
+            <button type="button" onClick={() => beginEdit(item)} className="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-white text-slate-500 transition-colors hover:text-ocean" aria-label="Edit submission">
               <Pencil size={17} />
             </button>
-            <Link to={`/submissions/${item.id}`} className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-ocean transition-colors hover:bg-blue-50" aria-label="Open submission">
+            <Link to={`/submissions/${item.id}`} className="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-white text-ocean transition-colors hover:bg-blue-50" aria-label="Open submission">
               <ArrowRight size={18} />
             </Link>
           </div>
         ) : null}
+      </div>
+      </div>
+    </article>
+  );
+}
+
+function HistoryMetric({ label, value, detail }) {
+  return (
+    <article className="workspace-card">
+      <div className="workspace-core p-4">
+        <p className="text-sm font-extrabold text-slate-500">{label}</p>
+        <p className="mt-2 text-3xl font-extrabold tracking-[-0.045em] text-ink">{value}</p>
+        <p className="mt-1 text-xs font-bold text-slate-500">{detail}</p>
       </div>
     </article>
   );

@@ -1,15 +1,18 @@
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { BookOpen, LockKeyhole, Mail, User } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { BookOpen, CheckCircle2, LockKeyhole, Mail, User } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { apiMessage } from '../api/client';
 import { ErrorBanner } from '../components/common/ErrorBanner';
+import { GoogleSignInButton } from '../components/common/GoogleSignInButton';
+import { authApi } from '../api/authApi';
 
 export function RegisterPage() {
   const auth = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ fullName: '', email: '', password: '' });
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState(null);
   const [loading, setLoading] = useState(false);
 
   if (auth.isAuthenticated) return <Navigate to="/dashboard" replace />;
@@ -19,8 +22,8 @@ export function RegisterPage() {
     setError('');
     setLoading(true);
     try {
-      await auth.register(form);
-      navigate('/dashboard', { replace: true });
+      const response = await auth.register(form);
+      setNotice(response);
     } catch (err) {
       setError(apiMessage(err, 'Registration failed'));
     } finally {
@@ -28,17 +31,76 @@ export function RegisterPage() {
     }
   }
 
+  const handleGoogleCredential = useCallback(async (credential) => {
+    setError('');
+    setLoading(true);
+    try {
+      await auth.googleLogin(credential);
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      setError(apiMessage(err, 'Google sign in failed'));
+    } finally {
+      setLoading(false);
+    }
+  }, [auth, navigate]);
+
+  async function resendVerification() {
+    if (!notice?.email) return;
+    setError('');
+    setLoading(true);
+    try {
+      await authApi.resendVerification(notice.email);
+      setNotice({ ...notice, nextStep: 'Verification email sent again. Please check your inbox.' });
+    } catch (err) {
+      setError(apiMessage(err, 'Could not resend verification email'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (notice) {
+    return (
+      <main className="landing-page grid min-h-[100dvh] place-items-center px-4 py-8">
+        <section className="auth-card">
+          <div className="auth-card-core">
+            <Link to="/" className="mb-8 inline-flex items-center gap-2.5 font-extrabold text-ink">
+              <span className="grid h-11 w-11 place-items-center rounded-[1.05rem] bg-sea text-white shadow-[0_18px_34px_rgba(37,99,235,0.24)]">
+                <BookOpen size={19} />
+              </span>
+              AI-Learning
+            </Link>
+            <div className="mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
+              <CheckCircle2 size={26} />
+            </div>
+            <h1 className="text-4xl font-extrabold tracking-[-0.035em] text-ink">Check your email</h1>
+            <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
+              We sent a verification link to <span className="text-ink">{notice.email}</span>. Verify your email before signing in.
+            </p>
+            <ErrorBanner message={error} onDismiss={() => setError('')} />
+            <div className="mt-6 grid gap-3">
+              <button type="button" disabled={loading} onClick={resendVerification} className="primary-button">
+                {loading ? 'Sending...' : 'Resend email'}
+              </button>
+              <Link to="/login" className="secondary-button text-center">Back to sign in</Link>
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   return (
-    <main className="grid min-h-[100dvh] place-items-center bg-[#f5f7fb] px-4 py-8">
-      <form onSubmit={submit} className="w-full max-w-md rounded-lg border border-slate-200 bg-white/95 p-5 shadow-[0_24px_60px_rgba(15,23,42,0.12)] sm:p-7">
+    <main className="landing-page grid min-h-[100dvh] place-items-center px-4 py-8">
+      <form onSubmit={submit} className="auth-card">
+        <div className="auth-card-core">
         <Link to="/" className="mb-8 inline-flex items-center gap-2.5 font-extrabold text-ink">
-          <span className="grid h-10 w-10 place-items-center rounded-lg bg-sea text-white shadow-[0_12px_24px_rgba(37,99,235,0.18)]">
+          <span className="grid h-11 w-11 place-items-center rounded-[1.05rem] bg-sea text-white shadow-[0_18px_34px_rgba(37,99,235,0.24)]">
             <BookOpen size={19} />
           </span>
-          StudyAI
+          AI-Learning
         </Link>
-        <h1 className="text-3xl font-extrabold text-ink">Create account</h1>
-        <p className="mt-2 text-sm font-medium text-slate-600">Start saving explanations and grading results.</p>
+        <h1 className="text-4xl font-extrabold tracking-[-0.035em] text-ink">Create account</h1>
+        <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">Start saving explanations and grading results.</p>
         <div className="mt-6 grid gap-4">
           <ErrorBanner message={error} onDismiss={() => setError('')} />
           <label className="grid gap-1.5 text-sm font-bold text-slate-700">
@@ -65,9 +127,16 @@ export function RegisterPage() {
           <button disabled={loading} className="primary-button">
             {loading ? 'Please wait...' : 'Create account'}
           </button>
+          <div className="flex items-center gap-3 text-xs font-extrabold uppercase tracking-[0.18em] text-slate-400">
+            <span className="h-px flex-1 bg-slate-100" />
+            or
+            <span className="h-px flex-1 bg-slate-100" />
+          </div>
+          <GoogleSignInButton onCredential={handleGoogleCredential} onError={setError} />
           <div className="border-t border-slate-100 pt-4 text-center text-sm font-medium text-slate-600">
             <Link to="/login" className="font-bold text-ocean">I already have an account</Link>
           </div>
+        </div>
         </div>
       </form>
     </main>

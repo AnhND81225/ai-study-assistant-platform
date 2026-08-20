@@ -27,9 +27,51 @@ Error:
 
 | Method | Path | Description | Auth |
 |---|---|---|---|
-| POST | `/api/auth/register` | Register a user | Public |
+| POST | `/api/auth/register` | Register a local user and send verification email | Public |
 | POST | `/api/auth/login` | Login and receive JWT | Public |
+| POST | `/api/auth/google` | Login/register with Google credential verified by backend | Public |
+| POST | `/api/auth/verify-email?token=...` | Verify a local account email | Public |
+| POST | `/api/auth/resend-verification` | Resend verification email with generic response | Public |
+| POST | `/api/auth/forgot-password` | Send password reset email with generic response | Public |
+| POST | `/api/auth/reset-password` | Reset password with email token | Public |
 | GET | `/api/auth/me` | Current profile | USER/ADMIN |
+
+Local registration returns a message instead of a JWT. The user must verify their email before signing in.
+
+Register request:
+
+```json
+{
+  "fullName": "Student One",
+  "email": "student@example.com",
+  "password": "Password123!"
+}
+```
+
+Register response:
+
+```json
+{
+  "success": true,
+  "message": "Registration successful. Check your email to verify your account.",
+  "data": {
+    "email": "student@example.com",
+    "message": "Check your email to verify your account before signing in."
+  },
+  "errorCode": null,
+  "details": []
+}
+```
+
+Login for an unverified local account returns `EMAIL_NOT_VERIFIED`. Google sign-in sends only the Google ID credential to the backend:
+
+```json
+{
+  "credential": "GOOGLE_ID_TOKEN_FROM_BROWSER"
+}
+```
+
+Forgot-password and resend-verification endpoints intentionally return generic messages so the API does not reveal whether an email exists.
 
 ## Health
 
@@ -92,6 +134,7 @@ Submission update request:
 | Method | Path | Description | Auth | Ownership |
 |---|---|---|---|---|
 | POST | `/api/submissions/{id}/explain` | Generate explanation | USER/ADMIN | USER own only |
+| POST | `/api/submissions/{id}/questions/solve` | Solve up to three detected questions | USER/ADMIN | USER own only |
 | POST | `/api/submissions/{id}/grade` | Grade answer | USER/ADMIN | USER own only |
 | POST | `/api/submissions/{id}/grade-image` | Grade answer from uploaded image | USER/ADMIN | USER own only |
 | POST | `/api/gradings/image` | Grade a new image containing both question and student work | USER/ADMIN | Current user |
@@ -103,15 +146,28 @@ Submission update request:
 | `questionNumber` | `5` | Question to solve when the image contains several numbered questions |
 | `solveMode` | `ONE_QUESTION` | `AUTO`, `ONE_QUESTION`, `ANSWERS_ONLY`, or `EXPLAIN_ALL` |
 
-When an image contains multiple questions and no scope is supplied, the API stores a `QUESTION_SELECTION_REQUIRED` result instead of pretending that a solution is ready. The response includes `questionType`, `resultStatus`, and `availableQuestions`. `ANSWERS_ONLY` is intended for multiple-choice pages. A selected question that is cropped or unreadable returns `INCOMPLETE_IMAGE`.
+When an image contains multiple questions and no scope is supplied, the API stores a `QUESTION_SELECTION_REQUIRED` scan instead of pretending that a solution is ready. The response includes `questionType`, `resultStatus`, and `availableQuestions`.
+
+Solve selected questions:
+
+```json
+{
+  "questionNumbers": [2, 5, 7]
+}
+```
+
+The request accepts one to three detected question numbers. Each new question costs one daily solve credit. Previously saved question solutions are returned from the database and do not consume another credit.
 
 Grading request:
 
 ```json
 {
-  "userAnswer": "My answer is..."
+  "userAnswer": "My answer is...",
+  "questionSolutionId": 42
 }
 ```
+
+`questionSolutionId` is optional for legacy single-question submissions and required by the UI when a multi-question submission has saved per-question solutions. Image grading accepts the same optional field as multipart form data.
 
 Grade new work from image uses `multipart/form-data`:
 
@@ -148,3 +204,5 @@ Quota response:
   "resetAt": "2026-06-05T00:00:00Z"
 }
 ```
+
+Multi-question detection is logged as a zero-credit `SCAN`, with a separate daily scan cap to protect provider cost. Successful solves consume one credit per newly generated question, not per HTTP request.

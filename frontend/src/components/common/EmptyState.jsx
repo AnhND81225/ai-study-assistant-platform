@@ -2,13 +2,15 @@ import { Plus } from 'lucide-react';
 
 export function EmptyState({ title, description, action }) {
   return (
-    <div className="rounded-lg border border-dashed border-slate-300 bg-white/90 px-5 py-10 text-center shadow-soft">
-      <div className="mx-auto mb-5 grid h-12 w-12 place-items-center rounded-lg bg-blue-50 text-ocean">
-        <Plus size={22} />
+    <div className="workspace-card border-dashed text-center">
+      <div className="workspace-core px-5 py-12">
+        <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-[1.35rem] border border-blue-100 bg-blue-50 text-ocean shadow-inner">
+          <Plus size={23} />
+        </div>
+        <h2 className="text-2xl font-extrabold tracking-[-0.025em] text-ink">{title}</h2>
+        <p className="mx-auto mt-3 max-w-md text-sm font-semibold leading-7 text-slate-600">{description}</p>
+        {action ? <div className="mt-6">{action}</div> : null}
       </div>
-      <h2 className="text-lg font-extrabold text-ink">{title}</h2>
-      <p className="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-slate-600">{description}</p>
-      {action ? <div className="mt-4">{action}</div> : null}
     </div>
   );
 }

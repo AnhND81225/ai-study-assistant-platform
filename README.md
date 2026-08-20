@@ -9,13 +9,14 @@ This project is designed to demonstrate fullstack development, backend architect
 ## Key Features
 
 - Register and login with JWT authentication.
+- Email verification for local accounts, Google sign-in, and password reset by email.
 - Role-based access control for `GUEST`, `USER`, and `ADMIN`.
 - Mobile-first React UI.
 - Scan homework images from camera or gallery with preview, rotate, and clear controls.
 - Validate and store images with Cloudinary.
 - AI explanation workflow with Markdown and LaTeX-ready responses.
 - AI grading workflow for typed answers, answer images, or a new image containing both the question and student work.
-- Daily AI explanation quota with user-visible remaining usage.
+- Daily solve-credit quota with free multi-question scanning, cached question solutions, and user-visible remaining usage.
 - Submission history with search, filters, favorites, editable notes, pagination, and delete-own-submission flow.
 - Admin-ready API structure.
 - PostgreSQL persistence.
@@ -141,9 +142,9 @@ Connect to local PostgreSQL:
 docker compose exec postgres psql -U eduaidb_user -d eduaidb
 ```
 
-From host tools, use port `55432` because Compose maps PostgreSQL to `localhost:55432` to avoid conflicts with a local PostgreSQL install.
+From host tools, use port `55433` because Compose maps PostgreSQL to `localhost:55433` by default to avoid conflicts with a local PostgreSQL install. If that port is already used, set `COMPOSE_POSTGRES_PORT` before starting Compose.
 
-Docker is for local development convenience. Production deployment targets Vercel, Render, Neon Postgres, and Cloudinary.
+Docker is for local development convenience. Production deployment can target Vercel for the frontend, Render or EC2 with Nginx for the backend, Neon Postgres for the database, and Cloudinary for media storage.
 
 ## IntelliJ IDEA Run Configurations
 
@@ -158,7 +159,7 @@ Recommended configs:
 | `Docker Compose - Database Only` | Runs only PostgreSQL for local backend debugging |
 | `Docker Compose - Down` | Stops the local Docker stack |
 | `Full Stack - Verify` | Builds Docker services, runs frontend build, backend tests, and prints service status |
-| `Backend - Spring Boot` | Runs backend locally with Maven against Docker PostgreSQL on `localhost:55432` |
+| `Backend - Spring Boot` | Runs backend locally with Maven against Docker PostgreSQL on `localhost:55433` |
 | `Backend - Tests` | Runs backend Maven tests |
 | `Frontend - Vite Dev` | Runs the Vite dev server from `frontend/` |
 | `Frontend - Build` | Runs the frontend production build |
@@ -198,6 +199,31 @@ Required OpenAI backend variables:
 | `AI_TIMEOUT_SECONDS` | OpenAI request timeout |
 | `AI_MAX_OUTPUT_TOKENS` | Output token cap for cost control |
 | `AI_EXPLAIN_LIMIT_PER_USER` | Maximum successful explanation requests per user per day |
+
+Authentication and email variables:
+
+| Variable | Purpose |
+|---|---|
+| `APP_FRONTEND_URL` | Frontend base URL used to build verification and password reset links |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID verified by the backend |
+| `MAIL_HOST` | SMTP host for verification and reset emails |
+| `MAIL_PORT` | SMTP port, commonly `587` |
+| `MAIL_USERNAME` | SMTP username |
+| `MAIL_PASSWORD` | SMTP password or app password |
+| `MAIL_FROM` | Sender address for auth emails |
+| `MAIL_SMTP_AUTH` | Enables SMTP authentication |
+| `MAIL_SMTP_STARTTLS_ENABLE` | Enables STARTTLS for SMTP |
+| `EMAIL_VERIFICATION_TOKEN_MINUTES` | Email verification link lifetime |
+| `PASSWORD_RESET_TOKEN_MINUTES` | Password reset link lifetime |
+
+Frontend authentication variables:
+
+| Variable | Purpose |
+|---|---|
+| `VITE_API_BASE_URL` | Public backend API base URL |
+| `VITE_GOOGLE_CLIENT_ID` | Public Google OAuth client ID used by the browser Google sign-in button |
+
+For local development, configure an SMTP sandbox such as Mailtrap or a provider-specific app password before testing local account registration. `VITE_GOOGLE_CLIENT_ID` is public, but backend secrets such as `MAIL_PASSWORD`, `JWT_SECRET`, and `OPENAI_API_KEY` must stay only on the backend.
 
 Never commit real `.env` files.
 
@@ -246,9 +272,21 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 ## Deployment
 
 - Frontend: Vercel
-- Backend: Render
+- Backend: Render or EC2 with Nginx HTTPS reverse proxy
 - Database: Neon Postgres
 - Media storage: Cloudinary
+
+When the backend runs on EC2, the Vercel frontend should call the HTTPS API domain:
+
+```text
+VITE_API_BASE_URL=https://api.ducanh.space/api
+```
+
+The backend CORS setting should list frontend origins, for example:
+
+```text
+CORS_ALLOWED_ORIGINS=https://ai-study-assistant-platform-nine.vercel.app,https://ducanh.space,https://www.ducanh.space,http://localhost:5173
+```
 
 See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 

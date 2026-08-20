@@ -39,7 +39,7 @@ public class AiUsageLogServiceImpl implements AiUsageLogService {
     public AiUsageQuotaResponse getCurrentUserQuota() {
         Instant todayStart = LocalDate.now(ZoneOffset.UTC).atStartOfDay().toInstant(ZoneOffset.UTC);
         Instant tomorrowStart = LocalDate.now(ZoneOffset.UTC).plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
-        long used = aiUsageLogRepository.countByUserIdAndRequestTypeAndStatusAndCreatedAtGreaterThanEqual(
+        long used = aiUsageLogRepository.sumCreditsUsed(
                 SecurityUtils.currentUserId(),
                 AiRequestType.EXPLAIN,
                 AiUsageStatus.SUCCESS,

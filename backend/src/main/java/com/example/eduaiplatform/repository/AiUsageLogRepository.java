@@ -14,11 +14,27 @@ import java.time.Instant;
 
 public interface AiUsageLogRepository extends JpaRepository<AiUsageLog, Long> {
     Page<AiUsageLog> findByUserId(Long userId, Pageable pageable);
+
     long countByUserIdAndRequestTypeAndStatusAndCreatedAtGreaterThanEqual(
             Long userId,
             AiRequestType requestType,
             AiUsageStatus status,
             Instant createdAt
+    );
+
+    @Query("""
+            select coalesce(sum(log.creditsUsed), 0)
+            from AiUsageLog log
+            where log.user.id = :userId
+              and log.requestType = :requestType
+              and log.status = :status
+              and log.createdAt >= :createdAt
+            """)
+    long sumCreditsUsed(
+            @Param("userId") Long userId,
+            @Param("requestType") AiRequestType requestType,
+            @Param("status") AiUsageStatus status,
+            @Param("createdAt") Instant createdAt
     );
 
     @Modifying

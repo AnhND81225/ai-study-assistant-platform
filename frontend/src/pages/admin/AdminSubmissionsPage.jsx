@@ -30,9 +30,10 @@ export function AdminSubmissionsPage() {
       ) : (
         <div className="grid gap-3">
           {items.map((item) => (
-            <Link key={item.id} to={`/submissions/${item.id}`} className="smooth-card app-card p-4">
+            <Link key={item.id} to={`/submissions/${item.id}`} className="smooth-card workspace-card">
+              <div className="workspace-core p-4">
               <div className="flex items-center gap-3">
-                <img src={item.imageUrl} alt="" className="h-16 w-16 rounded-lg object-cover" />
+                <img src={item.imageUrl} alt="" className="h-16 w-16 rounded-2xl object-cover shadow-[0_12px_28px_rgba(15,23,42,0.10)]" />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-extrabold">{item.subject.name}</h3>
@@ -40,6 +41,7 @@ export function AdminSubmissionsPage() {
                   </div>
                   <p className="mt-1 truncate text-sm font-medium text-slate-600">{item.userEmail}</p>
                 </div>
+              </div>
               </div>
             </Link>
           ))}

@@ -14,6 +14,7 @@ public final class AiUsageLogMapper {
                 log.getModelName(),
                 log.getInputTokens(),
                 log.getOutputTokens(),
+                log.getCreditsUsed(),
                 log.getStatus().name(),
                 log.getErrorMessage(),
                 log.getCreatedAt()

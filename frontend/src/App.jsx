@@ -11,6 +11,9 @@ const AdminLayout = lazyNamed(() => import('./layouts/AdminLayout'), 'AdminLayou
 const LandingPage = lazyNamed(() => import('./pages/LandingPage'), 'LandingPage');
 const LoginPage = lazyNamed(() => import('./pages/LoginPage'), 'LoginPage');
 const RegisterPage = lazyNamed(() => import('./pages/RegisterPage'), 'RegisterPage');
+const VerifyEmailPage = lazyNamed(() => import('./pages/VerifyEmailPage'), 'VerifyEmailPage');
+const ForgotPasswordPage = lazyNamed(() => import('./pages/ForgotPasswordPage'), 'ForgotPasswordPage');
+const ResetPasswordPage = lazyNamed(() => import('./pages/ResetPasswordPage'), 'ResetPasswordPage');
 const DashboardPage = lazyNamed(() => import('./pages/DashboardPage'), 'DashboardPage');
 const UploadPage = lazyNamed(() => import('./pages/UploadPage'), 'UploadPage');
 const GradePage = lazyNamed(() => import('./pages/GradePage'), 'GradePage');
@@ -27,11 +30,14 @@ const NotFoundPage = lazyNamed(() => import('./pages/NotFoundPage'), 'NotFoundPa
 
 export default function App() {
   return (
-    <Suspense fallback={<LoadingState label="Opening StudyAI..." />}>
+    <Suspense fallback={<LoadingState label="Opening AI-Learning..." />}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/403" element={<ForbiddenPage />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>

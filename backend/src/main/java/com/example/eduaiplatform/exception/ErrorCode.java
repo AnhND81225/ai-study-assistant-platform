@@ -3,6 +3,11 @@ package com.example.eduaiplatform.exception;
 public enum ErrorCode {
     VALIDATION_ERROR,
     AUTHENTICATION_FAILED,
+    EMAIL_NOT_VERIFIED,
+    TOKEN_INVALID,
+    TOKEN_EXPIRED,
+    EMAIL_DELIVERY_FAILED,
+    AUTH_PROVIDER_ERROR,
     ACCESS_DENIED,
     RESOURCE_NOT_FOUND,
     CONFLICT,

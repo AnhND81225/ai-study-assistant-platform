@@ -1,6 +1,7 @@
 package com.example.eduaiplatform.service.impl;
 
 import com.example.eduaiplatform.dto.request.GradeRequest;
+import com.example.eduaiplatform.dto.request.SolveQuestionsRequest;
 import com.example.eduaiplatform.dto.request.SubmissionUpdateRequest;
 import com.example.eduaiplatform.dto.response.GradingResultResponse;
 import com.example.eduaiplatform.dto.response.SubmissionResponse;
@@ -33,6 +34,7 @@ public class SubmissionServiceImpl implements SubmissionService {
     private final SubjectRepository subjectRepository;
     private final AiResponseRepository aiResponseRepository;
     private final GradingResultRepository gradingResultRepository;
+    private final QuestionSolutionRepository questionSolutionRepository;
     private final AiUsageLogRepository aiUsageLogRepository;
     private final CloudinaryService cloudinaryService;
     private final AiService aiService;
@@ -44,6 +46,7 @@ public class SubmissionServiceImpl implements SubmissionService {
             SubjectRepository subjectRepository,
             AiResponseRepository aiResponseRepository,
             GradingResultRepository gradingResultRepository,
+            QuestionSolutionRepository questionSolutionRepository,
             AiUsageLogRepository aiUsageLogRepository,
             CloudinaryService cloudinaryService,
             AiService aiService,
@@ -54,6 +57,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         this.subjectRepository = subjectRepository;
         this.aiResponseRepository = aiResponseRepository;
         this.gradingResultRepository = gradingResultRepository;
+        this.questionSolutionRepository = questionSolutionRepository;
         this.aiUsageLogRepository = aiUsageLogRepository;
         this.cloudinaryService = cloudinaryService;
         this.aiService = aiService;
@@ -137,7 +141,11 @@ public class SubmissionServiceImpl implements SubmissionService {
         if (submission.getAiResponse() != null && questionNumber == null && requestedMode == AiSolveMode.AUTO) {
             return SubmissionMapper.toResponse(submission);
         }
-        enforceExplainLimit();
+        if (questionNumber == null && requestedMode == AiSolveMode.AUTO) {
+            enforceScanLimit();
+        }
+        int requestedCredits = explainCredits(submission, requestedMode);
+        enforceExplainLimit(requestedCredits);
         try {
             AiService.AiExplanationResult result = aiService.explain(
                     submission.getImageUrl(),
@@ -177,15 +185,17 @@ public class SubmissionServiceImpl implements SubmissionService {
             }
             aiResponseRepository.save(response);
             submission.markAiResult(response, result.resultStatus());
+            boolean scanOnly = result.resultStatus() == AiResultStatus.QUESTION_SELECTION_REQUIRED;
             aiUsageLogRepository.save(new AiUsageLog(
                     currentUserEntity(),
                     submission,
-                    AiRequestType.EXPLAIN,
+                    scanOnly ? AiRequestType.SCAN : AiRequestType.EXPLAIN,
                     result.modelName(),
                     result.inputTokens(),
                     result.outputTokens(),
                     AiUsageStatus.SUCCESS,
-                    null
+                    null,
+                    scanOnly ? 0 : requestedCredits
             ));
             return SubmissionMapper.toResponse(submission);
         } catch (ApiException ex) {
@@ -206,22 +216,106 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Override
     @Transactional
+    public SubmissionResponse solveQuestions(Long id, SolveQuestionsRequest request) {
+        Submission submission = loadOwnedOrAdminSubmission(id);
+        AiResponse scan = submission.getAiResponse();
+        if (scan == null || scan.getAvailableQuestions().isEmpty()) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST,
+                    ErrorCode.VALIDATION_ERROR,
+                    "Scan the worksheet before choosing questions"
+            );
+        }
+
+        List<Integer> selected = request.questionNumbers().stream().distinct().sorted().toList();
+        if (selected.isEmpty() || selected.size() > 3) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST,
+                    ErrorCode.VALIDATION_ERROR,
+                    "Choose between one and three questions"
+            );
+        }
+        if (!scan.getAvailableQuestions().containsAll(selected)) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST,
+                    ErrorCode.VALIDATION_ERROR,
+                    "Choose only question numbers detected in this worksheet"
+            );
+        }
+
+        List<QuestionSolution> existing = questionSolutionRepository
+                .findBySubmissionIdAndQuestionNumberInOrderByQuestionNumber(id, selected);
+        List<Integer> missing = selected.stream()
+                .filter(number -> existing.stream().noneMatch(solution -> solution.getQuestionNumber().equals(number)))
+                .toList();
+        if (missing.isEmpty()) {
+            return SubmissionMapper.toResponse(submission);
+        }
+
+        enforceExplainLimit(missing.size());
+        try {
+            AiService.AiQuestionBatchResult result = aiService.explainQuestions(
+                    submission.getImageUrl(),
+                    submission.getSubject().getName(),
+                    submission.getNote(),
+                    missing
+            );
+            List<QuestionSolution> created = result.solutions().stream()
+                    .map(solution -> new QuestionSolution(
+                            submission,
+                            solution.questionNumber(),
+                            solution.detectedQuestion(),
+                            solution.explanation(),
+                            solution.finalAnswer(),
+                            result.modelName()
+                    ))
+                    .toList();
+            questionSolutionRepository.saveAll(created);
+            submission.getQuestionSolutions().addAll(created);
+            submission.markQuestionsSolved();
+            aiUsageLogRepository.save(new AiUsageLog(
+                    currentUserEntity(),
+                    submission,
+                    AiRequestType.EXPLAIN,
+                    result.modelName(),
+                    result.inputTokens(),
+                    result.outputTokens(),
+                    AiUsageStatus.SUCCESS,
+                    null,
+                    missing.size()
+            ));
+            return SubmissionMapper.toResponse(submission);
+        } catch (ApiException ex) {
+            aiUsageLogRepository.save(new AiUsageLog(
+                    currentUserEntity(),
+                    submission,
+                    AiRequestType.EXPLAIN,
+                    null,
+                    null,
+                    null,
+                    AiUsageStatus.FAILED,
+                    ex.getMessage(),
+                    0
+            ));
+            throw ex;
+        }
+    }
+
+    @Override
+    @Transactional
     public GradingResultResponse gradeSubmission(Long id, GradeRequest request) {
         Submission submission = loadOwnedOrAdminSubmission(id);
-        AiResponse aiResponse = submission.getAiResponse();
-        if (aiResponse == null) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, "Generate an explanation before grading");
-        }
-        requireGradableResult(aiResponse);
+        GradingContext context = resolveGradingContext(submission, request.questionSolutionId());
         try {
             AiService.AiGradingResult result = aiService.grade(
-                    aiResponse.getDetectedQuestion(),
-                    aiResponse.getExplanation(),
-                    aiResponse.getFinalAnswer(),
+                    context.detectedQuestion(),
+                    context.explanation(),
+                    context.finalAnswer(),
                     request.userAnswer()
             );
             GradingResult gradingResult = gradingResultRepository.save(new GradingResult(
                     submission,
+                    context.questionSolution(),
                     request.userAnswer(),
                     result.score(),
                     result.feedback(),
@@ -256,23 +350,20 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Override
     @Transactional
-    public GradingResultResponse gradeSubmissionImage(Long id, MultipartFile image) {
+    public GradingResultResponse gradeSubmissionImage(Long id, Long questionSolutionId, MultipartFile image) {
         Submission submission = loadOwnedOrAdminSubmission(id);
-        AiResponse aiResponse = submission.getAiResponse();
-        if (aiResponse == null) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, "Generate an explanation before grading");
-        }
-        requireGradableResult(aiResponse);
+        GradingContext context = resolveGradingContext(submission, questionSolutionId);
         CloudinaryService.UploadResult upload = cloudinaryService.uploadStudentAnswerImage(image);
         try {
             AiService.AiGradingResult result = aiService.gradeImage(
-                    aiResponse.getDetectedQuestion(),
-                    aiResponse.getExplanation(),
-                    aiResponse.getFinalAnswer(),
+                    context.detectedQuestion(),
+                    context.explanation(),
+                    context.finalAnswer(),
                     upload.imageUrl()
             );
             GradingResult gradingResult = gradingResultRepository.save(new GradingResult(
                     submission,
+                    context.questionSolution(),
                     result.detectedStudentAnswer(),
                     upload.imageUrl(),
                     upload.publicId(),
@@ -446,6 +537,42 @@ public class SubmissionServiceImpl implements SubmissionService {
         }
     }
 
+    private GradingContext resolveGradingContext(Submission submission, Long questionSolutionId) {
+        if (questionSolutionId != null) {
+            QuestionSolution solution = questionSolutionRepository.findByIdAndSubmissionId(
+                            questionSolutionId,
+                            submission.getId()
+                    )
+                    .orElseThrow(() -> new ApiException(
+                            HttpStatus.NOT_FOUND,
+                            ErrorCode.RESOURCE_NOT_FOUND,
+                            "Solved question not found for this submission"
+                    ));
+            return new GradingContext(
+                    solution,
+                    solution.getDetectedQuestion(),
+                    solution.getExplanation(),
+                    solution.getFinalAnswer()
+            );
+        }
+
+        AiResponse response = submission.getAiResponse();
+        if (response == null) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST,
+                    ErrorCode.VALIDATION_ERROR,
+                    "Generate an explanation before grading"
+            );
+        }
+        requireGradableResult(response);
+        return new GradingContext(
+                null,
+                response.getDetectedQuestion(),
+                response.getExplanation(),
+                response.getFinalAnswer()
+        );
+    }
+
     private String normalizeSearch(String search) {
         if (search == null || search.isBlank()) {
             return null;
@@ -458,23 +585,60 @@ public class SubmissionServiceImpl implements SubmissionService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ErrorCode.RESOURCE_NOT_FOUND, "User not found"));
     }
 
-    private void enforceExplainLimit() {
+    private int explainCredits(Submission submission, AiSolveMode solveMode) {
+        if (solveMode == AiSolveMode.EXPLAIN_ALL || solveMode == AiSolveMode.ANSWERS_ONLY) {
+            return Math.max(1, submission.getAiResponse() == null
+                    ? 1
+                    : submission.getAiResponse().getAvailableQuestions().size());
+        }
+        return 1;
+    }
+
+    private void enforceScanLimit() {
         if (SecurityUtils.isAdmin()) {
             return;
         }
         Instant todayStart = LocalDate.now(ZoneOffset.UTC).atStartOfDay().toInstant(ZoneOffset.UTC);
-        long used = aiUsageLogRepository.countByUserIdAndRequestTypeAndStatusAndCreatedAtGreaterThanEqual(
+        long scans = aiUsageLogRepository.countByUserIdAndRequestTypeAndStatusAndCreatedAtGreaterThanEqual(
+                SecurityUtils.currentUserId(),
+                AiRequestType.SCAN,
+                AiUsageStatus.SUCCESS,
+                todayStart
+        );
+        if (scans >= explainLimitPerUser) {
+            throw new ApiException(
+                    HttpStatus.TOO_MANY_REQUESTS,
+                    ErrorCode.AI_USAGE_LIMIT_EXCEEDED,
+                    "You have reached today's worksheet scan limit"
+            );
+        }
+    }
+
+    private void enforceExplainLimit(int requestedCredits) {
+        if (SecurityUtils.isAdmin()) {
+            return;
+        }
+        Instant todayStart = LocalDate.now(ZoneOffset.UTC).atStartOfDay().toInstant(ZoneOffset.UTC);
+        long used = aiUsageLogRepository.sumCreditsUsed(
                 SecurityUtils.currentUserId(),
                 AiRequestType.EXPLAIN,
                 AiUsageStatus.SUCCESS,
                 todayStart
         );
-        if (used >= explainLimitPerUser) {
+        if (used + requestedCredits > explainLimitPerUser) {
             throw new ApiException(
                     HttpStatus.TOO_MANY_REQUESTS,
                     ErrorCode.AI_USAGE_LIMIT_EXCEEDED,
-                    "You have reached the daily AI explanation limit for this account"
+                    "You do not have enough daily solves remaining for this request"
             );
         }
+    }
+
+    private record GradingContext(
+            QuestionSolution questionSolution,
+            String detectedQuestion,
+            String explanation,
+            String finalAnswer
+    ) {
     }
 }

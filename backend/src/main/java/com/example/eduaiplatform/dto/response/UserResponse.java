@@ -8,6 +8,8 @@ public record UserResponse(
         String email,
         String role,
         boolean enabled,
+        boolean emailVerified,
+        String authProvider,
         Instant createdAt
 ) {
 }
