@@ -535,6 +535,7 @@ textarea:focus-visible {
 }
 
 .result-section {
+  min-width: 0;
   animation: fade-in-up 420ms var(--ease-premium) both;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
   transition: border-color 280ms var(--ease-premium), background-color 280ms var(--ease-premium), box-shadow 280ms var(--ease-premium), transform 280ms var(--ease-premium);
@@ -598,6 +599,7 @@ textarea:focus-visible {
 }
 
 .answer-choice-grid {
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
   gap: 0.6rem;
@@ -617,6 +619,8 @@ textarea:focus-visible {
 }
 
 .answer-choice-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: #64748b;
   font-size: 0.72rem;
   font-weight: 600;
@@ -858,12 +862,17 @@ textarea:focus-visible {
 }
 
 .rich-text {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   color: #334155;
   font-size: 0.9375rem;
   line-height: 1.75;
 }
 
 .rich-text p {
+  max-width: 100%;
+  overflow-wrap: anywhere;
   margin: 0.5rem 0;
 }
 
