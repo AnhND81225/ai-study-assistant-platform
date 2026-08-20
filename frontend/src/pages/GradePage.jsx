@@ -270,7 +270,8 @@ export function GradePage() {
             action={<Link to="/upload" className="primary-button">Solve a question</Link>}
           />
         ) : (
-          <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)]">
+          <>
+          <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[minmax(300px,0.9fr)_minmax(0,1.35fr)]">
           <section className="focus-panel workspace-card h-fit min-w-0 lg:sticky lg:top-28">
             <div className="workspace-core p-4 sm:p-5">
             <div className="mb-4">
@@ -313,31 +314,10 @@ export function GradePage() {
           </section>
 
           <section className="grid min-w-0 gap-5">
-            {latestResult ? (
-              <Suspense fallback={<ResultLoadingState />}>
-                <LatestGradeSummary result={latestResult} />
-              </Suspense>
-            ) : null}
-
-            {answerKey && !latestResult ? (
-              <StepBlock
-                step="1"
-                title="Review the answer key"
-                description="This is the AI solution saved from the question image. It is used as the reference for grading."
-              >
-                <Suspense fallback={<ResultLoadingState />}>
-                  <ExplanationResultCard
-                    aiResponse={answerKey}
-                    titleOverride={selectedSolution ? `Question ${selectedSolution.questionNumber} answer key` : 'AI solution reference'}
-                  />
-                </Suspense>
-              </StepBlock>
-            ) : null}
-
             <StepBlock
-              step={latestResult ? '1' : '2'}
-              title={latestResult ? 'Check another answer' : "Add the student's answer"}
-              description={latestResult ? 'Use the same answer key to check a new response or a corrected version of the work.' : "Type the answer or upload a close-up of the student's work for this saved question."}
+              step="1"
+              title="Add the student's answer"
+              description="Type the answer or upload a close-up of the student's work for this saved question."
             >
               <div className="focus-panel workspace-card">
                 <div className="workspace-core p-4 sm:p-5">
@@ -368,6 +348,30 @@ export function GradePage() {
                 </div>
               </div>
             </StepBlock>
+          </section>
+          </form>
+
+          <div className="mt-5 grid min-w-0 gap-5">
+            {latestResult ? (
+              <Suspense fallback={<ResultLoadingState />}>
+                <LatestGradeSummary result={latestResult} />
+              </Suspense>
+            ) : null}
+
+            {answerKey && !latestResult ? (
+              <StepBlock
+                step="2"
+                title="Review the answer key"
+                description="This is the AI solution saved from the question image. It is used as the reference for grading."
+              >
+                <Suspense fallback={<ResultLoadingState />}>
+                  <ExplanationResultCard
+                    aiResponse={answerKey}
+                    titleOverride={selectedSolution ? `Question ${selectedSolution.questionNumber} answer key` : 'AI solution reference'}
+                  />
+                </Suspense>
+              </StepBlock>
+            ) : null}
 
             {relevantResults.length ? (
               <StepBlock
@@ -375,7 +379,7 @@ export function GradePage() {
                 title="Review feedback"
                 description="The newest grading result appears first, with score, detected answer, mistakes, and improvement tips."
               >
-                <div className="grid gap-3">
+                <div className="grid min-w-0 gap-3">
                   {relevantResults.map((result, index) => (
                     <Suspense key={result.id} fallback={<ResultLoadingState />}>
                       <GradingResultCard result={result} hideScoreSummary={index === 0} />
@@ -399,8 +403,8 @@ export function GradePage() {
                 </Suspense>
               </StepBlock>
             ) : null}
-          </section>
-          </form>
+          </div>
+          </>
         )}
       </div>
 
