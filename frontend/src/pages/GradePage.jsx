@@ -221,7 +221,7 @@ export function GradePage() {
 
       <div key={workflow} className="workflow-reveal">
         {workflow === 'new' ? (
-          <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <form onSubmit={submit} className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
           <section className="smooth-card workspace-card">
             <div className="workspace-core p-4 sm:p-5">
             <ImageScannerInput
@@ -276,7 +276,7 @@ export function GradePage() {
           />
         ) : (
           <>
-          <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[minmax(300px,0.9fr)_minmax(0,1.35fr)]">
+          <form onSubmit={submit} className="grid items-start gap-5 lg:grid-cols-[minmax(300px,0.9fr)_minmax(0,1.35fr)]">
           <section className="focus-panel workspace-card h-fit min-w-0 lg:sticky lg:top-28">
             <div className="workspace-core p-4 sm:p-5">
             <div className="mb-4">

@@ -33,14 +33,14 @@ export function ExplanationResultCard({ aiResponse, titleOverride, showFinalAnsw
         <ResultSection icon={HelpCircle} title="Detected question">
           <RichText>{aiResponse.detectedQuestion}</RichText>
         </ResultSection>
-        {aiResponse.explanation ? (
-          <ResultSection icon={ListChecks} title={aiResponse.resultStatus === 'QUESTION_SELECTION_REQUIRED' ? 'What to do next' : 'Step-by-step solution'}>
-            <StepByStepContent text={aiResponse.explanation} questionNumber={aiResponse.questionNumber} />
-          </ResultSection>
-        ) : null}
         {showFinalAnswer && finalAnswer ? (
           <ResultSection icon={Target} title="Final answer" accent>
             <FinalAnswerContent answer={finalAnswer} />
+          </ResultSection>
+        ) : null}
+        {aiResponse.explanation ? (
+          <ResultSection icon={ListChecks} title={aiResponse.resultStatus === 'QUESTION_SELECTION_REQUIRED' ? 'What to do next' : 'Step-by-step solution'}>
+            <StepByStepContent text={aiResponse.explanation} questionNumber={aiResponse.questionNumber} />
           </ResultSection>
         ) : null}
         {malformedFinalAnswer ? (
@@ -240,7 +240,11 @@ function StepByStepContent({ text, questionNumber }) {
 
 /** Normalize dense AI text into readable blocks without changing the saved answer. */
 function splitExplanationSteps(value) {
-  const text = normalizeAiText(value);
+  const text = normalizeAiText(value)
+    .split('\n')
+    .filter((line) => !isStandaloneAnswerChoice(line))
+    .join('\n')
+    .trim();
   if (!text) {
     return [];
   }
@@ -256,6 +260,10 @@ function splitExplanationSteps(value) {
     .filter(Boolean);
 
   return parts.length >= 2 ? parts : [];
+}
+
+function isStandaloneAnswerChoice(value) {
+  return /^\s*[A-D]\s*[,.;:]?\s*$/i.test(value);
 }
 
 function normalizeAiText(value) {
