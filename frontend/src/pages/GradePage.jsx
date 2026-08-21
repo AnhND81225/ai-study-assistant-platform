@@ -61,6 +61,11 @@ export function GradePage() {
   const canGradeExisting = Boolean(answerKey) && (mode === 'image' ? Boolean(answerImage) : Boolean(answer.trim()));
   const latestResult = relevantResults[0] || null;
 
+  function scrollToExplanation(questionNumber) {
+    const target = document.getElementById(`grade-explain-question-${questionNumber}`);
+    target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
   useEffect(() => {
     subjectApi.list()
       .then((subjectList) => {
@@ -382,7 +387,12 @@ export function GradePage() {
                 <div className="grid min-w-0 gap-3">
                   {relevantResults.map((result, index) => (
                     <Suspense key={result.id} fallback={<ResultLoadingState />}>
-                      <GradingResultCard result={result} hideScoreSummary={index === 0} />
+                      <GradingResultCard
+                        result={result}
+                        hideScoreSummary={index === 0}
+                        answerKey={answerKey}
+                        onQuestionSelect={scrollToExplanation}
+                      />
                     </Suspense>
                   ))}
                 </div>
@@ -399,6 +409,7 @@ export function GradePage() {
                   <ExplanationResultCard
                     aiResponse={answerKey}
                     titleOverride={selectedSolution ? `Question ${selectedSolution.questionNumber} answer key` : 'AI solution reference'}
+                    showFinalAnswer={false}
                   />
                 </Suspense>
               </StepBlock>
@@ -412,7 +423,7 @@ export function GradePage() {
         <div className="mt-4 grid gap-3">
           {selected.gradingResults.map((result) => (
             <Suspense key={result.id} fallback={<ResultLoadingState />}>
-              <GradingResultCard result={result} />
+              <GradingResultCard result={result} answerKey={selected?.aiResponse} onQuestionSelect={scrollToExplanation} />
             </Suspense>
           ))}
         </div>

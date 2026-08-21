@@ -1,7 +1,7 @@
 import { AlertTriangle, CheckCircle, HelpCircle, Lightbulb, ListChecks, Target } from 'lucide-react';
 import { RichText } from './RichText';
 
-export function ExplanationResultCard({ aiResponse, titleOverride }) {
+export function ExplanationResultCard({ aiResponse, titleOverride, showFinalAnswer = true }) {
   if (!aiResponse) return null;
   const finalAnswer = readFinalAnswer(aiResponse.finalAnswer);
   const malformedFinalAnswer = Boolean(aiResponse.finalAnswer) && !finalAnswer;
@@ -35,10 +35,10 @@ export function ExplanationResultCard({ aiResponse, titleOverride }) {
         </ResultSection>
         {aiResponse.explanation ? (
           <ResultSection icon={ListChecks} title={aiResponse.resultStatus === 'QUESTION_SELECTION_REQUIRED' ? 'What to do next' : 'Step-by-step solution'}>
-            <StepByStepContent text={aiResponse.explanation} />
+            <StepByStepContent text={aiResponse.explanation} questionNumber={aiResponse.questionNumber} />
           </ResultSection>
         ) : null}
-        {finalAnswer ? (
+        {showFinalAnswer && finalAnswer ? (
           <ResultSection icon={Target} title="Final answer" accent>
             <FinalAnswerContent answer={finalAnswer} />
           </ResultSection>
@@ -77,9 +77,10 @@ function readFinalAnswer(value) {
   }
 }
 
-export function GradingResultCard({ result, hideScoreSummary = false }) {
+export function GradingResultCard({ result, hideScoreSummary = false, answerKey, onQuestionSelect }) {
   const score = Number(result.score || 0);
   const scoreStyle = score >= 80 ? 'text-ocean bg-sky-50 border-sky-200' : score >= 50 ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-red-700 bg-red-50 border-red-200';
+  const answerReview = buildAnswerReview(answerKey?.finalAnswer, result.userAnswer);
 
   return (
     <article className="fade-in smooth-card workspace-card">
@@ -95,6 +96,7 @@ export function GradingResultCard({ result, hideScoreSummary = false }) {
       ) : null}
       {result.userAnswerImageUrl ? <img src={result.userAnswerImageUrl} alt="Graded student answer" className={`${hideScoreSummary ? '' : 'mt-4 '}max-h-72 w-full rounded-2xl object-contain shadow-[0_14px_34px_rgba(15,23,42,0.10)]`} /> : null}
       <div className={`${hideScoreSummary ? '' : 'mt-4 '}grid gap-3`}>
+        {answerReview.length ? <GradingAnswerGrid choices={answerReview} onQuestionSelect={onQuestionSelect} /> : null}
         {result.userAnswer ? (
           <ResultSection icon={HelpCircle} title="Student answer">
             <RichText>{result.userAnswer}</RichText>
@@ -117,6 +119,52 @@ export function GradingResultCard({ result, hideScoreSummary = false }) {
       </div>
     </article>
   );
+}
+
+function GradingAnswerGrid({ choices, onQuestionSelect }) {
+  return (
+    <section className="grading-answer-panel" aria-label="Answer review">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+          <Target size={16} className="text-emerald-700" />
+          Final answer review
+        </div>
+        <div className="grading-answer-legend" aria-label="Answer status legend">
+          <span className="grading-answer-legend-correct">Correct</span>
+          <span className="grading-answer-legend-wrong">Needs review</span>
+        </div>
+      </div>
+      <div className="grading-answer-grid">
+        {choices.map((choice) => (
+          <button
+            key={choice.question}
+            type="button"
+            className={`grading-answer-card grading-answer-${choice.status}`}
+            onClick={() => onQuestionSelect?.(choice.question)}
+            aria-label={`Question ${choice.question}, ${choice.status}`}
+          >
+            <span>Question {choice.question}</span>
+            <strong>{choice.answer}</strong>
+          </button>
+        ))}
+      </div>
+      <p className="mt-3 text-xs font-medium text-slate-500">Select a question to jump to its explanation.</p>
+    </section>
+  );
+}
+
+function buildAnswerReview(answerKey, userAnswer) {
+  const correctChoices = parseAnswerChoices(readFinalAnswer(answerKey));
+  const studentChoices = new Map(parseAnswerChoices(userAnswer).map((choice) => [choice.question, choice.answer]));
+
+  return correctChoices.map((choice) => {
+    const studentAnswer = studentChoices.get(choice.question);
+    return {
+      question: choice.question,
+      answer: choice.answer,
+      status: !studentAnswer ? 'unknown' : studentAnswer === choice.answer ? 'correct' : 'wrong',
+    };
+  });
 }
 
 export function LatestGradeSummary({ result }) {
@@ -167,12 +215,12 @@ function ResultSection({ icon: Icon, title, children, accent = false }) {
   );
 }
 
-function StepByStepContent({ text }) {
+function StepByStepContent({ text, questionNumber }) {
   const normalizedText = normalizeAiText(text);
   const steps = splitExplanationSteps(normalizedText);
 
   if (!steps.length) {
-    return <RichText>{normalizedText}</RichText>;
+    return <div id={questionNumber ? `grade-explain-question-${questionNumber}` : undefined}><RichText>{normalizedText}</RichText></div>;
   }
 
   return (
@@ -180,7 +228,7 @@ function StepByStepContent({ text }) {
       {steps.map((step, index) => {
         const label = stepLabel(step, index);
         return (
-          <div key={`${label}-${index}`} className="ai-step-item" style={{ '--step-index': index }}>
+          <div id={`grade-explain-question-${label}`} key={`${label}-${index}`} className="ai-step-item" style={{ '--step-index': index }}>
             <span className="ai-step-index">{label}</span>
             <RichText className="ai-step-copy">{stripStepLabel(step)}</RichText>
           </div>
