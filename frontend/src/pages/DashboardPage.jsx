@@ -121,7 +121,7 @@ export function DashboardPage() {
           <div className="workspace-core p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="eyebrow border-blue-100 bg-blue-50 text-ocean">Weekly activity</p>
+                <p className="eyebrow border-blue-100 bg-blue-50 text-ocean">Last 7 days</p>
                 <h2 className="mt-3 text-xl font-extrabold tracking-[-0.025em] text-ink">Study rhythm</h2>
               </div>
               <span className="grid h-11 w-11 place-items-center rounded-2xl bg-blue-50 text-ocean">
@@ -135,27 +135,11 @@ export function DashboardPage() {
                 <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-slate-400 shadow-sm">
                   <BarChart3 size={20} />
                 </span>
-                <p className="mt-3 text-sm font-extrabold text-ink">No saved work this week</p>
-                <p className="mt-1 max-w-sm text-sm font-semibold leading-6 text-slate-500">Solve or check a question to begin a new weekly study rhythm.</p>
+                <p className="mt-3 text-sm font-extrabold text-ink">No activity yet</p>
+                <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">Solve or check a question to start.</p>
               </div>
             ) : (
-              <div className="mt-6 grid grid-cols-7 items-end gap-1.5 sm:gap-3">
-                {stats.weeklyActivity.map((day) => (
-                  <div key={day.label} className="grid min-w-0 gap-2 text-center">
-                    <span className="text-xs font-extrabold tabular-nums text-slate-400" aria-label={`${day.count} saved item${day.count === 1 ? '' : 's'}`}>
-                      {day.count}
-                    </span>
-                    <div className="flex h-28 items-end rounded-full bg-slate-100 p-1.5">
-                      <div
-                        className={`w-full rounded-full bg-gradient-to-t from-sea to-sky-300 transition-[height,opacity] duration-300 ${day.count ? 'opacity-100' : 'opacity-0'}`}
-                        style={{ height: `${day.count ? Math.max(12, day.percent) : 0}%` }}
-                        title={`${day.count} item${day.count === 1 ? '' : 's'}`}
-                      />
-                    </div>
-                    <span className="text-xs font-extrabold text-slate-500">{day.label}</span>
-                  </div>
-                ))}
-              </div>
+              <WeeklyActivityChart days={stats.weeklyActivity} />
             )}
           </div>
         </section>
@@ -289,6 +273,59 @@ function MetricCard({ label, value, detail }) {
   );
 }
 
+function WeeklyActivityChart({ days }) {
+  const width = 720;
+  const height = 220;
+  const chartLeft = 28;
+  const chartRight = width - 28;
+  const chartTop = 28;
+  const chartBottom = 174;
+  const max = Math.max(1, ...days.map((day) => day.count));
+  const total = days.reduce((sum, day) => sum + day.count, 0);
+  const points = days.map((day, index) => {
+    const x = chartLeft + (index * (chartRight - chartLeft)) / Math.max(1, days.length - 1);
+    const y = chartBottom - (day.count / max) * (chartBottom - chartTop);
+    return { ...day, x, y };
+  });
+  const line = points.map((point) => `${point.x},${point.y}`).join(' ');
+  const area = `${chartLeft},${chartBottom} ${line} ${chartRight},${chartBottom}`;
+
+  return (
+    <div className="mt-5 rounded-[1.35rem] border border-slate-200/80 bg-slate-50/60 px-3 pb-2 pt-3 sm:px-5">
+      <div className="flex items-center justify-between gap-3 px-1">
+        <span className="text-xs font-bold text-slate-500">Saved work</span>
+        <span className="text-xs font-extrabold text-ocean">{total} this week</span>
+      </div>
+      <svg className="mt-2 h-auto w-full" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Saved work over the last seven days">
+        <defs>
+          <linearGradient id="weekly-activity-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        {[0, 0.5, 1].map((fraction) => {
+          const y = chartBottom - fraction * (chartBottom - chartTop);
+          return <line key={fraction} x1={chartLeft} x2={chartRight} y1={y} y2={y} stroke="#dbe7f0" strokeWidth="1" />;
+        })}
+        <polygon points={area} fill="url(#weekly-activity-fill)" />
+        <polyline points={line} fill="none" stroke="#168bd0" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
+        {points.map((point) => (
+          <g key={point.key}>
+            <title>{`${point.label}: ${point.count} saved item${point.count === 1 ? '' : 's'}`}</title>
+            <text x={point.x} y={Math.max(16, point.y - 12)} textAnchor="middle" fill="#55718a" fontSize="12" fontWeight="700">
+              {point.count}
+            </text>
+            <circle cx={point.x} cy={point.y} r="5.5" fill="#fff" stroke="#168bd0" strokeWidth="3" />
+            <text x={point.x} y="204" textAnchor="middle" fill="#64748b" fontSize="12" fontWeight="700">
+              {point.label}
+            </text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 function dashboardCacheKey(user) {
   return user?.id ?? user?.email ?? user?.username ?? 'current-user';
 }
@@ -408,16 +445,9 @@ function formatRelativeDate(value) {
 
 function ChartSkeleton() {
   return (
-    <div className="mt-6 grid grid-cols-7 items-end gap-1.5 sm:gap-3">
-      {[32, 48, 76, 42, 64, 28, 54].map((height, index) => (
-        <div key={index} className="grid min-w-0 gap-2 text-center">
-          <span className="mx-auto h-3 w-4 rounded-full bg-slate-100" />
-          <div className="flex h-28 items-end rounded-full bg-slate-100 p-1.5">
-            <div className="w-full animate-pulse rounded-full bg-slate-200" style={{ height: `${height}%` }} />
-          </div>
-          <span className="mx-auto h-3 w-8 rounded-full bg-slate-100" />
-        </div>
-      ))}
+    <div className="mt-5 h-48 animate-pulse rounded-[1.35rem] border border-slate-200/80 bg-slate-50/70">
+      <div className="mx-5 mt-8 h-px bg-slate-200" />
+      <div className="mx-5 mt-16 h-px bg-slate-200" />
     </div>
   );
 }
